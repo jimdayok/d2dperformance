@@ -1,3 +1,4 @@
+import { Quote } from "lucide-react";
 import { SectionHeading } from "@/components/section-heading";
 import { testimonials } from "@/lib/site-data";
 
@@ -13,9 +14,10 @@ export function TestimonialsSection() {
         {testimonials.map((testimonial) => (
           <blockquote
             key={testimonial.name}
-            className="rounded-[1.75rem] border border-[var(--color-border)] bg-white p-8"
+            className="editorial-frame p-8"
           >
-            <p className="text-lg leading-8 text-[var(--color-ink)]">
+            <Quote className="h-7 w-7 text-[var(--color-accent)]" />
+            <p className="mt-5 text-lg leading-8 text-[var(--color-ink)]">
               “{testimonial.quote}”
             </p>
             <footer className="mt-6 text-sm font-medium text-[var(--color-muted)]">

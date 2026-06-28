@@ -7,6 +7,7 @@ export async function POST(request: Request) {
     status: "accepted",
     message: "Brand discovery payload received.",
     receivedAt: new Date().toISOString(),
-    fieldsSubmitted: Object.keys(payload.values ?? {}).length,
+    fieldsSubmitted: Object.keys(payload.answers ?? {}).length,
+    summariesSubmitted: Object.keys(payload.summaries ?? {}).length,
   });
 }

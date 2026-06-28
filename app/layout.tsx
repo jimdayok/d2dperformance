@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { ThemeProvider } from "@/components/theme-provider";
 import { companyName, siteUrl, tagline } from "@/lib/site-data";
 import { sanitizeJsonLd } from "@/lib/metadata";
 
@@ -10,6 +12,12 @@ const inter = Inter({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-sans",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-display",
 });
 
 export const metadata: Metadata = {
@@ -55,17 +63,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full scroll-smooth`}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${inter.variable} ${playfair.variable} h-full scroll-smooth`}
+    >
       <body className="min-h-full bg-[var(--color-bg)] font-sans text-[var(--color-ink)] antialiased">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: sanitizeJsonLd(organizationJsonLd) }}
         />
-        <div className="site-bg">
-          <SiteHeader />
-          <main>{children}</main>
-          <SiteFooter />
-        </div>
+        <ThemeProvider>
+          <div className="site-bg">
+            <SiteHeader />
+            <main>{children}</main>
+            <SiteFooter />
+          </div>
+          <Toaster richColors position="top-right" />
+        </ThemeProvider>
       </body>
     </html>
   );

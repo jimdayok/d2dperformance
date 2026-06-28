@@ -13,12 +13,12 @@ export function ResultsSection() {
         {results.map((result) => (
           <article
             key={result.label}
-            className="rounded-[1.75rem] bg-[var(--color-ink)] p-8 text-white"
+            className="rounded-[1.9rem] bg-[color:color-mix(in_oklab,var(--color-accent)_92%,black)] p-8 text-white shadow-[0_20px_50px_rgba(88,72,77,0.15)]"
           >
-            <p className="text-sm uppercase tracking-[0.24em] text-white/55">
+            <p className="text-sm uppercase tracking-[0.24em] text-white/60">
               {result.label}
             </p>
-            <p className="mt-6 text-4xl font-semibold tracking-[-0.04em]">
+            <p className="mt-6 font-display text-5xl font-semibold tracking-[-0.04em]">
               {result.value}
             </p>
           </article>

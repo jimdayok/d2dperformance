@@ -1,5 +1,26 @@
+import {
+  BadgeDollarSign,
+  BriefcaseBusiness,
+  Compass,
+  LayoutPanelTop,
+  Megaphone,
+  Route,
+  Settings2,
+  UsersRound,
+} from "lucide-react";
 import { SectionHeading } from "@/components/section-heading";
 import { serviceList } from "@/lib/site-data";
+
+const icons = [
+  BriefcaseBusiness,
+  BadgeDollarSign,
+  UsersRound,
+  Compass,
+  Settings2,
+  Route,
+  Megaphone,
+  LayoutPanelTop,
+];
 
 export function ServicesGridSection() {
   return (
@@ -10,14 +31,21 @@ export function ServicesGridSection() {
         description="Our work spans strategy, leadership, brand, operations, and the commercial systems that make growth sustainable."
       />
       <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {serviceList.map((service) => (
-          <div
-            key={service}
-            className="rounded-[1.5rem] border border-[var(--color-border)] bg-white px-5 py-6 text-base font-medium text-[var(--color-ink)]"
-          >
-            {service}
-          </div>
-        ))}
+        {serviceList.map((service, index) => {
+          const Icon = icons[index];
+
+          return (
+            <div
+              key={service}
+              className="rounded-[1.6rem] border border-[var(--color-border)] bg-[var(--color-card)] px-5 py-6 shadow-[0_10px_30px_rgba(57,43,49,0.04)]"
+            >
+              <Icon className="h-5 w-5 text-[var(--color-accent)]" />
+              <p className="mt-4 text-base font-medium text-[var(--color-ink)]">
+                {service}
+              </p>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
