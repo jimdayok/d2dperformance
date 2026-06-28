@@ -62,6 +62,11 @@ export function BrandDiscoveryForm() {
   );
   const [isSaving, setIsSaving] = useState(false);
   const [submitState, setSubmitState] = useState<"idle" | "submitting" | "submitted" | "error">("idle");
+  const [deliveryStatus, setDeliveryStatus] = useState<{
+    configured: boolean;
+    databaseSaved: boolean;
+    emailSent: boolean;
+  } | null>(null);
   const saveTimeoutRef = useRef<number | null>(null);
 
   const currentSectionIndex = clampIndex(draft.currentSectionIndex ?? 0);
@@ -181,7 +186,16 @@ export function BrandDiscoveryForm() {
         throw new Error("Failed to submit");
       }
 
+      const data = (await response.json()) as {
+        delivery?: {
+          configured: boolean;
+          databaseSaved: boolean;
+          emailSent: boolean;
+        };
+      };
+
       setSubmitState("submitted");
+      setDeliveryStatus(data.delivery ?? null);
       updateDraft((current) => ({
         ...current,
         submittedAt: payload.submittedAt,
@@ -369,7 +383,9 @@ export function BrandDiscoveryForm() {
 
                     {submitState === "submitted" ? (
                       <p className="mt-4 text-sm text-emerald-700 dark:text-emerald-300">
-                        Submitted successfully. Backend persistence can be added next with Supabase and server actions.
+                        {deliveryStatus?.configured
+                          ? "Submitted successfully. Notification email and database storage both ran."
+                          : "Submitted successfully. This deployment still needs Resend and Supabase environment variables before owner email notifications and database storage will go live."}
                       </p>
                     ) : null}
                     {submitState === "error" ? (

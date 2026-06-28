@@ -1,3 +1,4 @@
+import { Mail, PhoneCall, ShieldCheck } from "lucide-react";
 import { PageIntro } from "@/components/page-intro";
 import { companyEmail } from "@/lib/site-data";
 import { createMetadata } from "@/lib/metadata";
@@ -19,7 +20,7 @@ export default function ContactPage() {
       />
       <section className="mx-auto max-w-7xl px-6 py-18 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[0.55fr_0.45fr]">
-          <form className="rounded-[2rem] border border-[var(--color-border)] bg-white p-8 shadow-[0_24px_80px_rgba(31,41,51,0.06)]">
+          <form className="editorial-frame p-8">
             <div className="grid gap-5">
               {[
                 { label: "Name", type: "text", placeholder: "Your name" },
@@ -49,18 +50,18 @@ export default function ContactPage() {
               </label>
               <a
                 href={`mailto:${companyEmail}?subject=D2D%20Performance%20Discovery`}
-                className="inline-flex w-fit items-center justify-center rounded-full bg-[var(--color-ink)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--color-ink-soft)]"
+                className="inline-flex w-fit items-center justify-center rounded-full bg-[var(--color-charcoal)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--color-accent)]"
               >
                 Schedule Discovery
               </a>
             </div>
           </form>
 
-          <aside className="rounded-[2rem] bg-[var(--color-ink)] p-8 text-white">
+          <aside className="rounded-[2rem] bg-[var(--color-charcoal)] p-8 text-white">
             <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[var(--color-sand)]">
               Contact
             </p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">
+            <h2 className="mt-4 font-display text-4xl font-semibold tracking-[-0.03em]">
               D2D Performance
             </h2>
             <p className="mt-5 text-base leading-8 text-white/75">
@@ -68,6 +69,20 @@ export default function ContactPage() {
               leadership teams who want clearer strategy and more dependable
               execution.
             </p>
+            <div className="mt-8 space-y-4 text-sm text-white/78">
+              <p className="inline-flex items-center gap-3">
+                <Mail className="h-4 w-4 text-[var(--color-sand)]" />
+                {companyEmail}
+              </p>
+              <p className="inline-flex items-center gap-3">
+                <PhoneCall className="h-4 w-4 text-[var(--color-sand)]" />
+                Discovery calls by appointment
+              </p>
+              <p className="inline-flex items-center gap-3">
+                <ShieldCheck className="h-4 w-4 text-[var(--color-sand)]" />
+                Strategy-first, relationship-first, practical
+              </p>
+            </div>
             <a
               href={`mailto:${companyEmail}`}
               className="mt-8 inline-block text-lg text-white underline underline-offset-4"

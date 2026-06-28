@@ -1,3 +1,4 @@
+import { ArrowRight, Compass, Layers3, Sparkles } from "lucide-react";
 import { ButtonLink } from "@/components/button-link";
 import { PageIntro } from "@/components/page-intro";
 import { createMetadata } from "@/lib/metadata";
@@ -22,11 +23,14 @@ export default function ServicesPage() {
       />
       <section className="mx-auto max-w-7xl px-6 py-18 lg:px-8">
         <div className="grid gap-6 lg:grid-cols-3">
-          {servicesPageItems.map((service) => (
+          {[Compass, Layers3, Sparkles].map((Icon, idx) => {
+            const service = servicesPageItems[idx];
+            return (
             <article
               key={service.slug}
-              className="rounded-[2rem] border border-[var(--color-border)] bg-white p-8 shadow-[0_24px_80px_rgba(31,41,51,0.06)]"
+              className="editorial-frame p-8"
             >
+              <Icon className="h-5 w-5 text-[var(--color-accent)]" />
               <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[var(--color-accent)]">
                 {service.title}
               </p>
@@ -64,10 +68,16 @@ export default function ServicesPage() {
                 </div>
               </div>
               <div className="mt-8">
-                <ButtonLink href={service.cta}>Learn More</ButtonLink>
+                <ButtonLink href={service.cta}>
+                  <span className="inline-flex items-center gap-2">
+                    Learn More
+                    <ArrowRight className="h-4 w-4" />
+                  </span>
+                </ButtonLink>
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
       </section>
     </>
