@@ -1,1 +1,44 @@
-export default function Home() { return ( <main className="min-h-screen bg-[#f6f1e8] text-[#1f2a24]"> <section className="mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-6 py-20"> <p className="mb-4 text-sm font-semibold uppercase tracking-[0.3em] text-[#8a5a2b]"> D2D Performance </p> <h1 className="max-w-4xl text-5xl font-semibold tracking-tight md:text-7xl"> Performance Built For The Day2Day </h1> <p className="mt-6 max-w-2xl text-xl leading-8 text-[#4d5a52]"> D2D Performance helps businesses grow faster with clear strategy, better systems, and focused execution. </p> <div className="mt-10 flex flex-wrap gap-4"> <a href="mailto:performance@d2dmktg.com" className="rounded-full bg-[#1f2a24] px-6 py-3 text-sm font-semibold text-white" > Start a Conversation </a> <a href="#services" className="rounded-full border border-[#1f2a24]/20 px-6 py-3 text-sm font-semibold" > View Services </a> </div> </section> </main> ); }
+import { TestimonialsSection } from "@/sections/home/testimonials";
+import { BrandCtaSection } from "@/sections/home/brand-cta";
+import { HomeHero } from "@/sections/home/hero";
+import { HomeProcessSection } from "@/sections/home/process";
+import { ResultsSection } from "@/sections/home/results";
+import { ServicesGridSection } from "@/sections/home/services-grid";
+import { WhatWeDoSection } from "@/sections/home/what-we-do";
+import { WhyStallSection } from "@/sections/home/why-stall";
+import { companyName, siteUrl } from "@/lib/site-data";
+import { createMetadata, sanitizeJsonLd } from "@/lib/metadata";
+
+export const metadata = createMetadata({
+  title: "Build a Better Business",
+  description:
+    "Executive consulting for leadership teams that need clearer strategy, stronger execution, and scalable growth.",
+});
+
+const homeJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: companyName,
+  url: siteUrl,
+  description:
+    "D2D Performance helps business owners and leadership teams scale through strategy, leadership, systems, execution, and brand clarity.",
+};
+
+export default function Home() {
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: sanitizeJsonLd(homeJsonLd) }}
+      />
+      <HomeHero />
+      <WhatWeDoSection />
+      <WhyStallSection />
+      <HomeProcessSection />
+      <ServicesGridSection />
+      <BrandCtaSection />
+      <ResultsSection />
+      <TestimonialsSection />
+    </>
+  );
+}
