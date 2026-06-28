@@ -26,6 +26,11 @@ export function SiteFooter() {
               that need better leadership, stronger execution, and more
               credible growth systems.
             </p>
+            <p className="text-sm leading-7 text-[var(--color-muted)]">
+              Led by Andrea Day and Jim Day, with a strategy approach shaped to
+              feel more practical, more human, and more useful in the real
+              day-to-day of the business.
+            </p>
             <div className="space-y-3 text-sm text-[var(--color-muted)]">
               <p className="inline-flex items-center gap-3">
                 <MapPin className="h-4 w-4 text-[var(--color-accent)]" />

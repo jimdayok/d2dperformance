@@ -5,6 +5,65 @@ export const parentBrandName = "DAY2DAY";
 export const companyEmail = "performance@d2dmktg.com";
 export const tagline = "Performance Built for the Day2Day.";
 
+export const leadershipProfiles = [
+  {
+    name: "Andrea Day",
+    role: "Founder, Brand Strategist, and Marketing Advisor",
+    focus:
+      "Senior-level brand strategy, messaging, campaign direction, and practical marketing systems built to support real businesses.",
+    detail:
+      "Andrea brings more than 25 years of experience across industries. Her approach is relationship-first, candid, and grounded in helping established businesses become clearer brands before they spend money on promotion.",
+    strengths: [
+      "Brand positioning and voice",
+      "Messaging and campaign direction",
+      "Brand systems for growing companies",
+    ],
+  },
+  {
+    name: "Jim Day",
+    role: "Growth, Sales, and Digital Systems Advisor",
+    focus:
+      "Commercial strategy, market positioning, digital execution, and platform quality informed by executive leadership experience.",
+    detail:
+      "Jim brings sales, growth, and market-positioning perspective shaped by leadership work in complex industries, including his public role as Executive VP of Sales & Marketing for Artisan Lab Network. He helps turn strategy into cleaner systems, sharper user experience, and stronger commercial follow-through.",
+    strengths: [
+      "Growth strategy and market positioning",
+      "Sales process and commercial clarity",
+      "Digital execution and platform oversight",
+    ],
+  },
+] as const;
+
+export const operatingPrinciples = [
+  {
+    title: "Relationship-first",
+    description:
+      "We build long-view partnerships, not one-off deliverables disconnected from the day-to-day of the business.",
+  },
+  {
+    title: "Clarity before creative",
+    description:
+      "Positioning, audience, and leadership alignment come first so design, sales, and marketing can carry real weight.",
+  },
+  {
+    title: "Built for execution",
+    description:
+      "Every recommendation is meant to survive contact with operations, not just look good in a strategy deck.",
+  },
+  {
+    title: "Senior-level perspective",
+    description:
+      "You get experienced judgment across brand, growth, customer experience, and commercial systems.",
+  },
+] as const;
+
+export const contactAudience = [
+  "Owners carrying too many decisions alone",
+  "Leadership teams that need a sharper operating rhythm",
+  "Established companies whose market presence no longer matches the quality of the business",
+  "Businesses preparing for a growth stage, rebrand, or more disciplined go-to-market plan",
+] as const;
+
 export const navigation = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
@@ -115,7 +174,7 @@ export const servicesPageItems = [
       "Executive coaching sessions",
     ],
     idealCustomer: "Founders, presidents, and executive teams navigating growth or transition.",
-    cta: "/contact",
+    cta: "/executive-coaching",
   },
   {
     slug: "growth-strategy",
@@ -160,18 +219,27 @@ export const resources = [
     title: "The Cost of Reactive Growth",
     description:
       "A short perspective on what happens when revenue expands faster than leadership systems can support it.",
+    type: "Perspective",
   },
   {
     title: "Brand Clarity for Established Companies",
     description:
       "Why mature businesses often need sharper positioning before they need more promotion.",
+    type: "Brand Strategy",
   },
   {
     title: "How Executive Teams Regain Operating Leverage",
     description:
       "A practical framework for reducing decision drag and rebuilding momentum inside a growing company.",
+    type: "Leadership",
   },
-];
+  {
+    title: "Sales Messaging That Matches the Business",
+    description:
+      "A future resource on tightening how offers, outcomes, and value are expressed across the pipeline.",
+    type: "Commercial Strategy",
+  },
+] as const;
 
 export const discoverySteps = [
   {

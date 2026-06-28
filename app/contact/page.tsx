@@ -1,12 +1,16 @@
 import { Mail, PhoneCall, ShieldCheck } from "lucide-react";
+import { ButtonLink } from "@/components/button-link";
 import { PageIntro } from "@/components/page-intro";
-import { companyEmail } from "@/lib/site-data";
+import {
+  companyEmail,
+  contactAudience,
+  leadershipProfiles,
+} from "@/lib/site-data";
 import { createMetadata } from "@/lib/metadata";
 
 export const metadata = createMetadata({
   title: "Contact",
-  description:
-    "Start a discovery conversation with D2D Performance.",
+  description: "Start a discovery conversation with D2D Performance.",
   path: "/contact",
 });
 
@@ -16,9 +20,48 @@ export default function ContactPage() {
       <PageIntro
         eyebrow="Contact"
         title="Start a discovery conversation."
-        description="Reach out to discuss strategy, leadership, brand development, or the operational constraints limiting growth."
+        description="Reach out to discuss leadership, growth, brand development, sales messaging, or the operational constraints limiting progress."
       />
       <section className="mx-auto max-w-7xl px-6 py-18 lg:px-8">
+        <div className="mb-8 grid gap-6 lg:grid-cols-[1.02fr_0.98fr]">
+          <article className="editorial-frame p-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--color-accent)]">
+              Best fit conversations
+            </p>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              {contactAudience.map((item) => (
+                <div
+                  key={item}
+                  className="rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-5 text-sm leading-7 text-[var(--color-muted)]"
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
+          </article>
+          <article className="rounded-[2rem] bg-[var(--color-charcoal)] p-8 text-white">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--color-sand)]">
+              Who you&apos;ll hear from
+            </p>
+            <div className="mt-5 space-y-5">
+              {leadershipProfiles.map((profile) => (
+                <div
+                  key={profile.name}
+                  className="rounded-[1.4rem] border border-white/12 bg-white/6 px-5 py-5"
+                >
+                  <p className="text-sm font-semibold text-white">{profile.name}</p>
+                  <p className="mt-1 text-xs uppercase tracking-[0.22em] text-white/58">
+                    {profile.role}
+                  </p>
+                  <p className="mt-3 text-sm leading-7 text-white/76">
+                    {profile.focus}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </article>
+        </div>
+
         <div className="grid gap-8 lg:grid-cols-[0.55fr_0.45fr]">
           <form className="editorial-frame p-8">
             <div className="grid gap-5">
@@ -50,7 +93,7 @@ export default function ContactPage() {
               </label>
               <a
                 href={`mailto:${companyEmail}?subject=D2D%20Performance%20Discovery`}
-                className="inline-flex w-fit items-center justify-center rounded-full bg-[var(--color-charcoal)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--color-accent)]"
+                className="inline-flex w-fit items-center justify-center rounded-full bg-[var(--button-primary-bg)] px-6 py-3 text-sm font-semibold text-[var(--button-primary-text)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(16,24,34,0.16)]"
               >
                 Schedule Discovery
               </a>
@@ -83,12 +126,14 @@ export default function ContactPage() {
                 Strategy-first, relationship-first, practical
               </p>
             </div>
-            <a
-              href={`mailto:${companyEmail}`}
-              className="mt-8 inline-block text-lg text-white underline underline-offset-4"
-            >
-              {companyEmail}
-            </a>
+            <div className="mt-8">
+              <ButtonLink href={`mailto:${companyEmail}`} variant="light">
+                <span className="inline-flex items-center gap-2">
+                  Email D2D
+                  <Mail className="h-4 w-4" />
+                </span>
+              </ButtonLink>
+            </div>
           </aside>
         </div>
       </section>
