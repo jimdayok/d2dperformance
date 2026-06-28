@@ -1,5 +1,6 @@
-import { Mail, MapPin, Phone, ShieldCheck } from "lucide-react";
+import { ArrowRight, Mail, MapPin, Phone } from "lucide-react";
 import Link from "next/link";
+import { ButtonLink } from "@/components/button-link";
 import {
   companyEmail,
   companyName,
@@ -10,78 +11,85 @@ import {
 
 export function SiteFooter() {
   return (
-    <footer className="footer-wave mt-24 bg-[color:color-mix(in_oklab,var(--color-accent)_88%,black)] text-white">
-      <div className="relative mx-auto max-w-7xl px-6 pb-14 pt-24 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-[1.3fr_0.8fr_0.8fr_0.9fr]">
+    <footer className="mt-24 border-t border-[var(--color-border)] bg-[color:color-mix(in_oklab,var(--color-surface)_92%,transparent)]">
+      <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
+        <div className="grid gap-10 rounded-[2rem] border border-[var(--color-border)] bg-[color:color-mix(in_oklab,var(--color-card)_94%,transparent)] p-8 shadow-[0_18px_50px_rgba(16,24,34,0.05)] backdrop-blur-sm lg:grid-cols-[1.25fr_0.85fr_0.9fr] lg:p-10">
           <div className="max-w-md space-y-5">
-            <p className="font-display text-4xl font-semibold tracking-[0.04em]">
+            <p className="font-display text-4xl font-semibold tracking-[0.02em] text-[var(--color-taupe)]">
               {companyName}
             </p>
-            <p className="text-sm uppercase tracking-[0.3em] text-white/70">
+            <p className="text-sm uppercase tracking-[0.3em] text-[var(--color-accent)]">
               {parentBrandName} foundation
             </p>
-            <p className="text-sm leading-7 text-white/74">
-              {tagline} Built to support the real day-to-day of the business with
-              strategy, brand clarity, and practical execution.
+            <p className="text-sm leading-7 text-[var(--color-muted)]">
+              {tagline} Executive consulting and brand clarity for companies
+              that need better leadership, stronger execution, and more
+              credible growth systems.
             </p>
-            <div className="space-y-3 text-sm text-white/74">
+            <div className="space-y-3 text-sm text-[var(--color-muted)]">
               <p className="inline-flex items-center gap-3">
-                <MapPin className="h-4 w-4 text-[var(--color-sand)]" />
+                <MapPin className="h-4 w-4 text-[var(--color-accent)]" />
                 Dallas - Fort Worth
               </p>
               <p className="inline-flex items-center gap-3">
-                <Phone className="h-4 w-4 text-[var(--color-sand)]" />
+                <Phone className="h-4 w-4 text-[var(--color-accent)]" />
                 Discovery calls by appointment
               </p>
               <a
                 href={`mailto:${companyEmail}`}
-                className="inline-flex items-center gap-3 transition hover:text-white"
+                className="inline-flex items-center gap-3 transition hover:text-[var(--color-ink)]"
               >
-                <Mail className="h-4 w-4 text-[var(--color-sand)]" />
+                <Mail className="h-4 w-4 text-[var(--color-accent)]" />
                 {companyEmail}
               </a>
             </div>
           </div>
 
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-white/55">
-              Main Menu
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--color-accent)]">
+              Links
             </p>
-            <div className="mt-4 flex flex-col gap-3 text-sm text-white/75">
-              {navigation.slice(0, 5).map((item) => (
-                <Link key={item.href} href={item.href} className="transition hover:text-white">
-                  {item.label}
-                </Link>
-              ))}
+            <div className="mt-4 flex flex-col gap-3 text-sm text-[var(--color-muted)]">
+              {navigation
+                .filter((item) =>
+                  [
+                    "/services",
+                    "/brand-development",
+                    "/executive-coaching",
+                    "/process",
+                    "/resources",
+                    "/about",
+                  ].includes(item.href),
+                )
+                .map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="transition hover:text-[var(--color-ink)]"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
             </div>
           </div>
 
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-white/55">
-              More
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--color-accent)]">
+              Contact
             </p>
-            <div className="mt-4 flex flex-col gap-3 text-sm text-white/75">
-              {navigation.slice(5).map((item) => (
-                <Link key={item.href} href={item.href} className="transition hover:text-white">
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-white/55">
-              Why D2D
-            </p>
-            <div className="mt-4 rounded-[1.5rem] border border-white/10 bg-white/6 p-5">
-              <p className="inline-flex items-center gap-2 text-sm font-semibold text-white">
-                <ShieldCheck className="h-4 w-4 text-[var(--color-sand)]" />
-                Better together
+            <div className="mt-4 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+              <p className="text-sm leading-7 text-[var(--color-muted)]">
+                Schedule a discovery conversation to talk through leadership,
+                brand, growth, or operational friction inside the business.
               </p>
-              <p className="mt-3 text-sm leading-7 text-white/75">
-                Senior-level strategy, down-to-earth guidance, and brand systems
-                designed for real-world use.
-              </p>
+              <div className="mt-5">
+                <ButtonLink href="/contact" variant="secondary">
+                  <span className="inline-flex items-center gap-2">
+                    Contact D2D
+                    <ArrowRight className="h-4 w-4" />
+                  </span>
+                </ButtonLink>
+              </div>
             </div>
           </div>
         </div>

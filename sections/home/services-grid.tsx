@@ -37,7 +37,7 @@ export function ServicesGridSection() {
           return (
             <div
               key={service}
-              className="rounded-[1.6rem] border border-[var(--color-border)] bg-[var(--color-card)] px-5 py-6 shadow-[0_10px_30px_rgba(57,43,49,0.04)]"
+              className="rounded-[1.6rem] border border-[var(--color-border)] bg-[color:color-mix(in_oklab,var(--color-card)_92%,transparent)] px-5 py-6 shadow-[0_14px_35px_rgba(16,24,34,0.05)] backdrop-blur-sm"
             >
               <Icon className="h-5 w-5 text-[var(--color-accent)]" />
               <p className="mt-4 text-base font-medium text-[var(--color-ink)]">

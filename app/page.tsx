@@ -1,4 +1,3 @@
-import { TestimonialsSection } from "@/sections/home/testimonials";
 import { BrandCtaSection } from "@/sections/home/brand-cta";
 import { HomeHero } from "@/sections/home/hero";
 import { HomeProcessSection } from "@/sections/home/process";
@@ -38,7 +37,6 @@ export default function Home() {
       <ServicesGridSection />
       <BrandCtaSection />
       <ResultsSection />
-      <TestimonialsSection />
     </>
   );
 }

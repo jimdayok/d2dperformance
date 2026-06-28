@@ -3,37 +3,47 @@
 :root {
   --color-bg: #f3eeea;
   --color-surface: #fbf7f3;
-  --color-card: rgba(255, 251, 247, 0.92);
-  --color-panel: rgba(232, 223, 219, 0.58);
-  --color-ink: #2b3138;
-  --color-ink-soft: #46515c;
-  --color-accent: #8a6a70;
-  --color-accent-soft: #b7c7db;
-  --color-muted: #6e6467;
-  --color-border: rgba(88, 72, 77, 0.13);
-  --color-border-soft: rgba(88, 72, 77, 0.08);
-  --color-border-strong: rgba(88, 72, 77, 0.18);
-  --color-sand: #e9e2da;
-  --color-taupe: #7f6668;
-  --color-charcoal: #232d38;
+  --color-card: rgba(255, 251, 247, 0.9);
+  --color-panel: rgba(237, 229, 224, 0.82);
+  --color-ink: #202730;
+  --color-ink-soft: #3b4550;
+  --color-accent: #87686d;
+  --color-accent-soft: #c8d4df;
+  --color-muted: #5f5960;
+  --color-border: rgba(83, 68, 74, 0.14);
+  --color-border-soft: rgba(83, 68, 74, 0.08);
+  --color-border-strong: rgba(83, 68, 74, 0.22);
+  --color-sand: #ede5dd;
+  --color-taupe: #735d62;
+  --color-charcoal: #101822;
+  --button-primary-bg: #101822;
+  --button-primary-text: #ffffff;
+  --button-secondary-bg: rgba(255, 255, 255, 0.72);
+  --button-secondary-text: #101822;
+  --button-secondary-border: rgba(32, 39, 48, 0.16);
 }
 
 .dark {
-  --color-bg: #1f1e24;
-  --color-surface: #26252d;
-  --color-card: rgba(38, 37, 45, 0.88);
-  --color-panel: rgba(96, 76, 83, 0.28);
-  --color-ink: #f5f7fb;
-  --color-ink-soft: #e7e2dc;
-  --color-accent: #c7a7a6;
-  --color-accent-soft: #6f819b;
-  --color-muted: #b4a7aa;
-  --color-border: rgba(220, 203, 201, 0.16);
-  --color-border-soft: rgba(220, 203, 201, 0.08);
-  --color-border-strong: rgba(220, 203, 201, 0.28);
-  --color-sand: #8f7d80;
-  --color-taupe: #d8c4c3;
-  --color-charcoal: #121821;
+  --color-bg: #11161d;
+  --color-surface: #171f29;
+  --color-card: rgba(23, 31, 41, 0.82);
+  --color-panel: rgba(255, 255, 255, 0.08);
+  --color-ink: #f6f3ee;
+  --color-ink-soft: #e7ddd2;
+  --color-accent: #c4a3a4;
+  --color-accent-soft: #71849b;
+  --color-muted: #c0b7ae;
+  --color-border: rgba(235, 226, 220, 0.14);
+  --color-border-soft: rgba(235, 226, 220, 0.08);
+  --color-border-strong: rgba(235, 226, 220, 0.28);
+  --color-sand: #d8cbc2;
+  --color-taupe: #ead7d6;
+  --color-charcoal: #0d141d;
+  --button-primary-bg: #f7f1ec;
+  --button-primary-text: #101822;
+  --button-secondary-bg: rgba(255, 255, 255, 0.08);
+  --button-secondary-text: #ffffff;
+  --button-secondary-border: rgba(255, 255, 255, 0.18);
 }
 
 @theme inline {
@@ -79,17 +89,17 @@ textarea {
 .site-bg {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(138, 106, 112, 0.16), transparent 24rem),
-    radial-gradient(circle at top right, rgba(183, 199, 219, 0.18), transparent 21rem),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0.28)),
+    radial-gradient(circle at top left, rgba(135, 104, 109, 0.15), transparent 28rem),
+    radial-gradient(circle at top right, rgba(200, 212, 223, 0.14), transparent 24rem),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.2)),
     var(--color-bg);
 }
 
 .dark .site-bg {
   background:
-    radial-gradient(circle at top left, rgba(199, 167, 166, 0.18), transparent 24rem),
-    radial-gradient(circle at top right, rgba(111, 129, 155, 0.14), transparent 24rem),
-    linear-gradient(180deg, rgba(31, 30, 36, 0.96), rgba(31, 30, 36, 0.99)),
+    radial-gradient(circle at top left, rgba(196, 163, 164, 0.16), transparent 28rem),
+    radial-gradient(circle at top right, rgba(113, 132, 155, 0.14), transparent 24rem),
+    linear-gradient(180deg, rgba(17, 22, 29, 0.98), rgba(17, 22, 29, 1)),
     var(--color-bg);
 }
 
@@ -120,52 +130,12 @@ textarea {
 .editorial-frame {
   border-radius: 2.25rem;
   border: 1px solid var(--color-border);
-  background: linear-gradient(180deg, color-mix(in oklab, var(--color-card) 88%, white), var(--color-card));
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--color-card) 92%, white),
+    var(--color-card)
+  );
   box-shadow: 0 28px 80px rgba(57, 43, 49, 0.08);
-}
-
-.section-curve-top {
-  position: relative;
-  overflow: hidden;
-}
-
-.section-curve-top::before {
-  content: "";
-  position: absolute;
-  inset: auto -10% 0 -10%;
-  height: 9rem;
-  background: color-mix(in oklab, var(--color-sand) 70%, white);
-  border-top-left-radius: 50% 100%;
-  border-top-right-radius: 50% 100%;
-  opacity: 0.72;
-  z-index: 0;
-}
-
-.section-curve-top > * {
-  position: relative;
-  z-index: 1;
-}
-
-.taupe-band {
-  background: linear-gradient(180deg, color-mix(in oklab, var(--color-accent) 20%, white), color-mix(in oklab, var(--color-accent) 32%, white));
-}
-
-.footer-wave {
-  position: relative;
-  overflow: hidden;
-}
-
-.footer-wave::before {
-  content: "";
-  position: absolute;
-  left: -5%;
-  right: -5%;
-  top: -4.5rem;
-  height: 10rem;
-  background: color-mix(in oklab, var(--color-accent) 86%, white);
-  border-bottom-left-radius: 50% 100%;
-  border-bottom-right-radius: 50% 100%;
-  opacity: 0.96;
 }
 
 .photo-placeholder {

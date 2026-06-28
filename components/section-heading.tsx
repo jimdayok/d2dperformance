@@ -16,7 +16,7 @@ export function SectionHeading({
           {eyebrow}
         </p>
       ) : null}
-      <h2 className="font-display text-balance text-4xl font-semibold tracking-[-0.03em] text-[var(--color-taupe)] md:text-6xl">
+      <h2 className="font-display text-balance text-[clamp(2.4rem,5vw,4.4rem)] font-semibold tracking-[-0.04em] text-[var(--color-taupe)]">
         {title}
       </h2>
       {description ? (
