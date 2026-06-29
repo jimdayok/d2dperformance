@@ -1,0 +1,84 @@
+[    5397ms] [LOG] %c
+▲
+
+    ________   _ __ _          ____           __
+   /  _/ __/  (_) /( )_____   / __/___ ______/ /_
+   / // /_   / / __/// ___/  / /_/ __ `/ ___/ __/
+ _/ // __/  / / /_  (__  )  / __/ /_/ (__  ) /_
+/___/_/    /_/\__/ /____/  /_/  \__,_/____/\__/
+    _ __ _                         _    __                    __
+   (_) /( )_____   ____  ____     | |  / /__  _____________  / /
+  / / __/// ___/  / __ \/ __ \    | | / / _ \/ ___/ ___/ _ \/ /
+ / / /_  (__  )  / /_/ / / / /    | |/ /  __/ /  / /__/  __/ /
+/_/\__/ /____/   \____/_/ /_/     |___/\___/_/   \___/\___/_/
+  
+
+Hello!
+
+- Open Source https://vercel.com/oss
+- Careers https://vercel.com/careers
+- Status https://vercel-status.com
+
+ font-family: "Geist Mono", monospace; white-space: pre; line-height: 1; @ https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/chunks/0uifg6aa68r5w.js:78
+[    5781ms] [WARNING] Deprecated API for given entry type. @ https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/chunks/0ri-ifq_wq5g_.js:18
+[    5877ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://vercel.com/api/jwt:0
+[    6127ms] [ERROR] Failed to load resource: the server responded with a status of 429 () @ https://o205439.ingest.us.sentry.io/api/4507726617772032/envelope/?sentry_key=285c77642188feae6e662bd2903e2d52&sentry_version=7&sentry_client=sentry.javascript.browser%2F7.111.0:0
+[   18604ms] [LOG] %c
+▲
+
+ _____ _              _                    _   _             __
+|_   _| |__   ___    / \   __ _  ___ _ __ | |_(_) ___       / /
+  | | | '_ \ / _ \  / _ \ / _` |/ _ \ '_ \| __| |/ __|     / /
+  | | | | | |  __/ / ___ \ (_| |  __/ | | | |_| | (__     /_/
+  |_| |_| |_|\___|/_/   \_\__, |\___|_| |_|\__|_|\___|    (_)
+                           |___/
+ ___        __               _                   _                 _
+|_ _|_ __  / _|_ __ __ _ ___| |_ _ __ _   _  ___| |_ _   _ _ __ ___
+ | || '_ \| |_| '__/ _` / __| __| '__| | | |/ __| __| | | | '__/ _ \
+ | || | | |  _| | | (_| \__ \ |_| |  | |_| | (__| |_| |_| | | |  __/
+|___|_| |_|_| |_|  \__,_|___/\__|_|   \__,_|\___|\__|\__,_|_|  \___|
+  
+
+Hello!
+
+- Open Source https://vercel.com/oss
+- Careers https://vercel.com/careers
+- Status https://vercel-status.com
+
+ font-family: "Geist Mono", monospace; white-space: pre; line-height: 1; @ https://vercel.com/_next/static/immutable/chunks/09cizcx7bxmnn.js:78
+[   18780ms] [WARNING] [GSI_LOGGER]: Your client application uses one of the Google One Tap prompt UI status methods that may stop functioning when FedCM becomes mandatory. Refer to the migration guide to update your code accordingly and opt-in to FedCM to test your changes. Learn more: https://developers.google.com/identity/gsi/web/guides/fedcm-migration?s=dc#display_moment and https://developers.google.com/identity/gsi/web/guides/fedcm-migration?s=dc#skipped_moment @ https://accounts.google.com/gsi/client:86
+[   18867ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://vercel.com/api/jwt:0
+[   18934ms] [WARNING] Deprecated API for given entry type. @ https://vercel.com/_next/static/immutable/chunks/30boi8e69jjip.js:18
+[   19385ms] [ERROR] Provider's accounts list is empty. @ https://vercel.com/login:0
+[   21999ms] [ERROR] [GSI_LOGGER]: FedCM get() rejects with AbortError: signal is aborted without reason @ https://vercel.com/_next/static/immutable/chunks/0zjvb6raqc_g6.js:8
+[   22149ms] [ERROR] Failed to load resource: the server responded with a status of 429 () @ https://o205439.ingest.sentry.io/api/1323670/envelope/?sentry_key=d00780d432ac4ccf882f60dd02062e14&sentry_version=7&sentry_client=sentry.javascript.browser%2F7.111.0:0
+[   25179ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ https://appleid.apple.com/auth/authorize?client_id=vercel&redirect_uri=https%3A%2F%2Fvercel.com%2Fapi%2Fregistration%2Fapple%2Fcallback&response_type=code+id_token&scope=email+name&response_mode=form_post&state=f74b89f91f49f527e30b768257a9ce44563e543837b5ad071bd6e85a6f8f8332cc943809790c81fcd406996964c7bb79fdeae46c760680c5fff64b311c992fe47869b8284438777aeec3f22d8cce01c09be52a4f5034f24eb9f3f95a5c9d58202c11eaea8a24d6a2c0d66a9aed47aaa76220bbf1cd00aa451174892c49dda6459d75020ccffc47b8c18517c48696a6c383998807ad0bc7aa971c60470cce959c5f6ff23aa4628c25e9c51b4edae914ec9bbe29ca456defc688446e4fbc57ce73912d10d75b1c9f20fdda126ae2e727e7da3f2d7aae0b543a846b6191a3b24e8173d5b29ed07e8780dceaf5902bc7b7c0fbfc67b71891642b6039bfb8cbb027d6bcffbd123c0a3605914bb065850d51df660cfe469eee134b0c042c252f1b4e43ac436a8a05455c73187e1ad4f8793ebba3f6e4c7d15b4600a3935b696196bca94e7df2e8f453e001089bf27ff84b37fec482fa1f4dfe25:0
+[   41951ms] [LOG] %c
+▲
+
+    ____                               _ __
+   / __ \________  ____ _____ ___     (_) /_
+  / / / / ___/ _ \/ __ `/ __ `__ \   / / __/
+ / /_/ / /  /  __/ /_/ / / / / / /  / / /__
+/_____/_/   \___/\__,_/_/ /_/ /_/  /_/\__( )
+   _____ __    _          _ __           |/
+  / ___// /_  (_)___     (_) /_
+  \__ \/ __ \/ / __ \   / / __/
+ ___/ / / / / / /_/ /  / / /_
+/____/_/ /_/_/ .___/  /_/\__/
+            /_/
+  
+
+Hello!
+
+- Open Source https://vercel.com/oss
+- Careers https://vercel.com/careers
+- Status https://vercel-status.com
+
+ font-family: "Geist Mono", monospace; white-space: pre; line-height: 1; @ https://vercel.com/_next/static/immutable/chunks/09cizcx7bxmnn.js:78
+[   42160ms] [WARNING] Deprecated API for given entry type. @ https://vercel.com/_next/static/immutable/chunks/30boi8e69jjip.js:18
+[   42268ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://vercel.com/api/jwt:0
+[   45473ms] [WARNING] The resource https://vercel.com/_next/static/immutable/chunks/01ite53vowhjv.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ https://vercel.com/login/callback/verify/2fa?token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjBhM2YyYmVhLTNhMTMtNDA5Yi1hODEwLTY1ODBiZWQ4YjcwOCJ9.eyJhbGxvd2VkTWV0aG9kcyI6WyJ0b3RwIiwid2ViYXV0aG4iLCJyZWNvdmVyeS1jb2RlIl0sInN1YiI6IlZmcFF3czM2TUx4bWxtUm5ScmtlUVZtdSIsImp0aSI6IjVlMWYzNmQwLWM3MjQtNGY3Yi1hNjAxLTc2ZTE4ODkzYmFkNiIsImlhdCI6MTc4MjY5MTkxNSwiZXhwIjoxNzgyNjkyMjE1fQ.A3OVjkuR5gFsYIqGmEvMBKkPs8qWHUuzOM5gn7TRaFOD5TT5EdHTQ7TqtHt1K3tG-R2N6pxTFRX0A_0Y1p39OB3O3ftkMXSHbm7Zlp1tVnGDJsEovcbKbhlQa44lpmmDqns3SLT8RY1CcVVjoktlFZEgNi95ItTUWzwaXeIYCv9asUMlN98kQGWRPBUTe-tgcReRSYheH__x_igl0UKncx1we9Zu3YSZZB_-SGvKVAvzrrzJ0-bjFURY1x4JnZUE8UmU7PwMWXAVvuWIEmlBmyQmN730auWVRb833fwvzK_gadBBmfq5BqbP99w_-PMpEUhBxG9KwsY0OE85HHLTCA&next=https%3A%2F%2Fvercel.com%2Flogin%2Fcallback%3Fredirect%3Dserver:0
+[   45473ms] [WARNING] The resource https://vercel.com/_next/static/immutable/chunks/1k2xfmi7zh1t3.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ https://vercel.com/login/callback/verify/2fa?token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjBhM2YyYmVhLTNhMTMtNDA5Yi1hODEwLTY1ODBiZWQ4YjcwOCJ9.eyJhbGxvd2VkTWV0aG9kcyI6WyJ0b3RwIiwid2ViYXV0aG4iLCJyZWNvdmVyeS1jb2RlIl0sInN1YiI6IlZmcFF3czM2TUx4bWxtUm5ScmtlUVZtdSIsImp0aSI6IjVlMWYzNmQwLWM3MjQtNGY3Yi1hNjAxLTc2ZTE4ODkzYmFkNiIsImlhdCI6MTc4MjY5MTkxNSwiZXhwIjoxNzgyNjkyMjE1fQ.A3OVjkuR5gFsYIqGmEvMBKkPs8qWHUuzOM5gn7TRaFOD5TT5EdHTQ7TqtHt1K3tG-R2N6pxTFRX0A_0Y1p39OB3O3ftkMXSHbm7Zlp1tVnGDJsEovcbKbhlQa44lpmmDqns3SLT8RY1CcVVjoktlFZEgNi95ItTUWzwaXeIYCv9asUMlN98kQGWRPBUTe-tgcReRSYheH__x_igl0UKncx1we9Zu3YSZZB_-SGvKVAvzrrzJ0-bjFURY1x4JnZUE8UmU7PwMWXAVvuWIEmlBmyQmN730auWVRb833fwvzK_gadBBmfq5BqbP99w_-PMpEUhBxG9KwsY0OE85HHLTCA&next=https%3A%2F%2Fvercel.com%2Flogin%2Fcallback%3Fredirect%3Dserver:0
+[   45473ms] [WARNING] The resource https://vercel.com/_next/static/immutable/chunks/1tfmo57som7nf.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ https://vercel.com/login/callback/verify/2fa?token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjBhM2YyYmVhLTNhMTMtNDA5Yi1hODEwLTY1ODBiZWQ4YjcwOCJ9.eyJhbGxvd2VkTWV0aG9kcyI6WyJ0b3RwIiwid2ViYXV0aG4iLCJyZWNvdmVyeS1jb2RlIl0sInN1YiI6IlZmcFF3czM2TUx4bWxtUm5ScmtlUVZtdSIsImp0aSI6IjVlMWYzNmQwLWM3MjQtNGY3Yi1hNjAxLTc2ZTE4ODkzYmFkNiIsImlhdCI6MTc4MjY5MTkxNSwiZXhwIjoxNzgyNjkyMjE1fQ.A3OVjkuR5gFsYIqGmEvMBKkPs8qWHUuzOM5gn7TRaFOD5TT5EdHTQ7TqtHt1K3tG-R2N6pxTFRX0A_0Y1p39OB3O3ftkMXSHbm7Zlp1tVnGDJsEovcbKbhlQa44lpmmDqns3SLT8RY1CcVVjoktlFZEgNi95ItTUWzwaXeIYCv9asUMlN98kQGWRPBUTe-tgcReRSYheH__x_igl0UKncx1we9Zu3YSZZB_-SGvKVAvzrrzJ0-bjFURY1x4JnZUE8UmU7PwMWXAVvuWIEmlBmyQmN730auWVRb833fwvzK_gadBBmfq5BqbP99w_-PMpEUhBxG9KwsY0OE85HHLTCA&next=https%3A%2F%2Fvercel.com%2Flogin%2Fcallback%3Fredirect%3Dserver:0
+[   45473ms] [WARNING] The resource https://vercel.com/_next/static/immutable/chunks/3m88gd-sogt5t.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ https://vercel.com/login/callback/verify/2fa?token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjBhM2YyYmVhLTNhMTMtNDA5Yi1hODEwLTY1ODBiZWQ4YjcwOCJ9.eyJhbGxvd2VkTWV0aG9kcyI6WyJ0b3RwIiwid2ViYXV0aG4iLCJyZWNvdmVyeS1jb2RlIl0sInN1YiI6IlZmcFF3czM2TUx4bWxtUm5ScmtlUVZtdSIsImp0aSI6IjVlMWYzNmQwLWM3MjQtNGY3Yi1hNjAxLTc2ZTE4ODkzYmFkNiIsImlhdCI6MTc4MjY5MTkxNSwiZXhwIjoxNzgyNjkyMjE1fQ.A3OVjkuR5gFsYIqGmEvMBKkPs8qWHUuzOM5gn7TRaFOD5TT5EdHTQ7TqtHt1K3tG-R2N6pxTFRX0A_0Y1p39OB3O3ftkMXSHbm7Zlp1tVnGDJsEovcbKbhlQa44lpmmDqns3SLT8RY1CcVVjoktlFZEgNi95ItTUWzwaXeIYCv9asUMlN98kQGWRPBUTe-tgcReRSYheH__x_igl0UKncx1we9Zu3YSZZB_-SGvKVAvzrrzJ0-bjFURY1x4JnZUE8UmU7PwMWXAVvuWIEmlBmyQmN730auWVRb833fwvzK_gadBBmfq5BqbP99w_-PMpEUhBxG9KwsY0OE85HHLTCA&next=https%3A%2F%2Fvercel.com%2Flogin%2Fcallback%3Fredirect%3Dserver:0
