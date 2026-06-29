@@ -64,6 +64,7 @@ export type DiscoverySection = {
 };
 
 export type DiscoveryDraft = {
+  started: boolean;
   currentSectionIndex: number;
   answers: DiscoveryFormValues;
   startedAt: string;

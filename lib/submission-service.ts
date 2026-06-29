@@ -1,6 +1,10 @@
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
-import type { DiscoveryAnswer, DiscoverySubmission } from "@/types/brand-discovery";
+import type {
+  DiscoveryAnswer,
+  DiscoverySubmission,
+  DiscoveryUploadMetadata,
+} from "@/types/brand-discovery";
 
 type SubmissionResult = {
   databaseSaved: boolean;
@@ -10,11 +14,13 @@ type SubmissionResult = {
 
 const {
   RESEND_API_KEY,
-  BRAND_DISCOVERY_NOTIFICATION_EMAIL,
+  BRAND_DISCOVERY_TO_EMAIL,
   BRAND_DISCOVERY_FROM_EMAIL,
   NEXT_PUBLIC_SUPABASE_URL,
   SUPABASE_SERVICE_ROLE_KEY,
 } = process.env;
+
+const fallbackToEmail = "performance@d2dmktg.com";
 
 function createSupabaseAdmin() {
   if (!NEXT_PUBLIC_SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
@@ -29,8 +35,17 @@ function createSupabaseAdmin() {
   });
 }
 
-function createResendClient() {
-  return RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
+function isUploadMetadataArray(value: DiscoveryAnswer): value is DiscoveryUploadMetadata[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (item) =>
+        typeof item === "object" &&
+        item !== null &&
+        "name" in item &&
+        typeof item.name === "string",
+    )
+  );
 }
 
 function answerToText(value: DiscoveryAnswer | undefined) {
@@ -51,90 +66,96 @@ function answerToText(value: DiscoveryAnswer | undefined) {
       return (value as string[]).join(", ");
     }
 
-    return (value as Array<{ name: string }>).map((file) => file.name).join(", ");
+    if (!isUploadMetadataArray(value)) {
+      return "Not provided";
+    }
+
+    return value
+      .map((file) => `${file.name}${file.type ? ` (${file.type})` : ""}${typeof file.size === "number" ? ` - ${file.size} bytes` : ""}`)
+      .join(", ");
   }
 
   return "Not provided";
 }
 
-function answersToMarkdown(payload: DiscoverySubmission) {
+function answersToEmailText(payload: DiscoverySubmission) {
   const lines = [
-    "# Brand Discovery Submission",
+    "Brand Discovery Submission",
     "",
     `Submitted: ${payload.submittedAt}`,
     `Started: ${payload.startedAt}`,
     `Last Updated: ${payload.updatedAt}`,
     "",
-    "## Answers",
+    `Name: ${answerToText(payload.answers.name)}`,
+    `Company: ${answerToText(payload.answers.company)}`,
+    `Role: ${answerToText(payload.answers.role)}`,
+    `Email: ${answerToText(payload.answers.email)}`,
+    `Phone: ${answerToText(payload.answers.phone)}`,
+    "",
+    "All Answers",
     "",
   ];
 
   for (const [key, value] of Object.entries(payload.answers)) {
-    lines.push(`### ${key}`);
-    lines.push(answerToText(value));
-    lines.push("");
+    lines.push(`${key}: ${answerToText(value)}`);
   }
 
   return lines.join("\n");
 }
 
+export function validateSubmission(payload: DiscoverySubmission) {
+  const name = typeof payload.answers.name === "string" ? payload.answers.name.trim() : "";
+  const company = typeof payload.answers.company === "string" ? payload.answers.company.trim() : "";
+  const email = typeof payload.answers.email === "string" ? payload.answers.email.trim() : "";
+
+  if (!name || !company || !email) {
+    return "Please complete the required contact details before submitting.";
+  }
+
+  return null;
+}
+
 export function isSubmissionServiceConfigured() {
-  return Boolean(
-    RESEND_API_KEY &&
-      BRAND_DISCOVERY_NOTIFICATION_EMAIL &&
-      BRAND_DISCOVERY_FROM_EMAIL &&
-      NEXT_PUBLIC_SUPABASE_URL &&
-      SUPABASE_SERVICE_ROLE_KEY,
-  );
+  return Boolean(RESEND_API_KEY && BRAND_DISCOVERY_FROM_EMAIL);
 }
 
 export async function handleBrandDiscoverySubmission(
   payload: DiscoverySubmission,
 ): Promise<SubmissionResult> {
+  if (!RESEND_API_KEY || !BRAND_DISCOVERY_FROM_EMAIL) {
+    throw new Error("Email delivery is not configured for Brand Discovery submissions.");
+  }
+
+  const resend = new Resend(RESEND_API_KEY);
   const supabase = createSupabaseAdmin();
-  const resend = createResendClient();
-  const configured = isSubmissionServiceConfigured();
-  const reportMarkdown = answersToMarkdown(payload);
+  const emailBody = answersToEmailText(payload);
+  const toEmail = BRAND_DISCOVERY_TO_EMAIL || fallbackToEmail;
+
+  await resend.emails.send({
+    from: BRAND_DISCOVERY_FROM_EMAIL,
+    to: toEmail,
+    subject: `New Brand Discovery: ${answerToText(payload.answers.company)}`,
+    text: emailBody,
+  });
 
   let databaseSaved = false;
-  let emailSent = false;
 
   if (supabase) {
     const { error } = await supabase.from("brand_discovery_submissions").insert({
       submitted_at: payload.submittedAt,
       answers: payload.answers,
       summaries: {},
-      report_markdown: reportMarkdown,
+      report_markdown: emailBody,
     });
 
-    if (error) {
-      throw new Error(`Supabase insert failed: ${error.message}`);
+    if (!error) {
+      databaseSaved = true;
     }
-
-    databaseSaved = true;
-  }
-
-  if (resend && BRAND_DISCOVERY_NOTIFICATION_EMAIL && BRAND_DISCOVERY_FROM_EMAIL) {
-    const companyName =
-      typeof payload.answers.companyName === "string"
-        ? payload.answers.companyName
-        : typeof payload.answers.contactName === "string"
-          ? payload.answers.contactName
-          : "Unknown company";
-
-    await resend.emails.send({
-      from: BRAND_DISCOVERY_FROM_EMAIL,
-      to: BRAND_DISCOVERY_NOTIFICATION_EMAIL,
-      subject: `New D2D Brand Discovery: ${companyName}`,
-      text: reportMarkdown,
-    });
-
-    emailSent = true;
   }
 
   return {
     databaseSaved,
-    emailSent,
-    configured,
+    emailSent: true,
+    configured: isSubmissionServiceConfigured(),
   };
 }

@@ -17,30 +17,13 @@ import type {
   DiscoverySubmission,
 } from "@/types/brand-discovery";
 
-const storageKey = "d2d-brand-discovery-v4";
-
-const interviewStages: DiscoverySection[] = [
-  ...brandDiscoverySections,
-  {
-    id: "review",
-    title: "Review",
-    description: "Review your answers before you submit your Brand Discovery.",
-    estimatedMinutes: 2,
-    questions: [],
-  },
-  {
-    id: "submit",
-    title: "Submit",
-    description: "Submit your discovery privately to the D2D team.",
-    estimatedMinutes: 1,
-    questions: [],
-  },
-];
+const storageKey = "d2d-brand-discovery-v5";
 
 function createEmptyDraft(): DiscoveryDraft {
   const now = new Date().toISOString();
 
   return {
+    started: false,
     currentSectionIndex: 0,
     answers: createInitialDiscoveryAnswers(),
     startedAt: now,
@@ -48,8 +31,8 @@ function createEmptyDraft(): DiscoveryDraft {
   };
 }
 
-function clampIndex(index: number) {
-  return Math.min(Math.max(index, 0), interviewStages.length - 1);
+function clampContentIndex(index: number) {
+  return Math.min(Math.max(index, 0), brandDiscoverySections.length - 1);
 }
 
 function getSectionValidationMessage(section: DiscoverySection, answers: DiscoveryFormValues) {
@@ -66,8 +49,12 @@ function getSectionValidationMessage(section: DiscoverySection, answers: Discove
   return null;
 }
 
-async function parseResponseJson<T>(response: Response) {
+async function parseJsonSafe<T>(response: Response) {
   const text = await response.text();
+  if (!text) {
+    return null;
+  }
+
   return safeJsonParse<T | null>(text, null);
 }
 
@@ -79,6 +66,7 @@ export function BrandDiscoveryForm() {
   const [isSaving, setIsSaving] = useState(false);
   const [submitState, setSubmitState] = useState<"idle" | "submitting" | "error">("idle");
   const [submitted, setSubmitted] = useState(false);
+  const questionTopRef = useRef<HTMLDivElement | null>(null);
   const saveTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -95,15 +83,44 @@ export function BrandDiscoveryForm() {
     saveDraft(storageKey, draft);
   }, [draft, hydrated, submitted]);
 
-  const currentSectionIndex = clampIndex(draft.currentSectionIndex);
-  const currentStage = interviewStages[currentSectionIndex];
-  const totalSteps = interviewStages.length;
-  const completion = Math.round(((currentSectionIndex + 1) / totalSteps) * 100);
-  const stepLabel = `Step ${currentSectionIndex + 1} of ${totalSteps}`;
+  useEffect(() => {
+    if (!hydrated || !draft.started) {
+      return;
+    }
+
+    questionTopRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, [draft.currentSectionIndex, draft.started, hydrated]);
+
+  const currentSectionIndex = Math.max(0, draft.currentSectionIndex);
+  const contentSteps = brandDiscoverySections.length;
+  const reviewStep = currentSectionIndex === contentSteps;
+  const submitStep = currentSectionIndex === contentSteps + 1;
+  const currentSection = brandDiscoverySections[clampContentIndex(currentSectionIndex)];
+  const stepLabel =
+    reviewStep ? "Review your answers" : submitStep ? "Submit Brand Discovery" : `Step ${currentSectionIndex + 1} of ${contentSteps}`;
+  const completion = reviewStep || submitStep
+    ? 100
+    : Math.round(((currentSectionIndex + 1) / contentSteps) * 100);
+
+  const currentStage = reviewStep
+    ? {
+        id: "review",
+        title: "Review",
+        description: "Review your answers before you submit your Brand Discovery.",
+      }
+    : submitStep
+      ? {
+          id: "submit",
+          title: "Submit",
+          description: "Submit your discovery privately to the D2D team.",
+        }
+      : currentSection;
 
   const answeredCount = useMemo(
-    () =>
-      Object.values(draft.answers).filter((value) => isQuestionAnswered(value)).length,
+    () => Object.values(draft.answers).filter((value) => isQuestionAnswered(value)).length,
     [draft.answers],
   );
 
@@ -115,7 +132,7 @@ export function BrandDiscoveryForm() {
     setIsSaving(true);
     saveTimeoutRef.current = window.setTimeout(() => {
       setIsSaving(false);
-    }, 500);
+    }, 450);
   }
 
   function updateDraft(updater: (current: DiscoveryDraft) => DiscoveryDraft) {
@@ -134,33 +151,59 @@ export function BrandDiscoveryForm() {
     }));
   }
 
-  function goToSection(index: number) {
+  function goToStep(index: number) {
     updateDraft((current) => ({
       ...current,
-      currentSectionIndex: clampIndex(index),
+      currentSectionIndex: index,
+      updatedAt: new Date().toISOString(),
+    }));
+  }
+
+  function handleStart() {
+    updateDraft((current) => ({
+      ...current,
+      started: true,
+      currentSectionIndex: 0,
       updatedAt: new Date().toISOString(),
     }));
   }
 
   function handlePrevious() {
-    goToSection(currentSectionIndex - 1);
-  }
-
-  function handleContinue() {
-    if (currentStage.id === "submit") {
+    if (submitStep) {
+      goToStep(contentSteps);
       return;
     }
 
-    if (currentStage.questions.length > 0) {
-      const validationMessage = getSectionValidationMessage(currentStage, draft.answers);
-
-      if (validationMessage) {
-        toast.error(validationMessage);
-        return;
-      }
+    if (reviewStep) {
+      goToStep(contentSteps - 1);
+      return;
     }
 
-    goToSection(currentSectionIndex + 1);
+    goToStep(Math.max(0, currentSectionIndex - 1));
+  }
+
+  function handleContinue() {
+    if (!draft.started) {
+      handleStart();
+      return;
+    }
+
+    if (reviewStep || submitStep) {
+      return;
+    }
+
+    const validationMessage = getSectionValidationMessage(currentSection, draft.answers);
+    if (validationMessage) {
+      toast.error(validationMessage);
+      return;
+    }
+
+    if (currentSectionIndex === contentSteps - 1) {
+      goToStep(contentSteps);
+      return;
+    }
+
+    goToStep(currentSectionIndex + 1);
   }
 
   async function handleSubmit() {
@@ -175,26 +218,26 @@ export function BrandDiscoveryForm() {
     };
 
     try {
-      const response = await fetch("/api/brand-blueprint", {
+      const response = await fetch("/api/brand-discovery/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      const data = await parseResponseJson<{ message?: string }>(response);
+      const result = await parseJsonSafe<{ ok?: boolean; error?: string }>(response);
 
-      if (!response.ok) {
+      if (!response.ok || !result?.ok) {
         throw new Error(
-          data?.message || "Something went wrong while saving. Your progress is still saved locally.",
+          result?.error || "Submission failed. Your progress is still saved.",
         );
       }
 
+      clearDraft(storageKey);
       setDraft((current) => ({
         ...current,
         submittedAt,
         updatedAt: submittedAt,
       }));
-      clearDraft(storageKey);
       setSubmitted(true);
       setSubmitState("idle");
     } catch (error) {
@@ -202,14 +245,14 @@ export function BrandDiscoveryForm() {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Something went wrong while saving. Your progress is still saved locally.",
+          : "Submission failed. Your progress is still saved.",
       );
     }
   }
 
   if (!hydrated) {
     return (
-      <section id="brand-discovery" className="mx-auto max-w-5xl px-6 pb-24 lg:px-8">
+      <section id="brand-discovery" className="mx-auto max-w-4xl px-6 pb-24 lg:px-8">
         <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-card)] p-8">
           <p className="text-sm text-[var(--color-muted)]">Loading your saved progress...</p>
         </div>
@@ -224,25 +267,22 @@ export function BrandDiscoveryForm() {
           <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[color:color-mix(in_oklab,var(--color-accent)_18%,white)] text-[var(--color-accent)]">
             <CheckCircle2 className="h-7 w-7" />
           </div>
-          <p className="mt-6 text-xs font-semibold uppercase tracking-[0.32em] text-[var(--color-accent)]">
-            Thank You
-          </p>
-          <h2 className="mt-4 text-balance text-4xl font-semibold tracking-[-0.04em] text-[var(--color-ink)] md:text-5xl">
-            Your Brand Discovery has been received.
+          <h2 className="mt-6 text-balance text-4xl font-semibold tracking-[-0.04em] text-[var(--color-ink)] md:text-5xl">
+            Thank you. Your Brand Discovery has been received.
           </h2>
           <p className="mt-5 max-w-3xl text-lg leading-8 text-[var(--color-muted)]">
-            Our team will review your answers and begin building your Brand Blueprint.
+            We&apos;ll review your answers and begin building your Brand Blueprint.
           </p>
 
           <div className="mt-8 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-panel)] p-6">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--color-accent)]">
-              What Happens Next
+              What happens next
             </p>
             <ol className="mt-4 space-y-4 text-base leading-7 text-[var(--color-muted)]">
               <li>1. We review your story, customer, visual, and positioning inputs.</li>
-              <li>2. We identify gaps or clarification points.</li>
+              <li>2. We identify any gaps or clarification points.</li>
               <li>
-                3. We prepare the strategy direction for your brand, website, messaging, and
+                3. We prepare the strategic direction for your brand, website, messaging, and
                 marketing foundation.
               </li>
             </ol>
@@ -255,9 +295,64 @@ export function BrandDiscoveryForm() {
     );
   }
 
+  if (!draft.started) {
+    return (
+      <section id="brand-discovery" className="mx-auto max-w-4xl px-6 pb-24 lg:px-8">
+        <div className="rounded-[2.25rem] border border-[var(--color-border)] bg-[var(--color-card)] p-8 shadow-[0_24px_60px_rgba(15,23,42,0.06)] md:p-12">
+          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[var(--color-accent)]">
+            Brand Discovery
+          </p>
+          <h2 className="mt-4 text-balance text-4xl font-semibold tracking-[-0.04em] text-[var(--color-ink)] md:text-5xl">
+            A simple guided interview to uncover the brand behind the business.
+          </h2>
+          <p className="mt-5 max-w-3xl text-lg leading-8 text-[var(--color-muted)]">
+            This takes about 15 to 20 minutes. Your progress is saved automatically, and your
+            answers are submitted privately to the D2D team.
+          </p>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {[
+              "8 focused sections with one clear topic at a time.",
+              "Large, readable inputs and a calmer review process.",
+              "Private submission with no visible strategy report on the client side.",
+            ].map((item) => (
+              <div
+                key={item}
+                className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-panel)] p-5 text-sm leading-7 text-[var(--color-muted)]"
+              >
+                {item}
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8 flex items-center justify-between gap-4 border-t border-[var(--color-border)] pt-6">
+            <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--color-muted)]">
+              <span className="inline-flex items-center gap-2 rounded-full bg-[var(--color-panel)] px-3 py-2">
+                <ShieldCheck className="h-4 w-4 text-[var(--color-accent)]" />
+                Private submission
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full bg-[var(--color-panel)] px-3 py-2">
+                <LockKeyhole className="h-4 w-4 text-[var(--color-accent)]" />
+                Progress saved
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleStart}
+              className="inline-flex items-center gap-2 rounded-full bg-[var(--button-primary-bg)] px-5 py-3 text-sm font-semibold text-[var(--button-primary-text)] transition hover:-translate-y-0.5"
+            >
+              Start Brand Discovery
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section id="brand-discovery" className="mx-auto max-w-5xl px-6 pb-24 lg:px-8">
-      <div className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-[0_24px_60px_rgba(15,23,42,0.06)] md:p-8">
+    <section id="brand-discovery" className="mx-auto max-w-4xl px-6 pb-24 lg:px-8">
+      <div ref={questionTopRef} className="rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-[0_24px_60px_rgba(15,23,42,0.06)] md:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[var(--color-accent)]">
@@ -269,17 +364,7 @@ export function BrandDiscoveryForm() {
               <span>{answeredCount} responses saved</span>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--color-muted)]">
-            <span className="inline-flex items-center gap-2 rounded-full bg-[var(--color-panel)] px-3 py-2">
-              <ShieldCheck className="h-4 w-4 text-[var(--color-accent)]" />
-              Private submission
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full bg-[var(--color-panel)] px-3 py-2">
-              <LockKeyhole className="h-4 w-4 text-[var(--color-accent)]" />
-              Progress saved
-            </span>
-            <AutosaveIndicator hydrated={hydrated} isSaving={isSaving} savedAt={draft.updatedAt} />
-          </div>
+          <AutosaveIndicator hydrated={hydrated} isSaving={isSaving} savedAt={draft.updatedAt} />
         </div>
 
         <div className="mt-6 h-2 rounded-full bg-[var(--color-border-soft)]">
@@ -307,28 +392,9 @@ export function BrandDiscoveryForm() {
               </p>
             </div>
 
-            {currentStage.id === "welcome" ? (
-              <div className="mt-8 grid gap-4 md:grid-cols-3">
-                {[
-                  "Plan for about 15 to 20 minutes.",
-                  "Your progress saves automatically as you go.",
-                  "Your answers are submitted privately to the D2D team.",
-                ].map((item) => (
-                  <div
-                    key={item}
-                    className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-panel)] p-5 text-sm leading-7 text-[var(--color-muted)]"
-                  >
-                    {item}
-                  </div>
-                ))}
-              </div>
-            ) : null}
-
-            {currentStage.id !== "welcome" &&
-            currentStage.id !== "review" &&
-            currentStage.id !== "submit" ? (
+            {!reviewStep && !submitStep ? (
               <div className="mt-8 space-y-5">
-                {currentStage.questions.map((question) => (
+                {currentSection.questions.map((question) => (
                   <QuestionCard
                     key={question.id}
                     question={question}
@@ -339,24 +405,24 @@ export function BrandDiscoveryForm() {
               </div>
             ) : null}
 
-            {currentStage.id === "review" ? (
+            {reviewStep ? (
               <div className="mt-8">
-                <ReviewPanel answers={draft.answers} onEdit={goToSection} />
+                <ReviewPanel answers={draft.answers} onEdit={goToStep} />
               </div>
             ) : null}
 
-            {currentStage.id === "submit" ? (
+            {submitStep ? (
               <div className="mt-8 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-panel)] p-6">
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--color-accent)]">
-                  Ready to submit
+                  Final check
                 </p>
                 <p className="mt-4 text-base leading-8 text-[var(--color-muted)]">
-                  When you submit, your answers, selected options, uploaded file metadata, and
-                  timestamps will be sent privately to the D2D team for review.
+                  When you submit, your contact details, answers, uploaded file metadata, and
+                  timestamps will be sent privately to the D2D team.
                 </p>
                 {submitState === "error" ? (
                   <p className="mt-4 text-sm text-rose-700 dark:text-rose-300">
-                    Something went wrong while saving. Your progress is still saved locally.
+                    Submission failed. Your progress is still saved.
                   </p>
                 ) : null}
               </div>
@@ -366,13 +432,13 @@ export function BrandDiscoveryForm() {
               <button
                 type="button"
                 onClick={handlePrevious}
-                disabled={currentSectionIndex === 0 || submitState === "submitting"}
+                disabled={submitState === "submitting"}
                 className="inline-flex items-center justify-center rounded-full border border-[var(--color-border)] px-5 py-3 text-sm font-semibold text-[var(--color-ink)] transition hover:border-[var(--color-accent)] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Previous
               </button>
 
-              {currentStage.id === "submit" ? (
+              {submitStep ? (
                 <button
                   type="button"
                   onClick={handleSubmit}
@@ -384,10 +450,10 @@ export function BrandDiscoveryForm() {
               ) : (
                 <button
                   type="button"
-                  onClick={handleContinue}
+                  onClick={reviewStep ? () => goToStep(contentSteps + 1) : handleContinue}
                   className="inline-flex items-center gap-2 rounded-full bg-[var(--button-primary-bg)] px-5 py-3 text-sm font-semibold text-[var(--button-primary-text)] transition hover:-translate-y-0.5"
                 >
-                  {currentStage.id === "welcome" ? "Start Brand Discovery" : "Save & Continue"}
+                  {reviewStep ? "Continue to Submit" : "Save & Continue"}
                   <ArrowRight className="h-4 w-4" />
                 </button>
               )}
