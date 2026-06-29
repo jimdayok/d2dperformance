@@ -1,8 +1,15 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, LockKeyhole, PartyPopper, RefreshCcw, ShieldCheck } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
+import {
+  ArrowRight,
+  LockKeyhole,
+  PartyPopper,
+  RefreshCcw,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { AutosaveIndicator } from "@/components/autosave-indicator";
 import { ProgressTracker } from "@/components/progress-tracker";
@@ -24,7 +31,7 @@ import type {
   DiscoverySubmission,
 } from "@/types/brand-discovery";
 
-const storageKey = "d2d-brand-discovery-v2";
+const storageKey = "d2d-brand-discovery-v3";
 
 const stageSections: DiscoverySection[] = [
   ...brandDiscoverySections,
@@ -32,14 +39,14 @@ const stageSections: DiscoverySection[] = [
     id: "review",
     title: "Review",
     description: "Review every section before generating the brand report.",
-    estimatedMinutes: 6,
+    estimatedMinutes: 2,
     questions: [],
   },
   {
     id: "submit",
     title: "Submit",
     description: "Generate the report and submit the discovery.",
-    estimatedMinutes: 4,
+    estimatedMinutes: 1,
     questions: [],
   },
 ];
@@ -67,10 +74,26 @@ export function BrandDiscoveryForm() {
     databaseSaved: boolean;
     emailSent: boolean;
   } | null>(null);
+  const [copilotReady, setCopilotReady] = useState(false);
+  const [copilotState, setCopilotState] = useState<"idle" | "loading" | "error">("idle");
+  const [copilotPrompt, setCopilotPrompt] = useState("");
+  const [copilotResponse, setCopilotResponse] = useState<{
+    assistantMessage: string;
+    followUpQuestion: string;
+    suggestedAnswer: string;
+    confidence: "low" | "medium" | "high";
+    remainingRequests: number;
+  } | null>(null);
   const saveTimeoutRef = useRef<number | null>(null);
 
   const currentSectionIndex = clampIndex(draft.currentSectionIndex ?? 0);
   const currentStage = stageSections[currentSectionIndex];
+  const assistableQuestion = currentStage.questions.find(
+    (question) =>
+      question.type === "paragraph" ||
+      question.type === "short-text" ||
+      question.type === "website",
+  );
   const currentSummary =
     draft.summaries[currentStage.id] ??
     (currentStage.questions.length
@@ -82,6 +105,41 @@ export function BrandDiscoveryForm() {
     () => estimateRemainingMinutes(Math.min(currentSectionIndex, brandDiscoverySections.length - 1), draft.answers),
     [currentSectionIndex, draft.answers],
   );
+
+  useEffect(() => {
+    if (!hydrated) {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function bootstrapCopilot() {
+      try {
+        const response = await fetch("/api/brand-copilot/session", {
+          method: "GET",
+          credentials: "same-origin",
+        });
+
+        if (!response.ok) {
+          throw new Error("Unable to initialize AI copilot.");
+        }
+
+        if (!cancelled) {
+          setCopilotReady(true);
+        }
+      } catch {
+        if (!cancelled) {
+          setCopilotReady(false);
+        }
+      }
+    }
+
+    void bootstrapCopilot();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hydrated]);
 
   function updateDraft(updater: (current: DiscoveryDraft) => DiscoveryDraft) {
     if (hydrated) {
@@ -138,6 +196,9 @@ export function BrandDiscoveryForm() {
   }
 
   function goToSection(index: number) {
+    setCopilotPrompt("");
+    setCopilotResponse(null);
+    setCopilotState("idle");
     updateDraft((current) => ({
       ...current,
       currentSectionIndex: clampIndex(index),
@@ -213,6 +274,81 @@ export function BrandDiscoveryForm() {
     toast("Discovery draft reset.");
   }
 
+  async function handleCopilotAsk() {
+    if (!assistableQuestion) {
+      return;
+    }
+
+    const currentAnswer =
+      typeof draft.answers[assistableQuestion.id] === "string"
+        ? (draft.answers[assistableQuestion.id] as string)
+        : "";
+
+    const userMessage =
+      copilotPrompt.trim() ||
+      currentAnswer ||
+      "Help me answer this question clearly and strategically.";
+
+    try {
+      setCopilotState("loading");
+
+      const response = await fetch("/api/brand-copilot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sectionId: currentStage.id,
+          sectionTitle: currentStage.title,
+          sectionDescription: currentStage.description,
+          targetQuestionId: assistableQuestion.id,
+          targetQuestionLabel: assistableQuestion.label,
+          targetQuestionDescription: assistableQuestion.description,
+          targetQuestionPlaceholder: assistableQuestion.placeholder,
+          currentAnswer,
+          sectionSummary: currentSummary,
+          answers: draft.answers,
+          userMessage,
+        }),
+      });
+
+      const data = (await response.json()) as
+        | {
+            assistantMessage: string;
+            followUpQuestion: string;
+            suggestedAnswer: string;
+            confidence: "low" | "medium" | "high";
+            remainingRequests: number;
+          }
+        | { message?: string };
+      const errorMessage =
+        "message" in data && typeof data.message === "string"
+          ? data.message
+          : "The AI copilot is unavailable right now.";
+
+      if (!response.ok || !("assistantMessage" in data)) {
+        throw new Error(errorMessage);
+      }
+
+      setCopilotResponse(data);
+      setCopilotState("idle");
+    } catch (error) {
+      setCopilotState("error");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "The AI copilot is unavailable right now.",
+      );
+    }
+  }
+
+  function applyCopilotDraft() {
+    if (!assistableQuestion || !copilotResponse?.suggestedAnswer) {
+      return;
+    }
+
+    updateAnswer(assistableQuestion.id, copilotResponse.suggestedAnswer);
+    toast.success("AI draft applied to this answer.");
+  }
+
   if (!hydrated) {
     return (
       <section id="brand-discovery" className="mx-auto max-w-7xl px-6 pb-24 lg:px-8">
@@ -278,7 +414,7 @@ export function BrandDiscoveryForm() {
                   <p>{currentStage.estimatedMinutes} minutes for this section</p>
                   <p className="mt-1">
                     {currentStage.id === "welcome"
-                      ? "Estimated total time: 45-60 minutes"
+                      ? "Estimated total time: 12-15 minutes"
                       : "You can pause and resume later."}
                   </p>
                 </div>
@@ -287,9 +423,9 @@ export function BrandDiscoveryForm() {
               {currentStage.id === "welcome" ? (
                 <div className="mt-8 grid gap-4 md:grid-cols-3">
                   {[
-                    "Large strategic questions are broken into manageable sections.",
+                    "This version is intentionally concise so owners can complete it in one sitting.",
                     "Every field autosaves locally so you can pause without losing work.",
-                    "Your report will be structured for future AI-assisted strategy generation.",
+                    "A protected AI copilot can help sharpen difficult answers without exposing your OpenAI key in the browser.",
                   ].map((item) => (
                     <div
                       key={item}
@@ -313,6 +449,88 @@ export function BrandDiscoveryForm() {
                       />
                     ))}
                   </div>
+
+                  {assistableQuestion ? (
+                    <div className="mt-8 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-card)] p-5">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <p className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-ink)]">
+                            <Sparkles className="h-4 w-4 text-[var(--color-accent)]" />
+                            D2D AI Copilot
+                          </p>
+                          <p className="mt-2 max-w-2xl text-sm leading-7 text-[var(--color-muted)]">
+                            Talk through this section with AI and get one sharper follow-up question plus a suggested draft answer for{" "}
+                            <span className="font-medium text-[var(--color-ink)]">
+                              {assistableQuestion.label}
+                            </span>
+                            .
+                          </p>
+                        </div>
+                        <span className="rounded-full bg-[var(--color-panel)] px-3 py-2 text-xs font-medium text-[var(--color-muted)]">
+                          {copilotReady ? "Protected session active" : "Copilot offline"}
+                        </span>
+                      </div>
+
+                      <textarea
+                        rows={4}
+                        value={copilotPrompt}
+                        onChange={(event) => setCopilotPrompt(event.target.value)}
+                        placeholder="Example: We do high-end custom home building, but I’m struggling to explain why clients choose us over other premium builders."
+                        className="mt-5 min-h-28 w-full rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-4 text-sm text-[var(--color-ink)] outline-none transition focus:border-[var(--color-accent)]"
+                      />
+
+                      <div className="mt-4 flex flex-wrap gap-3">
+                        <button
+                          type="button"
+                          onClick={handleCopilotAsk}
+                          disabled={!copilotReady || copilotState === "loading"}
+                          className="inline-flex items-center gap-2 rounded-full bg-[var(--button-primary-bg)] px-5 py-3 text-sm font-semibold text-[var(--button-primary-text)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {copilotState === "loading" ? "Thinking..." : "Ask AI Copilot"}
+                          <ArrowRight className="h-4 w-4" />
+                        </button>
+                        {copilotResponse?.suggestedAnswer ? (
+                          <button
+                            type="button"
+                            onClick={applyCopilotDraft}
+                            className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-3 text-sm font-semibold text-[var(--color-ink)] transition hover:border-[var(--color-accent)]"
+                          >
+                            Use Suggested Draft
+                          </button>
+                        ) : null}
+                      </div>
+
+                      {copilotResponse ? (
+                        <div className="mt-5 rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-panel)] p-4">
+                          <p className="text-sm font-semibold text-[var(--color-ink)]">
+                            {copilotResponse.assistantMessage}
+                          </p>
+                          {copilotResponse.followUpQuestion ? (
+                            <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">
+                              <span className="font-medium text-[var(--color-ink)]">
+                                Follow-up:
+                              </span>{" "}
+                              {copilotResponse.followUpQuestion}
+                            </p>
+                          ) : null}
+                          {copilotResponse.suggestedAnswer ? (
+                            <div className="mt-4 rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-card)] p-4">
+                              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-accent)]">
+                                Suggested draft
+                              </p>
+                              <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-[var(--color-muted)]">
+                                {copilotResponse.suggestedAnswer}
+                              </p>
+                            </div>
+                          ) : null}
+                          <p className="mt-3 text-xs text-[var(--color-muted)]">
+                            Confidence: {copilotResponse.confidence}. Remaining protected AI requests this session:{" "}
+                            {copilotResponse.remainingRequests}.
+                          </p>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
 
                   <div className="mt-8 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-panel)] p-5">
                     <div className="flex items-center gap-2 text-[var(--color-ink)]">

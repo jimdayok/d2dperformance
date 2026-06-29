@@ -203,15 +203,15 @@ export default function BrandDevelopmentPage() {
       <SectionShell
         eyebrow="Interactive Discovery Preview"
         title="A guided interview designed to feel effortless."
-        description="The platform keeps the process conversational and strategic. Questions arrive in manageable groups with progress, examples, summaries, and autosave built in."
+        description="The platform keeps the process conversational and strategic. It is designed to finish in about 12 to 15 minutes, with progress, autosave, summaries, and a protected AI copilot built in."
       >
         <div className="grid gap-6 lg:grid-cols-[0.42fr_0.58fr]">
           <div className="space-y-4">
             {[
-              "23-stage guided experience including review and submission.",
+              "Condensed discovery flow built to finish in one focused sitting.",
               "Progress, time estimates, section status, autosave, and resume later.",
-              "Helpful examples beside difficult questions so blank-page anxiety never takes over.",
-              "Editable section summaries that prepare the final strategy report.",
+              "Protected AI copilot helps ask sharper follow-up questions and draft stronger responses.",
+              "Editable section summaries prepare the final strategy report.",
             ].map((item) => (
               <div
                 key={item}
@@ -233,26 +233,25 @@ export default function BrandDevelopmentPage() {
                 </h3>
               </div>
               <div className="rounded-full bg-[var(--color-panel)] px-4 py-2 text-sm text-[var(--color-muted)]">
-                45-60 min
+                12-15 min
               </div>
             </div>
 
             <div className="mt-6 rounded-[1.5rem] bg-[var(--color-panel)] p-5">
               <div className="flex items-center justify-between text-sm text-[var(--color-muted)]">
-                <span>Step 07 of 23</span>
-                <span>Mission</span>
+                <span>Step 05 of 11</span>
+                <span>Positioning</span>
               </div>
               <div className="mt-3 h-2 rounded-full bg-[var(--color-border-soft)]">
-                <div className="h-2 w-[30%] rounded-full bg-[var(--color-accent)]" />
+                <div className="h-2 w-[46%] rounded-full bg-[var(--color-accent)]" />
               </div>
               <div className="mt-5 grid gap-4">
                 <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-card)] p-4">
                   <p className="text-sm font-semibold text-[var(--color-ink)]">
-                    What is your mission?
+                    What makes your company meaningfully different?
                   </p>
                   <p className="mt-2 text-sm leading-7 text-[var(--color-muted)]">
-                    Describe the practical role your company plays in customers&apos;
-                    lives and the market around it.
+                    Explain the real difference customers should care about.
                   </p>
                 </div>
                 <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-card)] p-4">
@@ -269,7 +268,7 @@ export default function BrandDevelopmentPage() {
               <div className="mt-5 flex items-center justify-between">
                 <span className="inline-flex items-center gap-2 rounded-full bg-[var(--color-card)] px-3 py-2 text-xs font-medium text-[var(--color-muted)]">
                   <Sparkles className="h-3.5 w-3.5 text-[var(--color-accent)]" />
-                  Saved automatically
+                  AI copilot + autosave
                 </span>
                 <button
                   type="button"
