@@ -4,316 +4,480 @@ import type {
   DiscoverySection,
 } from "@/types/brand-discovery";
 
+function textQuestion(
+  id: string,
+  label: string,
+  placeholder: string,
+  options?: Partial<DiscoveryQuestion>,
+): DiscoveryQuestion {
+  return {
+    id,
+    label,
+    type: "short-text",
+    placeholder,
+    required: true,
+    ...options,
+  };
+}
+
+function paragraphQuestion(
+  id: string,
+  label: string,
+  placeholder: string,
+  options?: Partial<DiscoveryQuestion>,
+): DiscoveryQuestion {
+  return {
+    id,
+    label,
+    type: "paragraph",
+    rows: 5,
+    placeholder,
+    required: true,
+    ...options,
+  };
+}
+
+const personalityOptions = [
+  "Premium",
+  "Practical",
+  "Bold",
+  "Warm",
+  "Modern",
+  "Traditional",
+  "Technical",
+  "Friendly",
+  "Quiet Luxury",
+  "Confident",
+  "Approachable",
+  "Innovative",
+  "Trustworthy",
+  "Precise",
+  "Creative",
+  "Serious",
+  "Playful",
+  "Rugged",
+  "Elegant",
+  "Minimal",
+].map((label) => ({
+  value: label.toLowerCase().replaceAll(" ", "-"),
+  label,
+}));
+
+const feelingOptions = [
+  "Confident",
+  "Safe",
+  "Inspired",
+  "Relieved",
+  "Proud",
+  "Excited",
+  "Protected",
+  "Understood",
+  "Successful",
+  "Supported",
+  "Exclusive",
+  "Comfortable",
+  "Energized",
+  "Clear",
+  "In Control",
+].map((label) => ({
+  value: label.toLowerCase().replaceAll(" ", "-"),
+  label,
+}));
+
+const visualDirectionOptions = [
+  "Modern luxury",
+  "Warm and personal",
+  "Clean and minimal",
+  "Industrial and strong",
+  "Classic and timeless",
+  "Natural and earthy",
+  "Bold and high-energy",
+  "Technical and precise",
+  "Editorial and premium",
+  "Local and approachable",
+].map((label) => ({
+  value: label.toLowerCase().replaceAll(" ", "-"),
+  label,
+}));
+
+const websiteGoalOptions = [
+  "Generate leads",
+  "Explain services",
+  "Build trust",
+  "Book calls",
+  "Sell products",
+  "Support current customers",
+  "Other",
+].map((label) => ({
+  value: label.toLowerCase().replaceAll(" ", "-"),
+  label,
+}));
+
+const uploadLabels = [
+  "Logo",
+  "Current brand files",
+  "Photos",
+  "Brochures",
+  "Price lists",
+  "Competitor examples",
+  "Inspiration screenshots",
+  "Other",
+];
+
 export const brandDiscoverySections: DiscoverySection[] = [
   {
     id: "welcome",
-    title: "Let's Build Your Brand",
+    title: "Welcome",
     description:
-      "In about 12 to 15 minutes, we’ll uncover the clearest version of your business, your customer, and the brand direction that should support growth.",
+      "This guided interview takes about 15 to 20 minutes. Your progress saves automatically, so you can step away and come back at any time.",
     estimatedMinutes: 1,
+    questions: [],
+  },
+  {
+    id: "about-you",
+    title: "About You",
+    description: "Start with the basics so we know who we are building this brand around.",
+    estimatedMinutes: 2,
     questions: [
-      {
-        id: "discoveryGoal",
-        label: "What do you need most from this process right now?",
-        type: "multiple-choice",
-        options: [
-          {
-            value: "clarity",
-            label: "Brand clarity",
-            description: "I need direction before I invest in design, website, or marketing.",
-          },
-          {
-            value: "positioning",
-            label: "Positioning",
-            description: "I need help defining how we should be perceived in the market.",
-          },
-          {
-            value: "growth",
-            label: "Growth direction",
-            description: "I need a stronger story and system to support sales and growth.",
-          },
-        ],
-      },
-      {
-        id: "readiness",
-        label: "How ready are you to define the brand behind this business?",
-        type: "slider",
-        min: 1,
-        max: 10,
-        step: 1,
-        description: "This helps us calibrate how much strategic guidance you may need.",
-      },
+      textQuestion("contactName", "Your name", "Jane Founder"),
+      textQuestion("contactRole", "Your role/title", "Founder, CEO, Owner"),
+      textQuestion("companyName", "Company name", "Northline Custom Homes"),
+      textQuestion("industryCategory", "Industry/category", "Construction, legal, wellness", {
+        description: "The industry or category you most want this brand to be known in.",
+      }),
+      textQuestion("bestEmail", "Best email", "jane@company.com", { inputType: "email" }),
+      textQuestion("bestPhone", "Best phone", "(555) 555-5555", { inputType: "tel" }),
     ],
   },
   {
-    id: "leadership-snapshot",
-    title: "Leadership Snapshot",
-    description:
-      "Start with the person leading the business and the role they play in shaping it.",
-    estimatedMinutes: 1,
+    id: "origin-story",
+    title: "Origin Story",
+    description: "Tell us why this company exists and what makes it worth building.",
+    estimatedMinutes: 3,
     questions: [
-      {
-        id: "founderName",
-        label: "Your name",
-        type: "short-text",
-        placeholder: "Jane Founder",
-      },
-      {
-        id: "founderRole",
-        label: "Your role",
-        type: "short-text",
-        placeholder: "Founder, CEO, Managing Partner...",
-      },
-      {
-        id: "companyName",
-        label: "Company name",
-        type: "short-text",
-        placeholder: "Northline Custom Homes",
-      },
-      {
-        id: "industry",
-        label: "Industry",
-        type: "short-text",
-        placeholder: "Construction, professional services, manufacturing...",
-      },
+      paragraphQuestion(
+        "companyStart",
+        "Why did this company start?",
+        "Tell the story of how the company began.",
+      ),
+      paragraphQuestion(
+        "problemYouSolve",
+        "What problem are you trying to solve?",
+        "Describe the pain, frustration, or gap that made this business necessary.",
+      ),
+      paragraphQuestion(
+        "deserveToExist",
+        "Why does this company deserve to exist?",
+        "What value does this business create that matters?",
+      ),
+      paragraphQuestion(
+        "proudSoFar",
+        "What are you most proud of so far?",
+        "Wins, milestones, work quality, customer impact, or progress you want us to understand.",
+      ),
     ],
   },
   {
-    id: "business-offer",
-    title: "Business & Offer",
-    description:
-      "Capture what the company actually does and which offers should lead the story.",
+    id: "customers",
+    title: "Customers",
+    description: "Define who this brand is for and what matters most to them.",
+    estimatedMinutes: 3,
+    questions: [
+      paragraphQuestion(
+        "idealCustomer",
+        "Who is your ideal customer?",
+        "Describe the kind of customer you most want to attract.",
+      ),
+      paragraphQuestion(
+        "notGoodFit",
+        "Who is NOT a good fit?",
+        "Describe the customer, project, or buyer you do not want more of.",
+      ),
+      paragraphQuestion(
+        "problemBeforeFindingYou",
+        "What problem do customers usually have before they find you?",
+        "What is going wrong, missing, or frustrating before they call you?",
+      ),
+      paragraphQuestion(
+        "customerCareMostAbout",
+        "What do customers care about most when choosing someone like you?",
+        "Price, trust, speed, expertise, service, clarity, design quality, or something else.",
+      ),
+    ],
+  },
+  {
+    id: "difference",
+    title: "Difference",
+    description: "Clarify what separates you from competitors and what proves it.",
+    estimatedMinutes: 3,
+    questions: [
+      paragraphQuestion(
+        "meaningfullyDifferent",
+        "What makes you meaningfully different?",
+        "Explain the real difference customers should notice and care about.",
+      ),
+      paragraphQuestion(
+        "betterThanCompetitors",
+        "What do you do better than competitors?",
+        "Be specific about process, quality, communication, speed, strategy, or experience.",
+      ),
+      paragraphQuestion(
+        "customerMisunderstanding",
+        "What do customers misunderstand about your business?",
+        "What do people assume incorrectly until they know you better?",
+      ),
+      paragraphQuestion(
+        "proofYouAreGood",
+        "What proof do you have that you are good at this?",
+        "Results, retention, referrals, testimonials, awards, case studies, or reputation.",
+      ),
+    ],
+  },
+  {
+    id: "personality",
+    title: "Personality",
+    description: "Choose the words that should shape how the brand comes across.",
     estimatedMinutes: 2,
     questions: [
       {
-        id: "businessSummary",
-        label: "Describe the business in plain language.",
-        type: "paragraph",
-        rows: 5,
-        placeholder: "What do you do, who do you serve, and what kind of work are you known for?",
-      },
-      {
-        id: "productsServices",
-        label: "What products or services drive the business today?",
-        type: "paragraph",
-        rows: 4,
-        placeholder: "List the main offers, revenue drivers, or service lines that matter most.",
-      },
-    ],
-  },
-  {
-    id: "founder-story",
-    title: "Founder Story",
-    description:
-      "Your business already has a story. This part helps uncover the reason it exists and the conviction behind it.",
-    estimatedMinutes: 2,
-    questions: [
-      {
-        id: "founderStory",
-        label: "How did this business start?",
-        type: "paragraph",
-        rows: 6,
-        placeholder: "Tell the story behind the company, what led you here, and what still drives you.",
-        helpTitle: "Need help finding the story?",
-        helpBody:
-          "Great founder stories usually include a moment, frustration, conviction, or opportunity that made the company necessary.",
-        helpExamples: [
-          "I saw clients constantly overpaying for generic solutions and knew there was a better way.",
-          "After years in custom building, I wanted to create a more premium and transparent client experience.",
-          "The company began because the market had expertise, but not enough trust or follow-through.",
-        ],
-        brandExamples: [
-          "Apple centers simplicity and belief in better design.",
-          "Patagonia anchors the brand in values and purpose.",
-        ],
-      },
-      {
-        id: "mission",
-        label: "What is your mission in practical terms?",
-        type: "paragraph",
-        rows: 4,
-        placeholder: "Why does this company exist, and what role does it play in customers’ lives?",
-      },
-    ],
-  },
-  {
-    id: "customer-market",
-    title: "Customer & Market",
-    description:
-      "Strong brands are specific about who they are for, what the market gets wrong, and where trust is won.",
-    estimatedMinutes: 2,
-    questions: [
-      {
-        id: "idealCustomer",
-        label: "Describe your best-fit customer.",
-        type: "paragraph",
-        rows: 5,
-        placeholder: "Who are they, what do they care about, and why are they worth serving well?",
-      },
-      {
-        id: "marketGap",
-        label: "Where do you think the market is underserving people?",
-        type: "paragraph",
-        rows: 4,
-        placeholder: "What do competitors miss, overcomplicate, or fail to deliver?",
-      },
-    ],
-  },
-  {
-    id: "positioning",
-    title: "Positioning",
-    description:
-      "This is where scattered ideas become a usable market position and a clearer direction for growth.",
-    estimatedMinutes: 2,
-    questions: [
-      {
-        id: "uvp",
-        label: "What makes your company meaningfully different?",
-        type: "paragraph",
-        rows: 5,
-        placeholder: "Explain the real difference customers should care about.",
-        helpTitle: "Need help?",
-        helpBody:
-          "Think about specialization, transparency, speed, communication, premium experience, or a better process.",
-        helpExamples: [
-          "We use better materials and explain every recommendation clearly.",
-          "We specialize in high-end custom homes for clients who want timeless design.",
-          "We are faster, cleaner, and more transparent than most competitors.",
-        ],
-        brandExamples: [
-          "Yeti owns durability and lifestyle.",
-          "Tesla combines innovation with status and category leadership.",
-        ],
-      },
-      {
-        id: "futureGoals",
-        label: "What do you want the next three years to look like?",
-        type: "paragraph",
-        rows: 4,
-        placeholder: "Growth, pricing, reputation, geography, category authority, team size...",
-      },
-    ],
-  },
-  {
-    id: "brand-direction",
-    title: "Brand Direction",
-    description:
-      "Shape how the brand should sound, feel, and be experienced before any visual system tries to carry too much weight.",
-    estimatedMinutes: 2,
-    questions: [
-      {
-        id: "brandVoice",
-        label: "How should the brand sound?",
+        id: "brandPersonality",
+        label: "If your company walked into a room, how should people describe it?",
+        description: "Select all that fit.",
         type: "checkboxes",
-        options: [
-          { value: "clear", label: "Clear" },
-          { value: "warm", label: "Warm" },
-          { value: "confident", label: "Confident" },
-          { value: "practical", label: "Practical" },
-          { value: "premium", label: "Premium" },
-        ],
+        options: personalityOptions,
+        required: true,
       },
+      paragraphQuestion(
+        "brandWordsShould",
+        "Any words that should describe the brand?",
+        "Add any important words that were not covered above.",
+      ),
+      paragraphQuestion(
+        "brandWordsShouldNot",
+        "Any words that should NOT describe the brand?",
+        "Tell us what the brand should avoid sounding or feeling like.",
+      ),
+    ],
+  },
+  {
+    id: "customer-feeling",
+    title: "Customer Feeling",
+    description: "Define the emotional outcome customers should walk away with.",
+    estimatedMinutes: 2,
+    questions: [
       {
-        id: "customerExperience",
-        label: "Describe the ideal customer experience.",
-        type: "paragraph",
-        rows: 5,
-        placeholder: "What should clients experience from the first call through delivery and follow-up?",
+        id: "customerFeeling",
+        label: "How should customers feel after working with you?",
+        description: "Select all that fit.",
+        type: "checkboxes",
+        options: feelingOptions,
+        required: true,
       },
+    ],
+  },
+  {
+    id: "visual-direction",
+    title: "Visual Direction",
+    description: "Point us toward the style direction that feels most aligned.",
+    estimatedMinutes: 3,
+    questions: [
       {
         id: "visualDirection",
-        label: "What visual cues already feel right for the brand?",
-        type: "paragraph",
-        rows: 4,
-        placeholder: "Think timeless, modern, architectural, handcrafted, minimal, warm, executive...",
+        label: "What visual direction feels closest to your brand?",
+        description: "Select all that feel relevant.",
+        type: "checkboxes",
+        options: visualDirectionOptions,
+        required: true,
       },
+      paragraphQuestion(
+        "colorsYouLike",
+        "What colors do you like?",
+        "List colors, moods, or combinations that feel right.",
+      ),
+      paragraphQuestion(
+        "colorsToAvoid",
+        "What colors should we avoid?",
+        "List any colors, combinations, or tones that feel off-brand.",
+      ),
+      paragraphQuestion(
+        "brandExamples",
+        "Are there any brands, websites, or logos you like?",
+        "Include links if possible and tell us what you like about them.",
+      ),
     ],
   },
   {
-    id: "activation",
-    title: "Activation",
-    description:
-      "Bring the strategy into the channels and touchpoints that need to support growth.",
+    id: "logo",
+    title: "Logo",
+    description: "Tell us where the current logo stands and what should happen next.",
     estimatedMinutes: 2,
     questions: [
       {
-        id: "websiteNeeds",
-        label: "What should your website or digital presence do better?",
-        type: "paragraph",
-        rows: 4,
-        placeholder: "Explain what needs to improve in messaging, trust, conversion, or structure.",
-      },
-      {
-        id: "marketingChannels",
-        label: "Which channels matter most right now?",
-        type: "checkboxes",
+        id: "hasLogo",
+        label: "Do you have a logo?",
+        type: "multiple-choice",
+        required: true,
         options: [
-          { value: "referrals", label: "Referrals" },
-          { value: "social", label: "Social media" },
-          { value: "seo", label: "SEO and content" },
-          { value: "email", label: "Email marketing" },
-          { value: "events", label: "Networking and events" },
-          { value: "ads", label: "Paid ads" },
+          { value: "yes", label: "Yes" },
+          { value: "no", label: "No" },
         ],
       },
       {
-        id: "salesProcess",
-        label: "How does a prospect become a customer today?",
-        type: "paragraph",
-        rows: 4,
-        placeholder: "Describe the journey from lead to close and where friction shows up.",
+        id: "logoFiles",
+        label: "Upload logo files if available",
+        type: "upload",
+        accept: ".pdf,.svg,.eps,.ai,.png,.jpg,.jpeg",
+        multiple: true,
+        required: false,
       },
+      {
+        id: "logoPlan",
+        label: "What do you want to do with the logo?",
+        type: "multiple-choice",
+        required: true,
+        options: [
+          { value: "keep", label: "Keep it" },
+          { value: "refresh", label: "Refresh it" },
+          { value: "replace", label: "Replace it" },
+          { value: "not-sure", label: "Not sure" },
+        ],
+      },
+      paragraphQuestion(
+        "logoLikesDislikes",
+        "What do you like or dislike about the current logo?",
+        "Tell us what should carry forward and what should change.",
+      ),
+    ],
+  },
+  {
+    id: "website",
+    title: "Website",
+    description: "Clarify the role your website should play in the business.",
+    estimatedMinutes: 3,
+    questions: [
+      {
+        id: "hasWebsite",
+        label: "Do you have a current website?",
+        type: "multiple-choice",
+        required: true,
+        options: [
+          { value: "yes", label: "Yes" },
+          { value: "no", label: "No" },
+        ],
+      },
+      textQuestion("websiteUrl", "Website URL", "https://yourwebsite.com", {
+        inputType: "url",
+        required: false,
+      }),
+      {
+        id: "websiteGoals",
+        label: "What should the website do?",
+        description: "Select all that apply.",
+        type: "checkboxes",
+        options: websiteGoalOptions,
+        required: true,
+      },
+      paragraphQuestion(
+        "websiteQuestions",
+        "What questions should the website answer before someone calls you?",
+        "List the key questions, objections, or trust gaps the site needs to handle.",
+      ),
+      paragraphQuestion(
+        "websitesYouLike",
+        "What websites do you like?",
+        "Include links if possible and tell us what you like about them.",
+      ),
+    ],
+  },
+  {
+    id: "marketing-sales",
+    title: "Marketing and Sales",
+    description: "Show us how customers find you now and how your sales process works.",
+    estimatedMinutes: 3,
+    questions: [
+      paragraphQuestion(
+        "findYouToday",
+        "How do customers find you today?",
+        "Referrals, social, search, events, ads, outreach, repeat business, or other sources.",
+      ),
+      paragraphQuestion(
+        "findYouFuture",
+        "Where do you want customers to find you in the future?",
+        "What channels or opportunities do you want the brand to support next?",
+      ),
+      paragraphQuestion(
+        "currentSalesProcess",
+        "What is your current sales process?",
+        "Walk us through what happens from first inquiry to signed client or sale.",
+      ),
+      paragraphQuestion(
+        "commonObjections",
+        "What objections do you hear most often?",
+        "What concerns or hesitations come up before people buy?",
+      ),
+    ],
+  },
+  {
+    id: "future-vision",
+    title: "Future Vision",
+    description: "Anchor this work in the future you are trying to build.",
+    estimatedMinutes: 3,
+    questions: [
+      paragraphQuestion(
+        "oneYearVision",
+        "Where do you want the company in 1 year?",
+        "Describe the next 12 months in practical business terms.",
+      ),
+      paragraphQuestion(
+        "threeYearVision",
+        "Where do you want the company in 3 years?",
+        "Describe the growth, positioning, team, or reputation you want to build.",
+      ),
+      paragraphQuestion(
+        "fiveYearVision",
+        "Where do you want the company in 5 years?",
+        "What does success look like over the longer arc?",
+      ),
+      paragraphQuestion(
+        "brandProjectSuccess",
+        "What would make this brand project a success?",
+        "Tell us what outcomes would make this feel worth it.",
+      ),
     ],
   },
   {
     id: "uploads",
     title: "Uploads",
-    description:
-      "Optional, but helpful. Add anything that gives context to your current brand or visual direction.",
-    estimatedMinutes: 1,
+    description: "Share anything useful that helps us understand the current brand.",
+    estimatedMinutes: 2,
     questions: [
       {
-        id: "logoUploads",
-        label: "Current logo or business card files",
+        id: "supportingFiles",
+        label: `Upload any of the following: ${uploadLabels.join(", ")}`,
+        description: "Upload whatever is available. File metadata is saved with your discovery.",
         type: "upload",
-        accept: ".png,.jpg,.jpeg,.pdf,.svg",
+        accept: ".pdf,.png,.jpg,.jpeg,.svg,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip",
         multiple: true,
-      },
-      {
-        id: "inspirationUploads",
-        label: "Inspiration images, screenshots, project photos, or competitor references",
-        type: "upload",
-        accept: ".png,.jpg,.jpeg,.pdf",
-        multiple: true,
+        required: false,
       },
     ],
   },
 ];
 
-function initialAnswerForQuestion(question: DiscoveryQuestion) {
-  switch (question.type) {
-    case "checkboxes":
-    case "ranking":
-    case "priority-order":
-      return [];
-    case "slider":
-      return question.min ?? 1;
-    case "color":
-      return "#1a6ac9";
-    case "upload":
-      return [];
-    default:
-      return "";
-  }
-}
-
 export function createInitialDiscoveryAnswers(): DiscoveryFormValues {
   return Object.fromEntries(
     brandDiscoverySections.flatMap((section) =>
-      section.questions.map((question) => [
-        question.id,
-        initialAnswerForQuestion(question),
-      ]),
+      section.questions.map((question) => {
+        if (question.type === "checkboxes") {
+          return [question.id, []];
+        }
+
+        if (question.type === "upload") {
+          return [question.id, []];
+        }
+
+        return [question.id, ""];
+      }),
     ),
   );
 }

@@ -1,18 +1,10 @@
 import {
   ArrowRight,
-  BookOpenText,
-  BriefcaseBusiness,
-  Compass,
-  FileBadge2,
-  Flag,
   Layers3,
-  MessageSquareQuote,
-  Palette,
   SearchCheck,
   ShieldCheck,
   Sparkles,
   Target,
-  Users,
 } from "lucide-react";
 import { BrandDiscoveryForm } from "@/components/brand-discovery-form";
 import { ButtonLink } from "@/components/button-link";
@@ -28,19 +20,6 @@ export const metadata = createMetadata({
     "A premium guided brand discovery experience for owners, founders, and leadership teams who need clarity before they invest in logos, websites, marketing, and sales.",
   path: "/brand-development",
 });
-
-const outputItems = [
-  { title: "Founder story", icon: MessageSquareQuote },
-  { title: "Mission, vision, values", icon: Flag },
-  { title: "Positioning", icon: Target },
-  { title: "Audience personas", icon: Users },
-  { title: "Brand voice", icon: BookOpenText },
-  { title: "Visual direction", icon: Palette },
-  { title: "Website strategy", icon: Compass },
-  { title: "Marketing roadmap", icon: Layers3 },
-  { title: "Sales messaging", icon: BriefcaseBusiness },
-  { title: "Logo creative brief", icon: FileBadge2 },
-];
 
 export default function BrandDevelopmentPage() {
   return (
@@ -181,37 +160,17 @@ export default function BrandDevelopmentPage() {
       </SectionShell>
 
       <SectionShell
-        eyebrow="Brand Blueprint Output"
-        title="What the client receives at the end."
-        description="The outcome is a structured strategy package rich enough to support design, website, marketing, AI-assisted copy generation, and executive decision-making."
-      >
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-          {outputItems.map(({ title, icon: Icon }) => (
-            <article
-              key={title}
-              className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-card)] px-5 py-6"
-            >
-              <Icon className="h-5 w-5 text-[var(--color-accent)]" />
-              <h3 className="mt-4 text-base font-semibold text-[var(--color-ink)]">
-                {title}
-              </h3>
-            </article>
-          ))}
-        </div>
-      </SectionShell>
-
-      <SectionShell
         eyebrow="Interactive Discovery Preview"
         title="A guided interview designed to feel effortless."
-        description="The platform keeps the process conversational and strategic. It is designed to finish in about 12 to 15 minutes, with progress, autosave, summaries, and a protected AI copilot built in."
+        description="The platform keeps the process calm, structured, and simple. It is designed to finish in about 15 to 20 minutes, with clear progress, autosave, and private submission built in."
       >
         <div className="grid gap-6 lg:grid-cols-[0.42fr_0.58fr]">
           <div className="space-y-4">
             {[
-              "Condensed discovery flow built to finish in one focused sitting.",
-              "Progress, time estimates, section status, autosave, and resume later.",
-              "Protected AI copilot helps ask sharper follow-up questions and draft stronger responses.",
-              "Editable section summaries prepare the final strategy report.",
+              "One guided section at a time, with large readable inputs and calm pacing.",
+              "Progress, autosave, and resume-later behavior without extra clutter.",
+              "Private submission that keeps the strategy work on the D2D side.",
+              "A clean review step before anything gets submitted.",
             ].map((item) => (
               <div
                 key={item}
@@ -268,13 +227,13 @@ export default function BrandDevelopmentPage() {
               <div className="mt-5 flex items-center justify-between">
                 <span className="inline-flex items-center gap-2 rounded-full bg-[var(--color-card)] px-3 py-2 text-xs font-medium text-[var(--color-muted)]">
                   <Sparkles className="h-3.5 w-3.5 text-[var(--color-accent)]" />
-                  AI copilot + autosave
+                  Private + autosaved
                 </span>
                 <button
                   type="button"
                   className="inline-flex items-center gap-2 rounded-full bg-[var(--color-ink)] px-4 py-2 text-sm font-semibold text-white"
                 >
-                  Continue
+                  Save & Continue
                   <ArrowRight className="h-4 w-4" />
                 </button>
               </div>

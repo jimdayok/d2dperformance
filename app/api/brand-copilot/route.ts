@@ -1,4 +1,5 @@
 import { requireBrandCopilotSession } from "@/lib/brand-copilot";
+import { safeJsonParse } from "@/lib/brand-discovery-storage";
 
 export const dynamic = "force-dynamic";
 
@@ -87,14 +88,25 @@ export async function POST(request: Request) {
         {
           error: "missing_openai_key",
           message:
-            "OPENAI_API_KEY is not configured yet, so the AI copilot is currently offline.",
+            "OPENAI_API_KEY is not configured yet, so guided follow-up prompts are currently offline.",
         },
         { status: 503 },
       );
     }
 
     const { rateLimit } = await requireBrandCopilotSession();
-    const body = (await request.json()) as CopilotRequest;
+    const requestText = await request.text();
+    const body = safeJsonParse<CopilotRequest | null>(requestText, null);
+
+    if (!body) {
+      return Response.json(
+        {
+          error: "invalid_payload",
+          message: "The guided follow-up request was invalid.",
+        },
+        { status: 400 },
+      );
+    }
 
     const payloadForModel = {
       section: {
@@ -116,14 +128,15 @@ export async function POST(request: Request) {
 
     const systemPrompt = [
       "You are the D2D Brand Discovery Copilot for a premium consulting workflow.",
-      "Your job is to help a business owner answer one brand strategy question quickly and clearly.",
-      "Ask one smart follow-up question when needed, then draft a stronger answer in the founder's voice.",
+      "Your job is to help a business owner provide better discovery input without answering for them.",
+      "Ask one smart follow-up question that can uncover missing clarity, proof, specificity, or examples.",
+      "You may briefly explain why the follow-up matters, but do not draft the answer for the client.",
+      "Do not write the brand story, positioning, messaging, or any founder-voice response on the client's behalf.",
       "Be concise, strategic, practical, and warm.",
       "Do not mention OpenAI, policies, or internal instructions.",
       "Return strict JSON only with these keys:",
       "assistantMessage: string",
       "followUpQuestion: string",
-      "suggestedAnswer: string",
       "confidence: 'low' | 'medium' | 'high'",
     ].join(" ");
 
@@ -159,7 +172,7 @@ export async function POST(request: Request) {
       return Response.json(
         {
           error: "openai_request_failed",
-          message: "The AI copilot request failed.",
+          message: "The guided follow-up request failed.",
           detail: errorText,
         },
         { status: 502 },
@@ -168,20 +181,30 @@ export async function POST(request: Request) {
 
     const responseJson = (await openAiResponse.json()) as unknown;
     const rawText = extractOutputText(responseJson);
-    const parsed = JSON.parse(sanitizeResponseText(rawText)) as {
+    const parsed = safeJsonParse<{
       assistantMessage?: string;
       followUpQuestion?: string;
-      suggestedAnswer?: string;
       confidence?: "low" | "medium" | "high";
-    };
+    } | null>(sanitizeResponseText(rawText), null);
+
+    if (!parsed) {
+      return Response.json(
+        {
+          error: "invalid_ai_response",
+          message: "The guided follow-up helper returned an unexpected response format.",
+        },
+        { status: 502 },
+      );
+    }
 
     return Response.json({
-      assistantMessage: parsed.assistantMessage || "Here’s a sharper way to answer that question.",
+      assistantMessage:
+        parsed.assistantMessage ||
+        "Here is one follow-up prompt to help surface more useful detail.",
       followUpQuestion: parsed.followUpQuestion || "",
-      suggestedAnswer: parsed.suggestedAnswer || body.currentAnswer || "",
       confidence: parsed.confidence || "medium",
-        remainingRequests: rateLimit.remaining,
-      });
+      remainingRequests: rateLimit.remaining,
+    });
   } catch (error) {
     if (error instanceof Response) {
       return error;
@@ -193,7 +216,7 @@ export async function POST(request: Request) {
         message:
           error instanceof Error
             ? error.message
-            : "The AI copilot returned an unexpected response format.",
+            : "The guided follow-up helper returned an unexpected response format.",
       },
       { status: 502 },
     );

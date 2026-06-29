@@ -38,6 +38,7 @@ export type DiscoveryQuestion = {
   id: string;
   label: string;
   type: DiscoveryQuestionType;
+  inputType?: "text" | "email" | "tel" | "url";
   description?: string;
   placeholder?: string;
   required?: boolean;
@@ -65,16 +66,16 @@ export type DiscoverySection = {
 export type DiscoveryDraft = {
   currentSectionIndex: number;
   answers: DiscoveryFormValues;
-  summaries: Record<string, string[]>;
-  completedSections: string[];
+  startedAt: string;
   updatedAt?: string;
   submittedAt?: string;
 };
 
 export type DiscoverySubmission = {
+  startedAt: string;
+  updatedAt: string;
   submittedAt: string;
   answers: DiscoveryFormValues;
-  summaries: Record<string, string[]>;
 };
 
 export type ReportBlock = {

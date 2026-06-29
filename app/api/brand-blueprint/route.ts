@@ -1,12 +1,22 @@
-import { requireBrandCopilotSession } from "@/lib/brand-copilot";
 import { handleBrandDiscoverySubmission } from "@/lib/submission-service";
+import { safeJsonParse } from "@/lib/brand-discovery-storage";
 import type { DiscoverySubmission } from "@/types/brand-discovery";
 
 export async function POST(request: Request) {
   try {
-    await requireBrandCopilotSession();
+    const bodyText = await request.text();
+    const payload = safeJsonParse<DiscoverySubmission | null>(bodyText, null);
 
-    const payload = (await request.json()) as DiscoverySubmission;
+    if (!payload || !payload.answers || !payload.submittedAt || !payload.startedAt || !payload.updatedAt) {
+      return Response.json(
+        {
+          error: "invalid_payload",
+          message: "Unable to submit brand discovery payload.",
+        },
+        { status: 400 },
+      );
+    }
+
     const delivery = await handleBrandDiscoverySubmission(payload);
 
     return Response.json({
@@ -14,7 +24,6 @@ export async function POST(request: Request) {
       message: "Brand discovery payload received.",
       receivedAt: new Date().toISOString(),
       fieldsSubmitted: Object.keys(payload.answers ?? {}).length,
-      summariesSubmitted: Object.keys(payload.summaries ?? {}).length,
       delivery,
     });
   } catch (error) {

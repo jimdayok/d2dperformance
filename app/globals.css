@@ -16,8 +16,8 @@
   --color-sand: #ede5dd;
   --color-taupe: #735d62;
   --color-charcoal: #101822;
-  --button-primary-bg: #101822;
-  --button-primary-text: #ffffff;
+  --button-primary-bg: #735d62;
+  --button-primary-text: #fffaf6;
   --button-secondary-bg: rgba(255, 255, 255, 0.72);
   --button-secondary-text: #101822;
   --button-secondary-border: rgba(32, 39, 48, 0.16);
@@ -39,8 +39,8 @@
   --color-sand: #d8cbc2;
   --color-taupe: #ead7d6;
   --color-charcoal: #0d141d;
-  --button-primary-bg: #f7f1ec;
-  --button-primary-text: #101822;
+  --button-primary-bg: #c4a3a4;
+  --button-primary-text: #11161d;
   --button-secondary-bg: rgba(255, 255, 255, 0.08);
   --button-secondary-text: #ffffff;
   --button-secondary-border: rgba(255, 255, 255, 0.18);

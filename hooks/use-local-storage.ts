@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { safeJsonParse } from "@/lib/brand-discovery-storage";
 
 export function useLocalStorage<T>(key: string, initialValue: T) {
   const [value, setValue] = useState<T>(initialValue);
@@ -12,7 +13,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     try {
       const stored = window.localStorage.getItem(key);
       if (stored) {
-        const parsed = JSON.parse(stored) as T;
+        const parsed = safeJsonParse<T>(stored, initialValue);
 
         queueMicrotask(() => {
           if (!cancelled) {
@@ -33,7 +34,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     return () => {
       cancelled = true;
     };
-  }, [key]);
+  }, [initialValue, key]);
 
   useEffect(() => {
     if (!hydrated) {

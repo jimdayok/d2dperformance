@@ -48,7 +48,7 @@ export function QuestionCard({ question, value, onChange }: QuestionCardProps) {
       <div className="space-y-4">
         {question.type === "short-text" || question.type === "website" ? (
           <input
-            type={question.type === "website" ? "url" : "text"}
+            type={question.inputType ?? (question.type === "website" ? "url" : "text")}
             value={typeof value === "string" ? value : ""}
             onChange={(event) => onChange(event.target.value)}
             placeholder={question.placeholder}
@@ -91,7 +91,7 @@ export function QuestionCard({ question, value, onChange }: QuestionCardProps) {
         ) : null}
 
         {question.type === "checkboxes" ? (
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="flex flex-wrap gap-3">
             {question.options?.map((option) => {
               const selectedValues =
                 Array.isArray(value) && value.every((item) => typeof item === "string")
@@ -107,13 +107,13 @@ export function QuestionCard({ question, value, onChange }: QuestionCardProps) {
                   key={option.value}
                   type="button"
                   onClick={() => onChange(nextValue)}
-                  className={`rounded-[1.25rem] border px-4 py-4 text-left transition ${
+                  className={`rounded-full border px-4 py-3 text-left text-sm font-medium transition ${
                     selected
-                      ? "border-[var(--color-accent)] bg-[var(--color-accent-soft)]/10"
-                      : "border-[var(--color-border)] bg-[var(--color-surface)]"
+                      ? "border-[var(--color-accent)] bg-[color:color-mix(in_oklab,var(--color-accent)_12%,white)] text-[var(--color-ink)]"
+                      : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-muted)] hover:border-[var(--color-accent)]/40 hover:text-[var(--color-ink)]"
                   }`}
                 >
-                  <p className="font-medium text-[var(--color-ink)]">{option.label}</p>
+                  <p>{option.label}</p>
                 </button>
               );
             })}

@@ -1,5 +1,6 @@
 import { createHmac, randomUUID, timingSafeEqual } from "crypto";
 import { cookies, headers } from "next/headers";
+import { safeJsonParse } from "@/lib/brand-discovery-storage";
 
 type SessionPayload = {
   sid: string;
@@ -66,9 +67,14 @@ function decodeSession(rawValue?: string | null) {
   }
 
   try {
-    const payload = JSON.parse(
+    const payload = safeJsonParse<SessionPayload | null>(
       Buffer.from(value, "base64url").toString("utf8"),
-    ) as SessionPayload;
+      null,
+    );
+
+    if (!payload) {
+      return null;
+    }
 
     if (!payload.sid || !payload.exp || payload.exp < Date.now()) {
       return null;
@@ -153,7 +159,8 @@ function assertRateLimit(sessionId: string, ip: string) {
     throw new Response(
       JSON.stringify({
         error: "rate_limited",
-        message: "Too many AI copilot requests. Please wait a few minutes and try again.",
+        message:
+          "Too many guided follow-up requests. Please wait a few minutes and try again.",
       }),
       {
         status: 429,
@@ -208,7 +215,7 @@ export async function requireBrandCopilotSession() {
       JSON.stringify({
         error: "session_required",
         message:
-          "A protected brand discovery session is required before using the AI copilot.",
+          "A protected brand discovery session is required before using guided follow-up prompts.",
       }),
       {
         status: 401,

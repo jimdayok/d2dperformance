@@ -3,7 +3,6 @@ import type { DiscoveryFormValues } from "@/types/brand-discovery";
 
 type ReviewPanelProps = {
   answers: DiscoveryFormValues;
-  summaries: Record<string, string[]>;
   onEdit: (index: number) => void;
 };
 
@@ -33,12 +32,12 @@ function answerToString(value: unknown) {
 
 export function ReviewPanel({
   answers,
-  summaries,
   onEdit,
 }: ReviewPanelProps) {
   return (
     <div className="space-y-6">
-      {brandDiscoverySections.map((section, index) => (
+      {brandDiscoverySections.map((section, index) =>
+        section.questions.length === 0 ? null : (
         <article
           key={section.id}
           className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-card)] p-6"
@@ -61,17 +60,6 @@ export function ReviewPanel({
             </button>
           </div>
 
-          <div className="mt-5 rounded-[1.25rem] bg-[var(--color-panel)] p-4">
-            <p className="text-sm font-semibold text-[var(--color-ink)]">
-              Here&apos;s what we&apos;ve learned so far...
-            </p>
-            <ul className="mt-3 space-y-2 text-sm leading-7 text-[var(--color-muted)]">
-              {(summaries[section.id] ?? []).map((summary) => (
-                <li key={summary}>{summary}</li>
-              ))}
-            </ul>
-          </div>
-
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             {section.questions.map((question) => (
               <div
@@ -88,7 +76,8 @@ export function ReviewPanel({
             ))}
           </div>
         </article>
-      ))}
+        ),
+      )}
     </div>
   );
 }
