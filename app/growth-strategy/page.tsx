@@ -15,7 +15,7 @@ export default function GrowthStrategyPage() {
         eyebrow="Growth Strategy"
         title="Profitable growth requires more than activity."
         description="We help leadership teams connect market opportunity, sales execution, brand position, and operational readiness into a strategy the business can actually carry."
-        primaryCta={{ href: "/contact", label: "Schedule Discovery" }}
+        primaryCta={{ href: "/#brand-discovery", label: "Start Brand Discovery" }}
       />
       <section className="mx-auto max-w-7xl px-6 py-18 lg:px-8">
         <div className="mb-8 grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">

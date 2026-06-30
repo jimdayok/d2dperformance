@@ -16,7 +16,7 @@ export default function ProcessPage() {
         eyebrow="Process"
         title="A consulting process designed to create clarity before motion."
         description="Every stage is meant to reduce noise, sharpen decisions, and build stronger follow-through across leadership, brand, and the commercial side of the business."
-        primaryCta={{ href: "/contact", label: "Schedule Discovery" }}
+        primaryCta={{ href: "/#brand-discovery", label: "Start Brand Discovery" }}
       />
       <section className="mx-auto max-w-7xl px-6 py-18 lg:px-8">
         <div className="mb-8 grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">

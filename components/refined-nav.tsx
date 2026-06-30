@@ -32,10 +32,6 @@ export function RefinedNav() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    setIsOpen(false);
-  }, [pathname]);
-
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-5 pt-4 lg:px-8">
       <div
@@ -86,10 +82,10 @@ export function RefinedNav() {
 
           <div className="hidden items-center gap-4 lg:flex">
             <Link
-              href="/contact"
+              href="/#brand-discovery"
               className="inline-flex items-center gap-2 border-b border-[var(--color-border-strong)] pb-1 text-[0.82rem] uppercase tracking-[0.18em] text-[var(--color-ink)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
             >
-              Schedule a Conversation
+              Start Brand Discovery
               <MoveRight className="h-4 w-4" />
             </Link>
           </div>
@@ -130,6 +126,7 @@ export function RefinedNav() {
                       ? "border-[var(--color-accent)] text-[var(--color-ink)]"
                       : "border-[var(--color-border-soft)] text-[var(--color-muted)] hover:text-[var(--color-ink)]"
                   }`}
+                  onClick={() => setIsOpen(false)}
                 >
                   {item.label}
                 </Link>
@@ -137,10 +134,11 @@ export function RefinedNav() {
             })}
           </nav>
           <Link
-            href="/contact"
+            href="/#brand-discovery"
             className="mt-8 inline-flex items-center gap-2 border-b border-[var(--color-border-strong)] pb-1 text-sm uppercase tracking-[0.18em] text-[var(--color-ink)]"
+            onClick={() => setIsOpen(false)}
           >
-            Schedule a Conversation
+            Start Brand Discovery
             <MoveRight className="h-4 w-4" />
           </Link>
         </div>

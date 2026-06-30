@@ -25,8 +25,8 @@ export default function AboutPage() {
         eyebrow="About"
         title="Senior-level guidance for companies that need sharper leadership, stronger brand clarity, and better execution."
         description="D2D Performance combines practical brand strategy, executive perspective, commercial thinking, and digital systems discipline so growth feels more intentional and less reactive."
-        primaryCta={{ href: "/contact", label: "Schedule Discovery" }}
-        secondaryCta={{ href: "/brand-development", label: "Build Your Brand" }}
+        primaryCta={{ href: "/#brand-discovery", label: "Start Brand Discovery" }}
+        secondaryCta={{ href: "/brand-development#brand-discovery", label: "Open Discovery Page" }}
       />
       <section className="mx-auto max-w-7xl px-6 py-18 lg:px-8">
         <div className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">

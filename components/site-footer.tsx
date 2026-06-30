@@ -66,15 +66,15 @@ export function SiteFooter() {
               If the business feels heavier than it should, start there.
             </p>
             <p className="mt-4 text-sm leading-7 text-[var(--color-muted)]">
-              Executive coaching, brand development, and growth work all begin
-              with the same question: what is making the business harder to run
-              than it needs to be?
+              The first move is the full brand discovery. It gives us the raw
+              business context before strategy, design, messaging, or growth
+              advice gets layered on top.
             </p>
             <Link
-              href="/contact"
+              href="/#brand-discovery"
               className="mt-6 inline-flex items-center gap-2 border-b border-[var(--color-border-strong)] pb-1 text-sm uppercase tracking-[0.18em] text-[var(--color-ink)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
             >
-              Schedule a conversation
+              Start Brand Discovery
             </Link>
           </div>
         </div>

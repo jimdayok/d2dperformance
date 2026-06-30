@@ -18,8 +18,8 @@ export default function ServicesPage() {
         eyebrow="Services"
         title="Advisory services built for leadership teams that have outgrown generic advice."
         description="Each engagement is designed to solve strategic, operational, commercial, and brand problems that keep solid companies from performing like stronger brands."
-        primaryCta={{ href: "/contact", label: "Schedule Discovery" }}
-        secondaryCta={{ href: "/brand-development", label: "Build Your Brand" }}
+        primaryCta={{ href: "/#brand-discovery", label: "Start Brand Discovery" }}
+        secondaryCta={{ href: "/brand-development#brand-discovery", label: "Open Discovery Page" }}
       />
       <section className="mx-auto max-w-7xl px-6 py-18 lg:px-8">
         <div className="mb-8 grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">

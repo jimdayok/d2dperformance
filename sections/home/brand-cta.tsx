@@ -29,9 +29,9 @@ export function BrandCtaSection() {
               the positioning, and the growth plan.
             </p>
             <div className="mt-8">
-              <ButtonLink href="/brand-development#brand-discovery">
+              <ButtonLink href="/#brand-discovery">
                 <span className="inline-flex items-center gap-2">
-                Start Brand Discovery
+                  Start Brand Discovery
                   <ArrowRight className="h-4 w-4" />
                 </span>
               </ButtonLink>

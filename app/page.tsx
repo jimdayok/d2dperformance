@@ -1,3 +1,4 @@
+import { BrandDiscoveryForm } from "@/components/brand-discovery-form";
 import { BrandCtaSection } from "@/sections/home/brand-cta";
 import { HomeHero } from "@/sections/home/hero";
 import { HomeProcessSection } from "@/sections/home/process";
@@ -31,6 +32,7 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: sanitizeJsonLd(homeJsonLd) }}
       />
       <HomeHero />
+      <BrandDiscoveryForm />
       <WhatWeDoSection />
       <WhyStallSection />
       <HomeProcessSection />
