@@ -1,6 +1,4 @@
-import { ArrowRight, Mail, MapPin, Phone } from "lucide-react";
 import Link from "next/link";
-import { ButtonLink } from "@/components/button-link";
 import {
   companyEmail,
   companyName,
@@ -9,93 +7,75 @@ import {
   tagline,
 } from "@/lib/site-data";
 
+const footerLinks = navigation.filter((item) =>
+  [
+    "/services",
+    "/executive-coaching",
+    "/brand-development",
+    "/growth-strategy",
+    "/about",
+    "/contact",
+  ].includes(item.href),
+);
+
 export function SiteFooter() {
   return (
-    <footer className="mt-24 border-t border-[var(--color-border)] bg-[color:color-mix(in_oklab,var(--color-surface)_92%,transparent)]">
-      <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
-        <div className="grid gap-10 rounded-[2rem] border border-[var(--color-border)] bg-[color:color-mix(in_oklab,var(--color-card)_94%,transparent)] p-8 shadow-[0_18px_50px_rgba(16,24,34,0.05)] backdrop-blur-sm lg:grid-cols-[1.25fr_0.85fr_0.9fr] lg:p-10">
-          <div className="max-w-md space-y-5">
-            <p className="font-display text-4xl font-semibold tracking-[0.02em] text-[var(--color-taupe)]">
+    <footer className="mt-28 border-t border-[var(--color-border)]">
+      <div className="mx-auto max-w-[88rem] px-6 py-16 lg:px-8 lg:py-20">
+        <div className="grid gap-10 lg:grid-cols-[1.15fr_0.7fr_0.8fr] lg:gap-14">
+          <div className="max-w-xl">
+            <p className="eyebrow-label">{parentBrandName}</p>
+            <h2 className="mt-4 font-display text-4xl font-semibold tracking-[-0.04em] text-[var(--color-ink)] md:text-5xl">
               {companyName}
+            </h2>
+            <p className="mt-5 max-w-lg text-base leading-8 text-[var(--color-muted)]">
+              {tagline} Advisory work for companies that have outgrown informal
+              leadership habits and need the business to feel lighter, clearer,
+              and more executable.
             </p>
-            <p className="text-sm uppercase tracking-[0.3em] text-[var(--color-accent)]">
-              {parentBrandName} foundation
-            </p>
-            <p className="text-sm leading-7 text-[var(--color-muted)]">
-              {tagline} Executive consulting and brand clarity for companies
-              that need better leadership, stronger execution, and more
-              credible growth systems.
-            </p>
-            <p className="text-sm leading-7 text-[var(--color-muted)]">
-              Led by Andrea Day and Jim Day, with a strategy approach shaped to
-              feel more practical, more human, and more useful in the real
-              day-to-day of the business.
-            </p>
-            <div className="space-y-3 text-sm text-[var(--color-muted)]">
-              <p className="inline-flex items-center gap-3">
-                <MapPin className="h-4 w-4 text-[var(--color-accent)]" />
-                Dallas - Fort Worth
-              </p>
-              <p className="inline-flex items-center gap-3">
-                <Phone className="h-4 w-4 text-[var(--color-accent)]" />
-                Discovery calls by appointment
-              </p>
+            <div className="mt-8 space-y-2 text-sm uppercase tracking-[0.18em] text-[var(--color-muted)]">
+              <p>Dallas-Fort Worth</p>
+              <p>Advisory work by appointment</p>
               <a
                 href={`mailto:${companyEmail}`}
-                className="inline-flex items-center gap-3 transition hover:text-[var(--color-ink)]"
+                className="inline-block border-b border-[var(--color-border-strong)] pb-1 text-[var(--color-ink)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
               >
-                <Mail className="h-4 w-4 text-[var(--color-accent)]" />
                 {companyEmail}
               </a>
             </div>
           </div>
 
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--color-accent)]">
-              Links
-            </p>
-            <div className="mt-4 flex flex-col gap-3 text-sm text-[var(--color-muted)]">
-              {navigation
-                .filter((item) =>
-                  [
-                    "/services",
-                    "/brand-development",
-                    "/executive-coaching",
-                    "/process",
-                    "/resources",
-                    "/about",
-                  ].includes(item.href),
-                )
-                .map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="transition hover:text-[var(--color-ink)]"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-            </div>
+            <p className="eyebrow-label">Navigate</p>
+            <nav className="mt-5 flex flex-col gap-4">
+              {footerLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="w-fit border-b border-transparent pb-1 text-base tracking-[-0.02em] text-[var(--color-muted)] transition hover:border-[var(--color-border)] hover:text-[var(--color-ink)]"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
           </div>
 
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--color-accent)]">
-              Contact
+          <div className="paper-panel rounded-[1.4rem] px-6 py-6">
+            <p className="eyebrow-label">Start Here</p>
+            <p className="mt-4 text-2xl font-display font-semibold tracking-[-0.03em] text-[var(--color-ink)]">
+              If the business feels heavier than it should, start there.
             </p>
-            <div className="mt-4 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-              <p className="text-sm leading-7 text-[var(--color-muted)]">
-                Schedule a discovery conversation to talk through leadership,
-                brand, growth, or operational friction inside the business.
-              </p>
-              <div className="mt-5">
-                <ButtonLink href="/contact" variant="secondary">
-                  <span className="inline-flex items-center gap-2">
-                    Contact D2D
-                    <ArrowRight className="h-4 w-4" />
-                  </span>
-                </ButtonLink>
-              </div>
-            </div>
+            <p className="mt-4 text-sm leading-7 text-[var(--color-muted)]">
+              Executive coaching, brand development, and growth work all begin
+              with the same question: what is making the business harder to run
+              than it needs to be?
+            </p>
+            <Link
+              href="/contact"
+              className="mt-6 inline-flex items-center gap-2 border-b border-[var(--color-border-strong)] pb-1 text-sm uppercase tracking-[0.18em] text-[var(--color-ink)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+            >
+              Schedule a conversation
+            </Link>
           </div>
         </div>
       </div>

@@ -18,18 +18,25 @@ type QuestionCardProps = {
 function CardShell({
   label,
   description,
+  required = true,
   children,
 }: {
   label: string;
   description?: string;
+  required?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <div className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-[0_14px_36px_rgba(15,23,42,0.04)]">
-      <div className="space-y-2">
-        <h4 className="text-lg font-semibold tracking-[-0.02em] text-[var(--color-ink)]">
-          {label}
-        </h4>
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h4 className="text-lg font-semibold tracking-[-0.02em] text-[var(--color-ink)]">
+            {label}
+          </h4>
+          <span className="rounded-full bg-[var(--color-panel)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
+            {required ? "Required" : "Optional"}
+          </span>
+        </div>
         {description ? (
           <p className="text-sm leading-7 text-[var(--color-muted)]">{description}</p>
         ) : null}
@@ -42,9 +49,15 @@ function CardShell({
 export function QuestionCard({ question, value, onChange }: QuestionCardProps) {
   const helpContent =
     question.helpTitle || question.helpBody || question.helpExamples?.length || question.brandExamples?.length;
+  const hasDetailedCheckboxOptions = question.type === "checkboxes"
+    && question.options?.some((option) => option.description);
 
   return (
-    <CardShell label={question.label} description={question.description}>
+    <CardShell
+      label={question.label}
+      description={question.description}
+      required={question.required !== false}
+    >
       <div className="space-y-4">
         {question.type === "short-text" || question.type === "website" ? (
           <input
@@ -91,7 +104,13 @@ export function QuestionCard({ question, value, onChange }: QuestionCardProps) {
         ) : null}
 
         {question.type === "checkboxes" ? (
-          <div className="flex flex-wrap gap-3">
+          <div
+            className={
+              hasDetailedCheckboxOptions
+                ? "grid gap-3 sm:grid-cols-2"
+                : "flex flex-wrap gap-3"
+            }
+          >
             {question.options?.map((option) => {
               const selectedValues =
                 Array.isArray(value) && value.every((item) => typeof item === "string")
@@ -107,13 +126,22 @@ export function QuestionCard({ question, value, onChange }: QuestionCardProps) {
                   key={option.value}
                   type="button"
                   onClick={() => onChange(nextValue)}
-                  className={`rounded-full border px-4 py-3 text-left text-sm font-medium transition ${
+                  className={`text-left transition ${
                     selected
-                      ? "border-[var(--color-accent)] bg-[color:color-mix(in_oklab,var(--color-accent)_12%,white)] text-[var(--color-ink)]"
-                      : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-muted)] hover:border-[var(--color-accent)]/40 hover:text-[var(--color-ink)]"
+                      ? hasDetailedCheckboxOptions
+                        ? "rounded-[1.25rem] border border-[var(--color-accent)] bg-[color:color-mix(in_oklab,var(--color-accent)_12%,white)] px-4 py-4 text-[var(--color-ink)] shadow-[0_10px_24px_rgba(15,23,42,0.06)]"
+                        : "rounded-full border border-[var(--color-accent)] bg-[color:color-mix(in_oklab,var(--color-accent)_12%,white)] px-4 py-3 text-sm font-medium text-[var(--color-ink)]"
+                      : hasDetailedCheckboxOptions
+                        ? "rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-4 text-[var(--color-muted)] hover:border-[var(--color-accent)]/40 hover:text-[var(--color-ink)]"
+                        : "rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm font-medium text-[var(--color-muted)] hover:border-[var(--color-accent)]/40 hover:text-[var(--color-ink)]"
                   }`}
                 >
-                  <p>{option.label}</p>
+                  <p className="font-medium">{option.label}</p>
+                  {option.description ? (
+                    <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
+                      {option.description}
+                    </p>
+                  ) : null}
                 </button>
               );
             })}

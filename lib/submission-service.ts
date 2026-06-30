@@ -12,6 +12,11 @@ type SubmissionResult = {
   configured: boolean;
 };
 
+type SubmissionEmailOptions = {
+  label: string;
+  subjectPrefix: string;
+};
+
 const {
   RESEND_API_KEY,
   BRAND_DISCOVERY_TO_EMAIL,
@@ -78,9 +83,12 @@ function answerToText(value: DiscoveryAnswer | undefined) {
   return "Not provided";
 }
 
-function answersToEmailText(payload: DiscoverySubmission) {
+function answersToEmailText(
+  payload: DiscoverySubmission,
+  options: SubmissionEmailOptions,
+) {
   const lines = [
-    "Brand Discovery Submission",
+    `${options.label} Submission`,
     "",
     `Submitted: ${payload.submittedAt}`,
     `Started: ${payload.startedAt}`,
@@ -122,19 +130,38 @@ export function isSubmissionServiceConfigured() {
 export async function handleBrandDiscoverySubmission(
   payload: DiscoverySubmission,
 ): Promise<SubmissionResult> {
+  return handleDiscoverySubmission(payload, {
+    label: "Brand Discovery",
+    subjectPrefix: "New Brand Discovery",
+  });
+}
+
+export async function handleExecutiveCoachingSubmission(
+  payload: DiscoverySubmission,
+): Promise<SubmissionResult> {
+  return handleDiscoverySubmission(payload, {
+    label: "Executive Coaching Discovery",
+    subjectPrefix: "New Executive Coaching Discovery",
+  });
+}
+
+async function handleDiscoverySubmission(
+  payload: DiscoverySubmission,
+  options: SubmissionEmailOptions,
+): Promise<SubmissionResult> {
   if (!RESEND_API_KEY || !BRAND_DISCOVERY_FROM_EMAIL) {
-    throw new Error("Email delivery is not configured for Brand Discovery submissions.");
+    throw new Error(`Email delivery is not configured for ${options.label} submissions.`);
   }
 
   const resend = new Resend(RESEND_API_KEY);
   const supabase = createSupabaseAdmin();
-  const emailBody = answersToEmailText(payload);
+  const emailBody = answersToEmailText(payload, options);
   const toEmail = BRAND_DISCOVERY_TO_EMAIL || fallbackToEmail;
 
   await resend.emails.send({
     from: BRAND_DISCOVERY_FROM_EMAIL,
     to: toEmail,
-    subject: `New Brand Discovery: ${answerToText(payload.answers.company)}`,
+    subject: `${options.subjectPrefix}: ${answerToText(payload.answers.company)}`,
     text: emailBody,
   });
 

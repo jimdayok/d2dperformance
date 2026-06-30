@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Fraunces, IBM_Plex_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { SiteFooter } from "@/components/site-footer";
@@ -8,16 +8,18 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { companyName, siteUrl, tagline } from "@/lib/site-data";
 import { sanitizeJsonLd } from "@/lib/metadata";
 
-const inter = Inter({
+const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-sans",
+  weight: ["400", "500", "600"],
 });
 
-const playfair = Playfair_Display({
+const fraunces = Fraunces({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-display",
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -66,7 +68,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.variable} ${playfair.variable} h-full scroll-smooth`}
+      className={`${ibmPlexSans.variable} ${fraunces.variable} h-full scroll-smooth`}
     >
       <body className="min-h-full bg-[var(--color-bg)] font-sans text-[var(--color-ink)] antialiased">
         <script

@@ -1,8 +1,11 @@
-import { brandDiscoverySections } from "@/lib/brand-discovery-data";
-import type { DiscoveryFormValues } from "@/types/brand-discovery";
+import type {
+  DiscoveryFormValues,
+  DiscoverySection,
+} from "@/types/brand-discovery";
 
 type ReviewPanelProps = {
   answers: DiscoveryFormValues;
+  sections: DiscoverySection[];
   onEdit: (index: number) => void;
 };
 
@@ -32,29 +35,30 @@ function answerToString(value: unknown) {
 
 export function ReviewPanel({
   answers,
+  sections,
   onEdit,
 }: ReviewPanelProps) {
   return (
     <div className="space-y-6">
-      {brandDiscoverySections.map((section, index) =>
+      {sections.map((section, index) =>
         section.questions.length === 0 ? null : (
         <article
           key={section.id}
-          className="rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-card)] p-6"
+          className="paper-panel rounded-[1.4rem] p-6"
         >
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-accent)]">
+              <p className="eyebrow-label">
                 Review
               </p>
-              <h3 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-[var(--color-ink)]">
+              <h3 className="mt-2 font-display text-3xl font-semibold tracking-[-0.04em] text-[var(--color-ink)]">
                 {section.title}
               </h3>
             </div>
             <button
               type="button"
               onClick={() => onEdit(index)}
-              className="rounded-full border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-ink)] transition hover:border-[var(--color-accent)]"
+              className="border-b border-[var(--color-border-strong)] pb-1 text-sm font-medium uppercase tracking-[0.18em] text-[var(--color-ink)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
             >
               Edit section
             </button>
@@ -64,9 +68,9 @@ export function ReviewPanel({
             {section.questions.map((question) => (
               <div
                 key={question.id}
-                className="rounded-[1.25rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-4"
+                className="border-t border-[var(--color-border)] px-1 py-4"
               >
-                <p className="text-sm font-medium text-[var(--color-ink)]">
+                <p className="text-sm font-medium uppercase tracking-[0.08em] text-[var(--color-ink)]">
                   {question.label}
                 </p>
                 <p className="mt-2 text-sm leading-7 text-[var(--color-muted)]">

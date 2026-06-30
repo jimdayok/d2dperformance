@@ -407,7 +407,11 @@ export function BrandDiscoveryForm() {
 
             {reviewStep ? (
               <div className="mt-8">
-                <ReviewPanel answers={draft.answers} onEdit={goToStep} />
+                <ReviewPanel
+                  answers={draft.answers}
+                  sections={brandDiscoverySections}
+                  onEdit={goToStep}
+                />
               </div>
             ) : null}
 
