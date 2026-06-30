@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
   CheckCircle2,
+  LoaderCircle,
   RotateCcw,
   ShieldCheck,
 } from "lucide-react";
@@ -17,6 +18,7 @@ import { clearDraft, loadDraft, safeJsonParse, saveDraft } from "@/lib/brand-dis
 import { isQuestionAnswered } from "@/lib/brand-report";
 import type {
   DiscoveryDraft,
+  DiscoveryEmailAttachment,
   DiscoveryFormValues,
   DiscoverySection,
   DiscoverySubmission,
@@ -38,6 +40,36 @@ function createEmptyDraft(): DiscoveryDraft {
 
 function clampContentIndex(index: number) {
   return Math.min(Math.max(index, 0), brandDiscoverySections.length - 1);
+}
+
+function normalizePhoneNumber(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 10);
+
+  if (digits.length <= 3) {
+    return digits ? `(${digits}` : "";
+  }
+
+  if (digits.length <= 6) {
+    return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  }
+
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+}
+
+async function fileToAttachment(file: File): Promise<DiscoveryEmailAttachment> {
+  const buffer = await file.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+
+  return {
+    filename: file.name,
+    content: btoa(binary),
+    contentType: file.type || "application/octet-stream",
+  };
 }
 
 function getSectionValidationMessage(section: DiscoverySection, answers: DiscoveryFormValues) {
@@ -72,8 +104,10 @@ export function BrandDiscoveryForm() {
   const [submitState, setSubmitState] = useState<"idle" | "submitting" | "error">("idle");
   const [submitted, setSubmitted] = useState(false);
   const [progressState, setProgressState] = useState<"idle" | "sending">("idle");
+  const [pendingUploads, setPendingUploads] = useState<Record<string, File[]>>({});
   const questionTopRef = useRef<HTMLDivElement | null>(null);
   const saveTimeoutRef = useRef<number | null>(null);
+  const sendingProgressCountRef = useRef(0);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -182,6 +216,7 @@ export function BrandDiscoveryForm() {
     setSubmitted(false);
     setSubmitState("idle");
     setProgressState("idle");
+    setPendingUploads({});
   }
 
   function handlePrevious() {
@@ -193,15 +228,9 @@ export function BrandDiscoveryForm() {
     goToStep(Math.max(0, currentSectionIndex - 1));
   }
 
-  async function sendPartialProgress() {
+  async function sendPartialProgress(payload: DiscoverySubmission) {
+    sendingProgressCountRef.current += 1;
     setProgressState("sending");
-
-    const payload: DiscoverySubmission = {
-      startedAt: draft.startedAt,
-      updatedAt: draft.updatedAt ?? new Date().toISOString(),
-      submittedAt: draft.updatedAt ?? new Date().toISOString(),
-      answers: draft.answers,
-    };
 
     try {
       const response = await fetch("/api/brand-discovery/progress", {
@@ -214,9 +243,12 @@ export function BrandDiscoveryForm() {
         throw new Error("Unable to email partial progress.");
       }
     } catch {
-      toast.error("We saved your answers, but the progress email did not send this time.");
+      toast.error("We saved your answers, but background syncing did not finish this time.");
     } finally {
-      setProgressState("idle");
+      sendingProgressCountRef.current = Math.max(0, sendingProgressCountRef.current - 1);
+      if (sendingProgressCountRef.current === 0) {
+        setProgressState("idle");
+      }
     }
   }
 
@@ -236,28 +268,43 @@ export function BrandDiscoveryForm() {
       return;
     }
 
-    await sendPartialProgress();
+    const progressTimestamp = new Date().toISOString();
+    const progressPayload: DiscoverySubmission = {
+      startedAt: draft.startedAt,
+      updatedAt: progressTimestamp,
+      submittedAt: progressTimestamp,
+      answers: draft.answers,
+    };
 
     if (currentSectionIndex === contentSteps - 1) {
       goToStep(contentSteps);
+      void sendPartialProgress(progressPayload);
       return;
     }
 
     goToStep(currentSectionIndex + 1);
+    void sendPartialProgress(progressPayload);
   }
 
   async function handleSubmit() {
     setSubmitState("submitting");
 
     const submittedAt = new Date().toISOString();
-    const payload: DiscoverySubmission = {
-      startedAt: draft.startedAt,
-      updatedAt: draft.updatedAt ?? submittedAt,
-      submittedAt,
-      answers: draft.answers,
-    };
 
     try {
+      const attachments = await Promise.all(
+        Object.values(pendingUploads)
+          .flat()
+          .map((file) => fileToAttachment(file)),
+      );
+      const payload: DiscoverySubmission = {
+        startedAt: draft.startedAt,
+        updatedAt: draft.updatedAt ?? submittedAt,
+        submittedAt,
+        answers: draft.answers,
+        attachments,
+      };
+
       const response = await fetch("/api/brand-discovery/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -278,6 +325,7 @@ export function BrandDiscoveryForm() {
         submittedAt,
         updatedAt: submittedAt,
       }));
+      setPendingUploads({});
       setSubmitted(true);
       setSubmitState("idle");
     } catch (error) {
@@ -308,11 +356,10 @@ export function BrandDiscoveryForm() {
             <CheckCircle2 className="h-7 w-7" />
           </div>
           <h2 className="mt-6 font-display text-balance text-4xl font-semibold tracking-[-0.05em] text-[var(--color-ink)] md:text-5xl">
-            Thank you. Your Brand Discovery has been received.
+            Your brand discovery request has been received.
           </h2>
           <p className="mt-5 max-w-3xl text-lg leading-8 text-[var(--color-muted)]">
-            The full discovery has been emailed to Jim and Andrea, and each completed section
-            was also sent along the way as progress.
+            We&apos;ll review your information and follow up with next steps.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-5 border-t border-[var(--color-border)] pt-6">
@@ -324,9 +371,6 @@ export function BrandDiscoveryForm() {
               <RotateCcw className="h-4 w-4" />
               Start Over
             </button>
-            <span className="text-sm uppercase tracking-[0.18em] text-[var(--color-muted)]">
-              Emails go to jim@d2dmktg.com and andrea@d2dmktg.com
-            </span>
           </div>
         </div>
       </section>
@@ -349,7 +393,7 @@ export function BrandDiscoveryForm() {
           <div className="mt-8 grid gap-5 border-t border-[var(--color-border)] pt-6 md:grid-cols-3">
             {[
               "Your exact 40 questions, with no extras added to the discovery itself.",
-              "Progress emails sent to Jim and Andrea as each section is completed.",
+              "A guided section-by-section flow that keeps the discovery clear and easy to complete.",
               "A simple reset if you want to clear everything and start over.",
             ].map((item) => (
               <div
@@ -368,7 +412,7 @@ export function BrandDiscoveryForm() {
                 40 Discovery Questions
               </span>
               <span className="inline-flex items-center gap-2 border border-[var(--color-border)] px-3 py-2 uppercase tracking-[0.16em]">
-                Progress emailed as you go
+                Guided section flow
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-5">
@@ -397,6 +441,24 @@ export function BrandDiscoveryForm() {
 
   return (
     <section id="brand-discovery" className="mx-auto max-w-5xl px-6 pb-24 lg:px-8">
+      {progressState === "sending" || submitState === "submitting" ? (
+        <div className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center px-6">
+          <div className="activity-bar flex min-w-[18rem] max-w-xl items-center gap-3 rounded-full border border-[var(--color-border)] bg-[color:color-mix(in_oklab,var(--color-card)_88%,white)] px-5 py-3 shadow-[0_22px_48px_rgba(20,16,12,0.16)] backdrop-blur-xl">
+            <LoaderCircle className="h-4 w-4 animate-spin text-[var(--color-accent)]" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-ink)]">
+                {submitState === "submitting" ? "Submitting Discovery" : "Sending Progress"}
+              </p>
+              <p className="text-sm text-[var(--color-muted)]">
+                {submitState === "submitting"
+                  ? "Please keep this tab open while we finish the submission."
+                  : "You can keep moving. We&apos;re sending this section in the background."}
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <div ref={questionTopRef} className="paper-panel rounded-[1.6rem] p-6 md:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-3">
@@ -406,7 +468,16 @@ export function BrandDiscoveryForm() {
               <span className="h-1 w-1 rounded-full bg-[var(--color-border-strong)]" />
               <span>{answeredCount} responses saved</span>
               <span className="h-1 w-1 rounded-full bg-[var(--color-border-strong)]" />
-              <span>{progressState === "sending" ? "Sending progress..." : "Progress emailed by section"}</span>
+              <span className="inline-flex items-center gap-2">
+                {progressState === "sending" ? (
+                  <>
+                    <LoaderCircle className="h-3.5 w-3.5 animate-spin text-[var(--color-accent)]" />
+                    Sending progress...
+                  </>
+                ) : (
+                  "Progress sends by section"
+                )}
+              </span>
             </div>
           </div>
 
@@ -429,6 +500,31 @@ export function BrandDiscoveryForm() {
             style={{ width: `${completion}%` }}
           />
         </div>
+
+        {progressState === "sending" || submitState === "submitting" ? (
+          <div className="mt-4 rounded-[1.2rem] border border-[var(--color-border)] bg-[var(--color-panel)] p-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[color:color-mix(in_oklab,var(--color-accent)_12%,white)] text-[var(--color-accent)]">
+                <LoaderCircle className="h-5 w-5 animate-spin" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-ink)]">
+                  {submitState === "submitting"
+                    ? "Submitting your discovery"
+                    : "Progress is sending now"}
+                </p>
+                <p className="mt-1 text-sm leading-6 text-[var(--color-muted)]">
+                  {submitState === "submitting"
+                    ? "This can take a moment while we package your responses and any attached files."
+                    : "Your answers are moving in the background, so the form stays responsive."}
+                </p>
+              </div>
+            </div>
+            <div className="activity-bar mt-4 h-2 rounded-full bg-[color:color-mix(in_oklab,var(--color-accent)_12%,white)]">
+              <div className="h-2 w-2/3 rounded-full bg-[var(--color-accent)] opacity-90" />
+            </div>
+          </div>
+        ) : null}
 
         <AnimatePresence mode="wait">
           <motion.div
@@ -455,7 +551,21 @@ export function BrandDiscoveryForm() {
                     key={question.id}
                     question={question}
                     value={draft.answers[question.id]}
-                    onChange={(nextValue) => updateAnswer(question.id, nextValue)}
+                    onChange={(nextValue, options) => {
+                      const normalizedValue =
+                        question.id === "phone" && typeof nextValue === "string"
+                          ? normalizePhoneNumber(nextValue)
+                          : nextValue;
+
+                      if (question.type === "upload") {
+                        setPendingUploads((current) => ({
+                          ...current,
+                          [question.id]: options?.files ?? [],
+                        }));
+                      }
+
+                      updateAnswer(question.id, normalizedValue);
+                    }}
                   />
                 ))}
               </div>
@@ -473,8 +583,8 @@ export function BrandDiscoveryForm() {
                     Final check
                   </p>
                   <p className="mt-4 text-base leading-8 text-[var(--color-muted)]">
-                    When you submit, the full discovery will be emailed to jim@d2dmktg.com and
-                    andrea@d2dmktg.com. Each completed section has also been emailed as progress.
+                    When you submit, your full discovery will be submitted for review. Any files
+                    attached in this session will be included with the final submission.
                   </p>
                   {submitState === "error" ? (
                     <p className="mt-4 text-sm text-rose-700 dark:text-rose-300">
@@ -502,7 +612,14 @@ export function BrandDiscoveryForm() {
                   disabled={submitState === "submitting"}
                   className="inline-flex items-center gap-2 border-b border-[var(--color-border-strong)] pb-2 text-sm font-medium uppercase tracking-[0.18em] text-[var(--button-primary-text)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {submitState === "submitting" ? "Submitting..." : "Submit Brand Discovery"}
+                  {submitState === "submitting" ? (
+                    <>
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    "Submit Brand Discovery"
+                  )}
                 </button>
               ) : (
                 <button

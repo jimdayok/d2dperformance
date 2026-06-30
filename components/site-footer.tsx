@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  companyEmail,
   companyName,
   navigation,
   parentBrandName,
@@ -36,12 +35,12 @@ export function SiteFooter() {
             <div className="mt-8 space-y-2 text-sm uppercase tracking-[0.18em] text-[var(--color-muted)]">
               <p>Dallas-Fort Worth</p>
               <p>Advisory work by appointment</p>
-              <a
-                href={`mailto:${companyEmail}`}
+              <Link
+                href="/contact"
                 className="inline-block border-b border-[var(--color-border-strong)] pb-1 text-[var(--color-ink)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
               >
-                {companyEmail}
-              </a>
+                Contact D2D
+              </Link>
             </div>
           </div>
 

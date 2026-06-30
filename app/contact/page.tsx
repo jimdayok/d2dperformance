@@ -1,11 +1,7 @@
 import { Mail, PhoneCall, ShieldCheck } from "lucide-react";
 import { ButtonLink } from "@/components/button-link";
 import { PageIntro } from "@/components/page-intro";
-import {
-  companyEmail,
-  contactAudience,
-  leadershipProfiles,
-} from "@/lib/site-data";
+import { contactAudience, leadershipProfiles } from "@/lib/site-data";
 import { createMetadata } from "@/lib/metadata";
 
 export const metadata = createMetadata({
@@ -91,12 +87,9 @@ export default function ContactPage() {
                   className="min-h-40 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-4 text-base text-[var(--color-ink)] outline-none transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-accent)]"
                 />
               </label>
-              <a
-                href={`mailto:${companyEmail}?subject=D2D%20Performance%20Discovery`}
-                className="inline-flex w-fit items-center justify-center rounded-full bg-[var(--button-primary-bg)] px-6 py-3 text-sm font-semibold text-[var(--button-primary-text)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(16,24,34,0.16)]"
-              >
-                Schedule Discovery
-              </a>
+              <ButtonLink href="/brand-development#brand-discovery">
+                Start Brand Discovery
+              </ButtonLink>
             </div>
           </form>
 
@@ -115,7 +108,7 @@ export default function ContactPage() {
             <div className="mt-8 space-y-4 text-sm text-white/78">
               <p className="inline-flex items-center gap-3">
                 <Mail className="h-4 w-4 text-[var(--color-sand)]" />
-                {companyEmail}
+                Brand discovery lives inside the site, not an email handoff.
               </p>
               <p className="inline-flex items-center gap-3">
                 <PhoneCall className="h-4 w-4 text-[var(--color-sand)]" />
@@ -127,10 +120,9 @@ export default function ContactPage() {
               </p>
             </div>
             <div className="mt-8">
-              <ButtonLink href={`mailto:${companyEmail}`} variant="light">
+              <ButtonLink href="/brand-development#brand-discovery" variant="light">
                 <span className="inline-flex items-center gap-2">
-                  Email D2D
-                  <Mail className="h-4 w-4" />
+                  Start the discovery
                 </span>
               </ButtonLink>
             </div>

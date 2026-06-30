@@ -26,6 +26,12 @@ export type DiscoveryUploadMetadata = {
   lastModified: number;
 };
 
+export type DiscoveryEmailAttachment = {
+  filename: string;
+  content: string;
+  contentType: string;
+};
+
 export type DiscoveryAnswer =
   | string
   | string[]
@@ -77,6 +83,7 @@ export type DiscoverySubmission = {
   updatedAt: string;
   submittedAt: string;
   answers: DiscoveryFormValues;
+  attachments?: DiscoveryEmailAttachment[];
 };
 
 export type ReportBlock = {

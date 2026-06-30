@@ -12,7 +12,7 @@ import type {
 type QuestionCardProps = {
   question: DiscoveryQuestion;
   value: DiscoveryAnswer;
-  onChange: (value: DiscoveryAnswer) => void;
+  onChange: (value: DiscoveryAnswer, options?: { files?: File[] }) => void;
 };
 
 function CardShell({
@@ -251,7 +251,7 @@ export function QuestionCard({ question, value, onChange }: QuestionCardProps) {
                 ? (value as DiscoveryUploadMetadata[])
                 : []
             }
-            onChange={(files) => onChange(files)}
+            onChange={(files, rawFiles) => onChange(files, { files: rawFiles })}
           />
         ) : null}
 

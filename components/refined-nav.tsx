@@ -43,14 +43,14 @@ export function RefinedNav() {
           className={`flex items-center justify-between gap-5 transition-all duration-500 ${
             isScrolled
               ? "rounded-[1.2rem] border border-[var(--color-border)] bg-[color:color-mix(in_oklab,var(--color-card)_78%,transparent)] px-5 py-3 shadow-[0_18px_50px_rgba(17,15,12,0.08)] backdrop-blur-[18px]"
-              : "px-0 py-2"
+              : "nav-brand-top rounded-[1.45rem] border border-[rgba(122,70,37,0.16)] px-5 py-4 shadow-[0_18px_44px_rgba(122,70,37,0.10)]"
           }`}
         >
           <Link href="/" className="group min-w-0">
-            <span className="block text-[0.7rem] font-medium uppercase tracking-[0.38em] text-[var(--color-muted)] transition group-hover:text-[var(--color-ink)]">
+            <span className="block text-[0.7rem] font-medium uppercase tracking-[0.38em] text-[var(--nav-top-muted,var(--color-muted))] transition group-hover:text-[var(--nav-top-ink,var(--color-ink))]">
               {parentBrandName}
             </span>
-            <span className="mt-1 block font-display text-[1.35rem] font-semibold tracking-[-0.03em] text-[var(--color-ink)]">
+            <span className="mt-1 block font-display text-[1.35rem] font-semibold tracking-[-0.03em] text-[var(--nav-top-ink,var(--color-ink))]">
               {companyName}
             </span>
           </Link>
@@ -65,8 +65,8 @@ export function RefinedNav() {
                   href={item.href}
                   className={`group relative text-[0.82rem] uppercase tracking-[0.18em] transition ${
                     active
-                      ? "text-[var(--color-ink)]"
-                      : "text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+                      ? "text-[var(--nav-top-ink,var(--color-ink))]"
+                      : "text-[var(--nav-top-muted,var(--color-muted))] hover:text-[var(--nav-top-ink,var(--color-ink))]"
                   }`}
                 >
                   {item.label}
@@ -83,7 +83,7 @@ export function RefinedNav() {
           <div className="hidden items-center gap-4 lg:flex">
             <Link
               href="/#brand-discovery"
-              className="inline-flex items-center gap-2 border-b border-[var(--color-border-strong)] pb-1 text-[0.82rem] uppercase tracking-[0.18em] text-[var(--color-ink)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+              className="inline-flex items-center gap-2 border-b border-[var(--nav-top-border,var(--color-border-strong))] pb-1 text-[0.82rem] uppercase tracking-[0.18em] text-[var(--nav-top-ink,var(--color-ink))] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
             >
               Start Brand Discovery
               <MoveRight className="h-4 w-4" />

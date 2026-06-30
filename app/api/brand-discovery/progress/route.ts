@@ -30,13 +30,12 @@ export async function POST(request: Request) {
 
     return Response.json({
       ok: true,
-      message: "Brand Discovery progress emailed successfully.",
+      message: "Brand Discovery progress synced successfully.",
     });
   } catch (error) {
+    console.error("Brand discovery progress sync failed.", error);
     return jsonError(
-      error instanceof Error
-        ? error.message
-        : "Unable to email Brand Discovery progress.",
+      "We couldn't sync this section right now. Your local progress is still saved.",
       500,
     );
   }

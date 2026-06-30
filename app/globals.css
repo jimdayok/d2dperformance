@@ -249,12 +249,46 @@ textarea {
   opacity: 0.8;
 }
 
+.nav-brand-top {
+  --nav-top-ink: #4f3324;
+  --nav-top-muted: rgba(79, 51, 36, 0.78);
+  --nav-top-border: rgba(79, 51, 36, 0.28);
+  background:
+    linear-gradient(120deg, rgba(245, 231, 216, 0.96), rgba(252, 245, 237, 0.92) 45%, rgba(237, 217, 195, 0.92)),
+    radial-gradient(circle at left top, rgba(166, 96, 47, 0.14), transparent 30rem);
+  backdrop-filter: saturate(1.08);
+}
+
+.activity-bar {
+  position: relative;
+  overflow: hidden;
+}
+
+.activity-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.46), transparent);
+  transform: translateX(-100%);
+  animation: activity-sheen 1.35s linear infinite;
+}
+
+@keyframes activity-sheen {
+  to {
+    transform: translateX(100%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
 
   .animate-page-enter {
+    animation: none;
+  }
+
+  .activity-bar::before {
     animation: none;
   }
 }

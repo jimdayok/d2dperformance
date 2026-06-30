@@ -27,11 +27,13 @@ export async function POST(request: Request) {
 
     return Response.json({
       ok: true,
-      message: "Brand Discovery submitted successfully.",
+      message:
+        "Your brand discovery request has been received. We'll review your information and follow up with next steps.",
     });
   } catch (error) {
+    console.error("Brand discovery submission failed.", error);
     return jsonError(
-      error instanceof Error ? error.message : "Unable to submit Brand Discovery.",
+      "We couldn't complete your submission right now. Your progress is still saved. Please try again in a moment.",
       500,
     );
   }

@@ -2,7 +2,6 @@ export const siteUrl = "https://d2dperformance.com";
 
 export const companyName = "D2D Performance";
 export const parentBrandName = "DAY2DAY";
-export const companyEmail = "performance@d2dmktg.com";
 export const tagline = "Performance Built for the Day2Day.";
 
 export const leadershipProfiles = [

@@ -8,7 +8,7 @@ type UploadDropzoneProps = {
   accept?: string;
   multiple?: boolean;
   files: DiscoveryUploadMetadata[];
-  onChange: (files: DiscoveryUploadMetadata[]) => void;
+  onChange: (files: DiscoveryUploadMetadata[], rawFiles: File[]) => void;
 };
 
 export function UploadDropzone({
@@ -31,7 +31,7 @@ export function UploadDropzone({
       lastModified: file.lastModified,
     }));
 
-    onChange(nextFiles);
+    onChange(nextFiles, Array.from(fileList));
   }
 
   return (
@@ -48,7 +48,7 @@ export function UploadDropzone({
           <div>
             <p className="text-sm font-semibold text-[var(--color-ink)]">{label}</p>
             <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
-              Choose any files you want us to review alongside your discovery.
+              Choose logos, documents, photos, or reference files you want us to review.
             </p>
           </div>
           <span className="inline-flex items-center gap-2 rounded-full bg-[var(--color-card)] px-4 py-2 text-sm font-medium text-[var(--color-ink)] shadow-[0_8px_20px_rgba(15,23,42,0.06)]">

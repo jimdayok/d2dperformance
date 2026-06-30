@@ -5,6 +5,7 @@ import type {
   DiscoveryAnswer,
   DiscoverySubmission,
   DiscoveryUploadMetadata,
+  DiscoveryEmailAttachment,
 } from "@/types/brand-discovery";
 import { brandDiscoverySections } from "@/lib/brand-discovery-data";
 import { safeJsonParse } from "@/lib/brand-discovery-storage";
@@ -18,7 +19,8 @@ type SubmissionResult = {
 type SubmissionEmailOptions = {
   label: string;
   subjectPrefix: string;
-  recipients?: string[];
+  notificationRecipients?: string[];
+  sendCustomerConfirmation?: boolean;
 };
 
 type DiscoveryInsight = {
@@ -39,11 +41,6 @@ const {
   NEXT_PUBLIC_SUPABASE_URL,
   SUPABASE_SERVICE_ROLE_KEY,
 } = process.env;
-
-const brandDiscoveryDefaultRecipients = [
-  "jim@d2dmktg.com",
-  "andrea@d2dmktg.com",
-];
 
 function createSupabaseAdmin() {
   if (!NEXT_PUBLIC_SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
@@ -330,39 +327,27 @@ export function validateSubmission(payload: DiscoverySubmission) {
 }
 
 export function isSubmissionServiceConfigured() {
-  return Boolean(RESEND_API_KEY && BRAND_DISCOVERY_FROM_EMAIL && process.env.OPENAI_API_KEY);
+  return Boolean(RESEND_API_KEY && BRAND_DISCOVERY_FROM_EMAIL);
 }
 
-function getNotificationRecipients(explicitRecipients?: string[]) {
-  if (explicitRecipients && explicitRecipients.length > 0) {
-    return Array.from(
-      new Set(
-        explicitRecipients
-          .map((value) => value.trim().toLowerCase())
-          .filter(Boolean),
-      ),
-    );
-  }
-
-  const envRecipients = [
-    BRAND_DISCOVERY_TO_EMAIL,
-    BRAND_DISCOVERY_NOTIFICATION_EMAIL,
-  ]
+function parseEmailList(values: Array<string | undefined>) {
+  return values
     .filter(Boolean)
     .flatMap((value) => value!.split(/[;,]/))
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean);
+}
 
-  const manualRecipients = (explicitRecipients ?? [])
-    .map((value) => value.trim().toLowerCase())
-    .filter(Boolean);
+function getNotificationRecipients(explicitRecipients?: string[], excludeEmail?: string) {
+  const excluded = excludeEmail?.trim().toLowerCase();
+  const envRecipients = parseEmailList([
+    BRAND_DISCOVERY_TO_EMAIL,
+    BRAND_DISCOVERY_NOTIFICATION_EMAIL,
+  ]);
+  const manualRecipients = parseEmailList(explicitRecipients ?? []);
 
-  return Array.from(
-    new Set([
-      ...manualRecipients,
-      ...envRecipients,
-      ...brandDiscoveryDefaultRecipients,
-    ]),
+  return Array.from(new Set([...manualRecipients, ...envRecipients])).filter(
+    (value) => !excluded || value !== excluded,
   );
 }
 
@@ -372,7 +357,7 @@ export async function handleBrandDiscoverySubmission(
   return handleDiscoverySubmission(payload, {
     label: "Brand Discovery",
     subjectPrefix: "New Brand Discovery",
-    recipients: brandDiscoveryDefaultRecipients,
+    sendCustomerConfirmation: true,
   });
 }
 
@@ -382,7 +367,6 @@ export async function handleBrandDiscoveryProgress(
   return handleDiscoverySubmission(payload, {
     label: "Brand Discovery Progress",
     subjectPrefix: "Brand Discovery In Progress",
-    recipients: brandDiscoveryDefaultRecipients,
   });
 }
 
@@ -408,15 +392,39 @@ async function handleDiscoverySubmission(
   const insight = await generateDiscoveryInsight(payload, options.label);
   const emailBody = answersToEmailText(payload, options, insight);
   const emailHtml = buildBeautifulEmailHtml(payload, options, insight);
-  const recipients = getNotificationRecipients(options.recipients);
+  const submitterEmail =
+    typeof payload.answers.email === "string" ? payload.answers.email.trim().toLowerCase() : "";
+  const recipients = getNotificationRecipients(options.notificationRecipients, submitterEmail);
+  const attachments = (payload.attachments ?? []).map((attachment: DiscoveryEmailAttachment) => ({
+    filename: attachment.filename,
+    content: attachment.content,
+    content_type: attachment.contentType,
+  }));
 
-  await resend.emails.send({
-    from: BRAND_DISCOVERY_FROM_EMAIL,
-    to: recipients,
-    subject: `${options.subjectPrefix}: ${answerToText(payload.answers.company)}`,
-    text: emailBody,
-    html: emailHtml,
-  });
+  let emailSent = false;
+
+  if (recipients.length > 0) {
+    await resend.emails.send({
+      from: BRAND_DISCOVERY_FROM_EMAIL,
+      to: recipients,
+      subject: `${options.subjectPrefix}: ${answerToText(payload.answers.company)}`,
+      text: emailBody,
+      html: emailHtml,
+      attachments: attachments.length ? attachments : undefined,
+    });
+    emailSent = true;
+  }
+
+  if (options.sendCustomerConfirmation && submitterEmail) {
+    await resend.emails.send({
+      from: BRAND_DISCOVERY_FROM_EMAIL,
+      to: submitterEmail,
+      subject: "We received your brand discovery request",
+      text: buildCustomerConfirmationText(),
+      html: buildCustomerConfirmationHtml(),
+    });
+    emailSent = true;
+  }
 
   let databaseSaved = false;
 
@@ -435,9 +443,33 @@ async function handleDiscoverySubmission(
 
   return {
     databaseSaved,
-    emailSent: true,
+    emailSent,
     configured: isSubmissionServiceConfigured(),
   };
+}
+
+function buildCustomerConfirmationText() {
+  return [
+    "Your brand discovery request has been received.",
+    "",
+    "We'll review your information and follow up with next steps.",
+  ].join("\n");
+}
+
+function buildCustomerConfirmationHtml() {
+  return `
+    <div style="background:#f6f0e8; padding:32px 20px; font-family:'IBM Plex Sans', Arial, sans-serif; color:#151515;">
+      <div style="max-width:640px; margin:0 auto; background:#fbf6ef; border:1px solid rgba(21,21,21,0.12); padding:32px;">
+        <div style="font-size:11px; letter-spacing:0.32em; text-transform:uppercase; color:#9a5f34; font-weight:600;">D2D Performance</div>
+        <h1 style="margin:16px 0 0; font-family:Georgia, 'Times New Roman', serif; font-size:34px; line-height:1.08; letter-spacing:-0.04em; color:#151515;">
+          Your brand discovery request has been received.
+        </h1>
+        <p style="margin:18px 0 0; font-size:16px; line-height:1.8; color:#6d6258;">
+          We&apos;ll review your information and follow up with next steps.
+        </p>
+      </div>
+    </div>
+  `;
 }
 
 async function generateDiscoveryInsight(

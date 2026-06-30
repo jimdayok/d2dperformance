@@ -15,7 +15,7 @@ function textQuestion(
     label,
     type: "short-text",
     placeholder,
-    required: true,
+    required: false,
     ...options,
   };
 }
@@ -32,7 +32,7 @@ function paragraphQuestion(
     type: "paragraph",
     rows: 4,
     placeholder,
-    required: true,
+    required: false,
     ...options,
   };
 }
@@ -44,10 +44,13 @@ export const brandDiscoverySections: DiscoverySection[] = [
     description: "So we know who this discovery belongs to and how to follow up.",
     estimatedMinutes: 2,
     questions: [
-      textQuestion("name", "Name", "Jane Founder"),
-      textQuestion("company", "Company", "Northline Custom Homes"),
+      textQuestion("name", "Name", "Jane Founder", { required: true }),
+      textQuestion("company", "Company", "Northline Custom Homes", { required: true }),
       textQuestion("role", "Role", "Founder, Owner, President"),
-      textQuestion("email", "Email", "jane@company.com", { inputType: "email" }),
+      textQuestion("email", "Email", "jane@company.com", {
+        inputType: "email",
+        required: true,
+      }),
       textQuestion("phone", "Phone", "(555) 555-5555", {
         inputType: "tel",
         required: false,
@@ -270,7 +273,7 @@ export const brandDiscoverySections: DiscoverySection[] = [
         id: "professional_vs_approachable",
         label: "Do you want the brand to feel more professional, approachable, or somewhere in between?",
         type: "multiple-choice",
-        required: true,
+        required: false,
         options: [
           { value: "professional", label: "Professional" },
           { value: "approachable", label: "Approachable" },
@@ -305,6 +308,17 @@ export const brandDiscoverySections: DiscoverySection[] = [
         "Do you have any product images, shop photos, or examples of past work with description of job?",
         "Yes, no, or a short explanation",
       ),
+      {
+        id: "supporting_files",
+        label: "Upload any logos, documents, photos, or reference files you want to share.",
+        type: "upload",
+        required: false,
+        multiple: true,
+        accept:
+          ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.png,.jpg,.jpeg,.webp,.svg,.zip,.txt,.rtf",
+        description:
+          "Optional. Add any supporting files you want included with your final submission.",
+      },
       paragraphQuestion(
         "new_customer_look_up",
         "If a new customer looked you up today, what would they see?",

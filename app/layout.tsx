@@ -54,7 +54,6 @@ const organizationJsonLd = {
   "@type": "Organization",
   name: companyName,
   url: siteUrl,
-  email: "performance@d2dmktg.com",
   description:
     "Executive performance consulting for owners, founders, and leadership teams building companies that scale.",
 };
