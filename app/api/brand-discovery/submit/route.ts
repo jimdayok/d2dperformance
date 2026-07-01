@@ -1,6 +1,6 @@
 import {
   handleBrandDiscoverySubmission,
-  validateSubmission,
+  validateBrandDiscoverySubmission,
 } from "@/lib/submission-service";
 import { safeJsonParse } from "@/lib/brand-discovery-storage";
 import type { DiscoverySubmission } from "@/types/brand-discovery";
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
       return jsonError("Invalid Brand Discovery payload.", 400);
     }
 
-    const validationError = validateSubmission(payload);
+    const validationError = validateBrandDiscoverySubmission(payload);
     if (validationError) {
       return jsonError(validationError, 400);
     }

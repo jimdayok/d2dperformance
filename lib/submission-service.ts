@@ -1,8 +1,10 @@
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
 import type {
+  DiscoveryCompletionStatus,
   DiscoveryFormValues,
   DiscoveryAnswer,
+  DiscoveryProgressPayload,
   DiscoverySubmission,
   DiscoveryUploadMetadata,
   DiscoveryEmailAttachment,
@@ -13,6 +15,17 @@ import { safeJsonParse } from "@/lib/brand-discovery-storage";
 type SubmissionResult = {
   databaseSaved: boolean;
   emailSent: boolean;
+  configured: boolean;
+};
+
+type SessionSyncResult = {
+  databaseSaved: boolean;
+  configured: boolean;
+};
+
+type PartialNotificationResult = {
+  checked: number;
+  notified: number;
   configured: boolean;
 };
 
@@ -41,6 +54,10 @@ const {
   NEXT_PUBLIC_SUPABASE_URL,
   SUPABASE_SERVICE_ROLE_KEY,
 } = process.env;
+
+const BRAND_DISCOVERY_SESSION_TABLE = "brand_discovery_sessions";
+const BRAND_DISCOVERY_SUBMISSIONS_TABLE = "brand_discovery_submissions";
+const PARTIAL_NOTIFICATION_DELAY_MS = 60 * 60 * 1000;
 
 function createSupabaseAdmin() {
   if (!NEXT_PUBLIC_SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
@@ -96,6 +113,25 @@ function answerToText(value: DiscoveryAnswer | undefined) {
   }
 
   return "Not provided";
+}
+
+function getDisplayName(answers: DiscoveryFormValues) {
+  const company = answerToText(answers.company);
+  const name = answerToText(answers.name);
+
+  if (company !== "Not provided") {
+    return company;
+  }
+
+  if (name !== "Not provided") {
+    return name;
+  }
+
+  return "Unknown";
+}
+
+function normalizeStatus(status: DiscoveryCompletionStatus | undefined) {
+  return status ?? "started";
 }
 
 const questionLabels = Object.fromEntries(
@@ -314,6 +350,106 @@ function answersToEmailText(
   return lines.join("\n");
 }
 
+function partialAnswersToEmailText(payload: DiscoveryProgressPayload) {
+  const lines = [
+    "Partial Brand Discovery Started",
+    "",
+    "This person started but has not completed the Brand Discovery questionnaire.",
+    "",
+    `Session ID: ${payload.sessionId}`,
+    `Started: ${payload.startedAt}`,
+    `Last Updated: ${payload.updatedAt}`,
+    `Last Completed Step: ${payload.lastCompletedStep}`,
+    `Current Step: ${payload.currentStep}`,
+    `Completion: ${payload.completionPercentage}%`,
+    "",
+    `Name: ${answerToText(payload.answers.name)}`,
+    `Company: ${answerToText(payload.answers.company)}`,
+    `Role: ${answerToText(payload.answers.role)}`,
+    `Email: ${answerToText(payload.answers.email)}`,
+    `Phone: ${answerToText(payload.answers.phone)}`,
+    "",
+    "All Answers Collected So Far",
+    "",
+  ];
+
+  for (const [key, value] of Object.entries(payload.answers)) {
+    lines.push(`${questionLabels[key] || key}: ${answerToText(value)}`);
+  }
+
+  return lines.join("\n");
+}
+
+function buildPartialNotificationHtml(payload: DiscoveryProgressPayload) {
+  const questionRows = formatQuestionAnswerRows(payload.answers);
+  const company = answerToText(payload.answers.company);
+  const name = answerToText(payload.answers.name);
+  const email = answerToText(payload.answers.email);
+  const phone = answerToText(payload.answers.phone);
+
+  return `
+    <div style="background:#f6f0e8; padding:32px 20px; font-family:'IBM Plex Sans', Arial, sans-serif; color:#151515;">
+      <div style="max-width:980px; margin:0 auto; background:#fbf6ef; border:1px solid rgba(21,21,21,0.12);">
+        <div style="padding:28px 32px; border-bottom:1px solid rgba(21,21,21,0.12); background:linear-gradient(180deg, rgba(255,255,255,0.45), rgba(239,230,218,0.65));">
+          <div style="font-size:11px; letter-spacing:0.32em; text-transform:uppercase; color:#9a5f34; font-weight:600;">D2D Performance</div>
+          <h1 style="margin:16px 0 10px; font-family:Georgia, 'Times New Roman', serif; font-size:42px; line-height:1.02; letter-spacing:-0.04em; color:#151515;">
+            Partial Brand Discovery Started
+          </h1>
+          <p style="margin:0; max-width:720px; font-size:16px; line-height:1.8; color:#6d6258;">
+            This person started but has not completed the Brand Discovery questionnaire.
+          </p>
+        </div>
+        <div style="padding:28px 32px; border-bottom:1px solid rgba(21,21,21,0.12);">
+          <div style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px;">
+            <div>
+              <div style="font-size:11px; letter-spacing:0.24em; text-transform:uppercase; color:#9a5f34; font-weight:600;">Primary Contact</div>
+              <p style="margin:10px 0 0; font-size:18px; line-height:1.6; color:#151515;">${escapeHtml(name)}</p>
+            </div>
+            <div>
+              <div style="font-size:11px; letter-spacing:0.24em; text-transform:uppercase; color:#9a5f34; font-weight:600;">Company</div>
+              <p style="margin:10px 0 0; font-size:18px; line-height:1.6; color:#151515;">${escapeHtml(company)}</p>
+            </div>
+            <div>
+              <div style="font-size:11px; letter-spacing:0.24em; text-transform:uppercase; color:#9a5f34; font-weight:600;">Email</div>
+              <p style="margin:10px 0 0; font-size:16px; line-height:1.6; color:#151515;">${escapeHtml(email)}</p>
+            </div>
+            <div>
+              <div style="font-size:11px; letter-spacing:0.24em; text-transform:uppercase; color:#9a5f34; font-weight:600;">Phone</div>
+              <p style="margin:10px 0 0; font-size:16px; line-height:1.6; color:#151515;">${escapeHtml(phone)}</p>
+            </div>
+            <div>
+              <div style="font-size:11px; letter-spacing:0.24em; text-transform:uppercase; color:#9a5f34; font-weight:600;">Started</div>
+              <p style="margin:10px 0 0; font-size:16px; line-height:1.6; color:#151515;">${escapeHtml(payload.startedAt)}</p>
+            </div>
+            <div>
+              <div style="font-size:11px; letter-spacing:0.24em; text-transform:uppercase; color:#9a5f34; font-weight:600;">Last Activity</div>
+              <p style="margin:10px 0 0; font-size:16px; line-height:1.6; color:#151515;">
+                ${escapeHtml(payload.updatedAt)}<br />
+                Step ${escapeHtml(`${payload.lastCompletedStep}`)} complete<br />
+                ${escapeHtml(`${payload.completionPercentage}%`)} complete
+              </p>
+            </div>
+          </div>
+        </div>
+        <div style="padding:28px 32px;">
+          <div style="font-size:11px; letter-spacing:0.32em; text-transform:uppercase; color:#9a5f34; font-weight:600;">All Answers Collected So Far</div>
+          <table style="width:100%; margin-top:18px; border-collapse:collapse; background:white; border:1px solid #e7ddd2;">
+            ${questionRows}
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+export function validateProgressPayload(payload: DiscoveryProgressPayload) {
+  if (!payload.sessionId || !payload.startedAt || !payload.updatedAt || !payload.answers) {
+    return "Invalid Brand Discovery progress payload.";
+  }
+
+  return null;
+}
+
 export function validateSubmission(payload: DiscoverySubmission) {
   const name = typeof payload.answers.name === "string" ? payload.answers.name.trim() : "";
   const company = typeof payload.answers.company === "string" ? payload.answers.company.trim() : "";
@@ -326,8 +462,66 @@ export function validateSubmission(payload: DiscoverySubmission) {
   return null;
 }
 
+export function validateBrandDiscoverySubmission(payload: DiscoverySubmission) {
+  if (!payload.sessionId) {
+    return "A valid discovery session is required before submitting.";
+  }
+
+  return validateSubmission(payload);
+}
+
 export function isSubmissionServiceConfigured() {
   return Boolean(RESEND_API_KEY && BRAND_DISCOVERY_FROM_EMAIL);
+}
+
+export async function syncBrandDiscoverySession(
+  payload: DiscoveryProgressPayload,
+): Promise<SessionSyncResult> {
+  const supabase = createSupabaseAdmin();
+
+  console.info("[brand-discovery] event=autosave", {
+    sessionId: payload.sessionId,
+    completionStatus: payload.completionStatus,
+    currentStep: payload.currentStep,
+    lastCompletedStep: payload.lastCompletedStep,
+  });
+
+  if (!supabase) {
+    console.warn("[brand-discovery] autosave skipped: Supabase admin not configured.");
+
+    return {
+      databaseSaved: false,
+      configured: false,
+    };
+  }
+
+  const { error } = await supabase.from(BRAND_DISCOVERY_SESSION_TABLE).upsert(
+    {
+      session_id: payload.sessionId,
+      contact_name: answerToText(payload.answers.name),
+      company_name: answerToText(payload.answers.company),
+      email: answerToText(payload.answers.email),
+      phone: answerToText(payload.answers.phone),
+      started_at: payload.startedAt,
+      updated_at: payload.updatedAt,
+      submitted_at: payload.submittedAt,
+      completion_status: normalizeStatus(payload.completionStatus),
+      current_step: payload.currentStep,
+      last_completed_step: payload.lastCompletedStep,
+      completion_percentage: payload.completionPercentage,
+      answers_json: payload.answers,
+    },
+    { onConflict: "session_id" },
+  );
+
+  if (error) {
+    throw new Error(`Unable to save brand discovery session: ${error.message}`);
+  }
+
+  return {
+    databaseSaved: true,
+    configured: true,
+  };
 }
 
 function parseEmailList(values: Array<string | undefined>) {
@@ -354,19 +548,22 @@ function getNotificationRecipients(explicitRecipients?: string[], excludeEmail?:
 export async function handleBrandDiscoverySubmission(
   payload: DiscoverySubmission,
 ): Promise<SubmissionResult> {
+  await syncBrandDiscoverySession({
+    sessionId: payload.sessionId ?? crypto.randomUUID(),
+    startedAt: payload.startedAt,
+    updatedAt: payload.updatedAt,
+    submittedAt: payload.submittedAt,
+    currentStep: payload.currentStep ?? brandDiscoverySections.length,
+    lastCompletedStep: payload.lastCompletedStep ?? brandDiscoverySections.length,
+    completionPercentage: payload.completionPercentage ?? 100,
+    completionStatus: "submitted",
+    answers: payload.answers,
+  });
+
   return handleDiscoverySubmission(payload, {
     label: "Brand Discovery",
     subjectPrefix: "New Brand Discovery",
     sendCustomerConfirmation: true,
-  });
-}
-
-export async function handleBrandDiscoveryProgress(
-  payload: DiscoverySubmission,
-): Promise<SubmissionResult> {
-  return handleDiscoverySubmission(payload, {
-    label: "Brand Discovery Progress",
-    subjectPrefix: "Brand Discovery In Progress",
   });
 }
 
@@ -383,6 +580,13 @@ async function handleDiscoverySubmission(
   payload: DiscoverySubmission,
   options: SubmissionEmailOptions,
 ): Promise<SubmissionResult> {
+  console.info("[brand-discovery] event=final-submit", {
+    sessionId: payload.sessionId ?? "unknown",
+    label: options.label,
+    currentStep: payload.currentStep ?? null,
+    completionPercentage: payload.completionPercentage ?? null,
+  });
+
   if (!RESEND_API_KEY || !BRAND_DISCOVERY_FROM_EMAIL) {
     throw new Error(`Email delivery is not configured for ${options.label} submissions.`);
   }
@@ -429,7 +633,7 @@ async function handleDiscoverySubmission(
   let databaseSaved = false;
 
   if (supabase && options.label === "Brand Discovery") {
-    const { error } = await supabase.from("brand_discovery_submissions").insert({
+    const { error } = await supabase.from(BRAND_DISCOVERY_SUBMISSIONS_TABLE).insert({
       submitted_at: payload.submittedAt,
       answers: payload.answers,
       summaries: {},
@@ -445,6 +649,113 @@ async function handleDiscoverySubmission(
     databaseSaved,
     emailSent,
     configured: isSubmissionServiceConfigured(),
+  };
+}
+
+export async function sendAbandonedBrandDiscoveryNotifications(
+  now = new Date(),
+): Promise<PartialNotificationResult> {
+  const supabase = createSupabaseAdmin();
+  const configured = Boolean(supabase && RESEND_API_KEY && BRAND_DISCOVERY_FROM_EMAIL);
+
+  if (!supabase) {
+    console.warn("[brand-discovery] partial-notification skipped: Supabase admin not configured.");
+
+    return {
+      checked: 0,
+      notified: 0,
+      configured: false,
+    };
+  }
+
+  if (!RESEND_API_KEY || !BRAND_DISCOVERY_FROM_EMAIL) {
+    console.warn("[brand-discovery] partial-notification skipped: email delivery not configured.");
+
+    return {
+      checked: 0,
+      notified: 0,
+      configured: false,
+    };
+  }
+
+  const resend = new Resend(RESEND_API_KEY);
+  const staleBefore = new Date(now.getTime() - PARTIAL_NOTIFICATION_DELAY_MS).toISOString();
+  const recipients = getNotificationRecipients();
+
+  if (recipients.length === 0) {
+    console.warn("[brand-discovery] partial-notification skipped: no internal recipients configured.");
+
+    return {
+      checked: 0,
+      notified: 0,
+      configured: false,
+    };
+  }
+
+  const { data, error } = await supabase
+    .from(BRAND_DISCOVERY_SESSION_TABLE)
+    .select("session_id, started_at, updated_at, submitted_at, completion_status, current_step, last_completed_step, completion_percentage, answers_json, partial_notification_sent_at")
+    .is("submitted_at", null)
+    .is("partial_notification_sent_at", null)
+    .in("completion_status", ["started", "in_progress"])
+    .lte("updated_at", staleBefore);
+
+  if (error) {
+    throw new Error(`Unable to load abandoned brand discovery sessions: ${error.message}`);
+  }
+
+  let notified = 0;
+
+  for (const row of data ?? []) {
+    const payload: DiscoveryProgressPayload = {
+      sessionId: row.session_id,
+      startedAt: row.started_at,
+      updatedAt: row.updated_at,
+      submittedAt: row.submitted_at,
+      currentStep: row.current_step ?? 0,
+      lastCompletedStep: row.last_completed_step ?? 0,
+      completionPercentage: row.completion_percentage ?? 0,
+      completionStatus: normalizeStatus(row.completion_status),
+      answers: (row.answers_json ?? {}) as DiscoveryFormValues,
+    };
+
+    console.info("[brand-discovery] event=partial-notification", {
+      sessionId: payload.sessionId,
+      currentStep: payload.currentStep,
+      completionPercentage: payload.completionPercentage,
+    });
+
+    await resend.emails.send({
+      from: BRAND_DISCOVERY_FROM_EMAIL,
+      to: recipients,
+      subject: `Partial Brand Discovery Started: ${getDisplayName(payload.answers)}`,
+      text: partialAnswersToEmailText(payload),
+      html: buildPartialNotificationHtml(payload),
+    });
+
+    const partialNotificationSentAt = new Date().toISOString();
+    const { error: updateError } = await supabase
+      .from(BRAND_DISCOVERY_SESSION_TABLE)
+      .update({
+        completion_status: "abandoned_notified",
+        partial_notification_sent_at: partialNotificationSentAt,
+      })
+      .eq("session_id", payload.sessionId)
+      .is("partial_notification_sent_at", null);
+
+    if (updateError) {
+      throw new Error(
+        `Unable to mark brand discovery partial notification as sent: ${updateError.message}`,
+      );
+    }
+
+    notified += 1;
+  }
+
+  return {
+    checked: data?.length ?? 0,
+    notified,
+    configured,
   };
 }
 

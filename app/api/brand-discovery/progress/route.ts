@@ -1,9 +1,9 @@
 import {
-  handleBrandDiscoveryProgress,
-  validateSubmission,
+  syncBrandDiscoverySession,
+  validateProgressPayload,
 } from "@/lib/submission-service";
 import { safeJsonParse } from "@/lib/brand-discovery-storage";
-import type { DiscoverySubmission } from "@/types/brand-discovery";
+import type { DiscoveryProgressPayload } from "@/types/brand-discovery";
 
 function jsonError(error: string, status: number) {
   return Response.json({ ok: false, error }, { status });
@@ -12,28 +12,25 @@ function jsonError(error: string, status: number) {
 export async function POST(request: Request) {
   try {
     const bodyText = await request.text();
-    const payload = safeJsonParse<DiscoverySubmission | null>(bodyText, null);
+    const payload = safeJsonParse<DiscoveryProgressPayload | null>(bodyText, null);
 
     if (!payload || !payload.answers || !payload.startedAt || !payload.updatedAt) {
       return jsonError("Invalid Brand Discovery progress payload.", 400);
     }
 
-    const validationError = validateSubmission(payload);
+    const validationError = validateProgressPayload(payload);
     if (validationError) {
       return jsonError(validationError, 400);
     }
 
-    await handleBrandDiscoveryProgress({
-      ...payload,
-      submittedAt: payload.submittedAt || payload.updatedAt,
-    });
+    await syncBrandDiscoverySession(payload);
 
     return Response.json({
       ok: true,
-      message: "Brand Discovery progress synced successfully.",
+      message: "Brand Discovery draft saved successfully.",
     });
   } catch (error) {
-    console.error("Brand discovery progress sync failed.", error);
+    console.error("[brand-discovery] event=autosave error", error);
     return jsonError(
       "We couldn't sync this section right now. Your local progress is still saved.",
       500,

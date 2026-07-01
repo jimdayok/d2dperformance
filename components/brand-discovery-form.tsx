@@ -17,19 +17,22 @@ import { brandDiscoverySections, createInitialDiscoveryAnswers } from "@/lib/bra
 import { clearDraft, loadDraft, safeJsonParse, saveDraft } from "@/lib/brand-discovery-storage";
 import { isQuestionAnswered } from "@/lib/brand-report";
 import type {
+  DiscoveryCompletionStatus,
   DiscoveryDraft,
   DiscoveryEmailAttachment,
   DiscoveryFormValues,
+  DiscoveryProgressPayload,
   DiscoverySection,
   DiscoverySubmission,
 } from "@/types/brand-discovery";
 
 const storageKey = "d2d-brand-discovery-v6";
 
-function createEmptyDraft(): DiscoveryDraft {
+function createEmptyDraft(sessionId = crypto.randomUUID()): DiscoveryDraft {
   const now = new Date().toISOString();
 
   return {
+    sessionId,
     started: false,
     currentSectionIndex: 0,
     answers: createInitialDiscoveryAnswers(),
@@ -108,6 +111,7 @@ export function BrandDiscoveryForm() {
   const questionTopRef = useRef<HTMLDivElement | null>(null);
   const saveTimeoutRef = useRef<number | null>(null);
   const sendingProgressCountRef = useRef(0);
+  const syncTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -194,12 +198,17 @@ export function BrandDiscoveryForm() {
   }
 
   function handleStart() {
-    updateDraft((current) => ({
-      ...current,
-      started: true,
-      currentSectionIndex: 0,
-      updatedAt: new Date().toISOString(),
-    }));
+    updateDraft((current) => {
+      const now = new Date().toISOString();
+
+      return {
+        ...current,
+        started: true,
+        currentSectionIndex: 0,
+        startedAt: current.started ? current.startedAt : now,
+        updatedAt: now,
+      };
+    });
   }
 
   function handleStartOver() {
@@ -212,7 +221,7 @@ export function BrandDiscoveryForm() {
     }
 
     clearDraft(storageKey);
-    setDraft(createEmptyDraft());
+    setDraft(createEmptyDraft(submitted ? undefined : draft.sessionId));
     setSubmitted(false);
     setSubmitState("idle");
     setProgressState("idle");
@@ -228,7 +237,7 @@ export function BrandDiscoveryForm() {
     goToStep(Math.max(0, currentSectionIndex - 1));
   }
 
-  async function sendPartialProgress(payload: DiscoverySubmission) {
+  async function syncDraftProgress(payload: DiscoveryProgressPayload) {
     sendingProgressCountRef.current += 1;
     setProgressState("sending");
 
@@ -240,10 +249,10 @@ export function BrandDiscoveryForm() {
       });
 
       if (!response.ok) {
-        throw new Error("Unable to email partial progress.");
+        throw new Error("Unable to save draft progress.");
       }
     } catch {
-      toast.error("We saved your answers, but background syncing did not finish this time.");
+      toast.error("We saved your answers locally, but background syncing did not finish this time.");
     } finally {
       sendingProgressCountRef.current = Math.max(0, sendingProgressCountRef.current - 1);
       if (sendingProgressCountRef.current === 0) {
@@ -251,6 +260,46 @@ export function BrandDiscoveryForm() {
       }
     }
   }
+
+  useEffect(() => {
+    if (!hydrated || !draft.started || submitted) {
+      return;
+    }
+
+    if (syncTimeoutRef.current) {
+      window.clearTimeout(syncTimeoutRef.current);
+    }
+
+    syncTimeoutRef.current = window.setTimeout(() => {
+      const currentAnsweredCount = Object.values(draft.answers).filter((value) =>
+        isQuestionAnswered(value),
+      ).length;
+      const completionStatus: DiscoveryCompletionStatus =
+        currentAnsweredCount > 0 || draft.currentSectionIndex > 0 ? "in_progress" : "started";
+      const payload: DiscoveryProgressPayload = {
+        sessionId: draft.sessionId ?? crypto.randomUUID(),
+        startedAt: draft.startedAt,
+        updatedAt: draft.updatedAt ?? new Date().toISOString(),
+        submittedAt: draft.submittedAt ?? null,
+        currentStep: Math.min(draft.currentSectionIndex + 1, contentSteps),
+        lastCompletedStep: Math.min(draft.currentSectionIndex, contentSteps),
+        completionPercentage:
+          draft.currentSectionIndex >= contentSteps
+            ? 100
+            : Math.round((draft.currentSectionIndex / contentSteps) * 100),
+        completionStatus,
+        answers: draft.answers,
+      };
+
+      void syncDraftProgress(payload);
+    }, 1200);
+
+    return () => {
+      if (syncTimeoutRef.current) {
+        window.clearTimeout(syncTimeoutRef.current);
+      }
+    };
+  }, [contentSteps, draft, hydrated, submitted]);
 
   async function handleContinue() {
     if (!draft.started) {
@@ -268,22 +317,12 @@ export function BrandDiscoveryForm() {
       return;
     }
 
-    const progressTimestamp = new Date().toISOString();
-    const progressPayload: DiscoverySubmission = {
-      startedAt: draft.startedAt,
-      updatedAt: progressTimestamp,
-      submittedAt: progressTimestamp,
-      answers: draft.answers,
-    };
-
     if (currentSectionIndex === contentSteps - 1) {
       goToStep(contentSteps);
-      void sendPartialProgress(progressPayload);
       return;
     }
 
     goToStep(currentSectionIndex + 1);
-    void sendPartialProgress(progressPayload);
   }
 
   async function handleSubmit() {
@@ -298,9 +337,14 @@ export function BrandDiscoveryForm() {
           .map((file) => fileToAttachment(file)),
       );
       const payload: DiscoverySubmission = {
+        sessionId: draft.sessionId,
         startedAt: draft.startedAt,
         updatedAt: draft.updatedAt ?? submittedAt,
         submittedAt,
+        currentStep: contentSteps,
+        lastCompletedStep: contentSteps,
+        completionPercentage: 100,
+        completionStatus: "submitted",
         answers: draft.answers,
         attachments,
       };
@@ -447,12 +491,12 @@ export function BrandDiscoveryForm() {
             <LoaderCircle className="h-4 w-4 animate-spin text-[var(--color-accent)]" />
             <div className="flex-1">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-ink)]">
-                {submitState === "submitting" ? "Submitting Discovery" : "Sending Progress"}
+                {submitState === "submitting" ? "Submitting Discovery" : "Saving Your Responses"}
               </p>
               <p className="text-sm text-[var(--color-muted)]">
                 {submitState === "submitting"
                   ? "Please keep this tab open while we finish the submission."
-                  : "You can keep moving. We&apos;re sending this section in the background."}
+                  : "You can keep moving. We're saving your progress in the background."}
               </p>
             </div>
           </div>
@@ -472,10 +516,10 @@ export function BrandDiscoveryForm() {
                 {progressState === "sending" ? (
                   <>
                     <LoaderCircle className="h-3.5 w-3.5 animate-spin text-[var(--color-accent)]" />
-                    Sending progress...
+                    Saving responses...
                   </>
                 ) : (
-                  "Progress sends by section"
+                  "Responses save automatically"
                 )}
               </span>
             </div>
@@ -511,12 +555,12 @@ export function BrandDiscoveryForm() {
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-ink)]">
                   {submitState === "submitting"
                     ? "Submitting your discovery"
-                    : "Progress is sending now"}
+                    : "Saving your responses"}
                 </p>
                 <p className="mt-1 text-sm leading-6 text-[var(--color-muted)]">
                   {submitState === "submitting"
                     ? "This can take a moment while we package your responses and any attached files."
-                    : "Your answers are moving in the background, so the form stays responsive."}
+                    : "Your answers are being saved in the background, so the form stays responsive."}
                 </p>
               </div>
             </div>

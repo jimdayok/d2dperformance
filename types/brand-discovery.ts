@@ -70,6 +70,7 @@ export type DiscoverySection = {
 };
 
 export type DiscoveryDraft = {
+  sessionId?: string;
   started: boolean;
   currentSectionIndex: number;
   answers: DiscoveryFormValues;
@@ -78,10 +79,33 @@ export type DiscoveryDraft = {
   submittedAt?: string;
 };
 
+export type DiscoveryCompletionStatus =
+  | "started"
+  | "in_progress"
+  | "submitted"
+  | "abandoned_notified";
+
+export type DiscoveryProgressPayload = {
+  sessionId: string;
+  startedAt: string;
+  updatedAt: string;
+  submittedAt?: string | null;
+  currentStep: number;
+  lastCompletedStep: number;
+  completionPercentage: number;
+  completionStatus: DiscoveryCompletionStatus;
+  answers: DiscoveryFormValues;
+};
+
 export type DiscoverySubmission = {
+  sessionId?: string;
   startedAt: string;
   updatedAt: string;
   submittedAt: string;
+  currentStep?: number;
+  lastCompletedStep?: number;
+  completionPercentage?: number;
+  completionStatus?: DiscoveryCompletionStatus;
   answers: DiscoveryFormValues;
   attachments?: DiscoveryEmailAttachment[];
 };
