@@ -7,8 +7,9 @@ export async function GET(request: Request) {
   const next = url.searchParams.get("next");
   if (code) {
     const supabase = await createSupabaseServerClient();
-    await supabase.auth.exchangeCodeForSession(code);
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) return NextResponse.redirect(new URL("/portal/login?auth_error=callback", url.origin));
   }
-  const safeNext = next?.startsWith("/") && !next.startsWith("//") ? next : "/portal/dashboard";
+  const safeNext = next?.startsWith("/") && !next.startsWith("//") ? next : "/portal/set-password";
   return NextResponse.redirect(new URL(safeNext, url.origin));
 }

@@ -8,6 +8,11 @@ export async function proxy(request: NextRequest) {
   const isPortalHost = hostname === "portal.d2dperformance.com" || hostname === "portal.localhost";
   const url = request.nextUrl.clone();
 
+  if (isPortalHost && url.pathname === "/" && url.searchParams.has("code")) {
+    url.pathname = "/portal/auth/callback";
+    return NextResponse.rewrite(url);
+  }
+
   if (isPortalHost && !url.pathname.startsWith("/portal") && !url.pathname.startsWith("/api")) {
     url.pathname = url.pathname === "/" ? "/portal/dashboard" : `/portal${url.pathname}`;
     return NextResponse.rewrite(url);

@@ -21,7 +21,7 @@ export async function requestPasswordReset(_: LoginState, formData: FormData): P
   if (!email.success) return { error: "Enter your email address first." };
   const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL ?? "http://localhost:3000/portal";
   const supabase = await createSupabaseServerClient();
-  await supabase.auth.resetPasswordForEmail(email.data, { redirectTo: `${portalUrl}/auth/callback?next=/account` });
+  await supabase.auth.resetPasswordForEmail(email.data, { redirectTo: `${portalUrl}/auth/callback?next=/portal/set-password` });
   return { message: "If an account exists, password reset instructions have been sent." };
 }
 
