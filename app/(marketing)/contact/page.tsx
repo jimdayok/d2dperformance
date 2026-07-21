@@ -1,5 +1,6 @@
 import { Mail, PhoneCall, ShieldCheck } from "lucide-react";
 import { ButtonLink } from "@/components/button-link";
+import { ContactForm } from "@/components/contact-form";
 import { PageIntro } from "@/components/page-intro";
 import { contactAudience, leadershipProfiles } from "@/lib/site-data";
 import { createMetadata } from "@/lib/metadata";
@@ -59,39 +60,7 @@ export default function ContactPage() {
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[0.55fr_0.45fr]">
-          <form className="editorial-frame p-8">
-            <div className="grid gap-5">
-              {[
-                { label: "Name", type: "text", placeholder: "Your name" },
-                { label: "Company", type: "text", placeholder: "Company name" },
-                { label: "Email", type: "email", placeholder: "you@company.com" },
-              ].map((field) => (
-                <label key={field.label} className="grid gap-3">
-                  <span className="text-sm font-medium text-[var(--color-ink)]">
-                    {field.label}
-                  </span>
-                  <input
-                    type={field.type}
-                    placeholder={field.placeholder}
-                    className="h-14 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-5 text-base text-[var(--color-ink)] outline-none transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-accent)]"
-                  />
-                </label>
-              ))}
-              <label className="grid gap-3">
-                <span className="text-sm font-medium text-[var(--color-ink)]">
-                  What are you trying to solve?
-                </span>
-                <textarea
-                  rows={8}
-                  placeholder="Share the business challenge, growth objective, or leadership issue you want to discuss."
-                  className="min-h-40 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-4 text-base text-[var(--color-ink)] outline-none transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-accent)]"
-                />
-              </label>
-              <ButtonLink href="/brand-development#brand-discovery">
-                Start Brand Discovery
-              </ButtonLink>
-            </div>
-          </form>
+          <ContactForm />
 
           <aside className="rounded-[2rem] bg-[var(--color-charcoal)] p-8 text-white">
             <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[var(--color-sand)]">

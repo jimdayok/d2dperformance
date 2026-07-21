@@ -112,6 +112,20 @@ export type DiscoverySubmission = {
 
 export type ReportBlock = {
   title: string;
-  body: string;
+  body?: string;
   bullets?: string[];
+  priority?: "High" | "Medium" | "Low";
+  quickWins?: string[];
+  longTermOpportunities?: string[];
+  sourceData?: string[];
+  callout?: string;
+  collapsible?: boolean;
+  questionResponses?: Array<{
+    question: string;
+    response: string;
+  }>;
+  table?: {
+    columns: string[];
+    rows: string[][];
+  };
 };

@@ -2,11 +2,8 @@ import type { Metadata } from "next";
 import { Fraunces, IBM_Plex_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { companyName, siteUrl, tagline } from "@/lib/site-data";
-import { sanitizeJsonLd } from "@/lib/metadata";
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
@@ -49,15 +46,6 @@ export const metadata: Metadata = {
   },
 };
 
-const organizationJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: companyName,
-  url: siteUrl,
-  description:
-    "Executive performance consulting for owners, founders, and leadership teams building companies that scale.",
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -70,16 +58,8 @@ export default function RootLayout({
       className={`${ibmPlexSans.variable} ${fraunces.variable} h-full scroll-smooth`}
     >
       <body className="min-h-full bg-[var(--color-bg)] font-sans text-[var(--color-ink)] antialiased">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: sanitizeJsonLd(organizationJsonLd) }}
-        />
         <ThemeProvider>
-          <div className="site-bg">
-            <SiteHeader />
-            <main>{children}</main>
-            <SiteFooter />
-          </div>
+          {children}
           <Toaster richColors position="top-right" />
         </ThemeProvider>
       </body>

@@ -21,6 +21,8 @@ Add these Vercel environment variables before expecting production submissions t
 NEXT_PUBLIC_SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 RESEND_API_KEY=
+CONTACT_FORM_TO_EMAIL=brand@d2dperformance.com
+CONTACT_FORM_FROM_EMAIL=brand@d2dperformance.com
 BRAND_DISCOVERY_FROM_EMAIL=
 BRAND_DISCOVERY_TO_EMAIL=
 BRAND_DISCOVERY_NOTIFICATION_EMAIL=
@@ -67,6 +69,12 @@ Create a table named `brand_discovery_sessions` with at least these columns:
 
 - `BRAND_DISCOVERY_FROM_EMAIL` is the sender for internal notifications and the customer confirmation email.
 - `BRAND_DISCOVERY_NOTIFICATION_EMAIL` and `BRAND_DISCOVERY_TO_EMAIL` are internal routing destinations only and should never be rendered in the public UI.
+
+## Contact form email routing
+
+- `CONTACT_FORM_TO_EMAIL` routes Contact Us form notifications and should be `brand@d2dperformance.com`.
+- `CONTACT_FORM_FROM_EMAIL` should be a verified Resend sender for the `d2dperformance.com` domain.
+- If `CONTACT_FORM_FROM_EMAIL` is unavailable, the contact route falls back to `BRAND_DISCOVERY_FROM_EMAIL`.
 
 ## Brand Discovery draft and notification behavior
 

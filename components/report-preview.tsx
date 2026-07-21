@@ -83,19 +83,202 @@ export function ReportPreview({ report, payload }: ReportPreviewProps) {
             key={block.title}
             className="rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-panel)] p-5"
           >
-            <h4 className="text-xl font-semibold tracking-[-0.02em] text-[var(--color-ink)]">
-              {block.title}
-            </h4>
-            <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">
-              {block.body}
-            </p>
-            {block.bullets?.length ? (
-              <ul className="mt-4 space-y-2 text-sm leading-7 text-[var(--color-muted)]">
-                {block.bullets.map((bullet) => (
-                  <li key={bullet}>{bullet}</li>
-                ))}
-              </ul>
-            ) : null}
+            {block.collapsible ? (
+              <details className="group">
+                <summary className="cursor-pointer list-none text-xl font-semibold tracking-[-0.02em] text-[var(--color-ink)]">
+                  {block.title}
+                </summary>
+                <div className="mt-4 space-y-4">
+                  {block.body ? (
+                    <p className="text-sm leading-7 text-[var(--color-muted)]">
+                      {block.body}
+                    </p>
+                  ) : null}
+                  {block.priority ? (
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">
+                      Priority: {block.priority}
+                    </p>
+                  ) : null}
+                  {block.bullets?.length ? (
+                    <ul className="space-y-2 text-sm leading-7 text-[var(--color-muted)]">
+                      {block.bullets.map((bullet) => (
+                        <li key={bullet}>{bullet}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {block.table ? (
+                    <div className="overflow-x-auto rounded-[1rem] border border-[var(--color-border)]">
+                      <table className="min-w-full divide-y divide-[var(--color-border)] text-left text-sm text-[var(--color-muted)]">
+                        <thead className="bg-[var(--color-card)] text-[var(--color-ink)]">
+                          <tr>
+                            {block.table.columns.map((column) => (
+                              <th key={column} className="px-4 py-3 font-semibold">
+                                {column}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {block.table.rows.map((row) => (
+                            <tr key={row.join("|")} className="border-t border-[var(--color-border)]">
+                              {row.map((cell) => (
+                                <td key={cell} className="px-4 py-3 align-top">
+                                  {cell}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : null}
+                  {block.quickWins?.length ? (
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">
+                        Quick Wins (30 Days)
+                      </p>
+                      <ul className="mt-3 space-y-2 text-sm leading-7 text-[var(--color-muted)]">
+                        {block.quickWins.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  {block.longTermOpportunities?.length ? (
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">
+                        Long-Term Opportunities (6-24 Months)
+                      </p>
+                      <ul className="mt-3 space-y-2 text-sm leading-7 text-[var(--color-muted)]">
+                        {block.longTermOpportunities.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  {block.sourceData?.length ? (
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">
+                        Source Data
+                      </p>
+                      <ul className="mt-3 space-y-2 text-sm leading-7 text-[var(--color-muted)]">
+                        {block.sourceData.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  {block.questionResponses?.length ? (
+                    <div className="space-y-4">
+                      {block.questionResponses.map((item) => (
+                        <div
+                          key={`${block.title}-${item.question}`}
+                          className="rounded-[1rem] border border-[var(--color-border)] bg-[var(--color-card)] p-4"
+                        >
+                          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">
+                            Question
+                          </p>
+                          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--color-ink)]">
+                            {item.question}
+                          </p>
+                          <p className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">
+                            Customer Response
+                          </p>
+                          <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-[var(--color-muted)]">
+                            {item.response}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              </details>
+            ) : (
+              <>
+                <h4 className="text-xl font-semibold tracking-[-0.02em] text-[var(--color-ink)]">
+                  {block.title}
+                </h4>
+                {block.body ? (
+                  <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">
+                    {block.body}
+                  </p>
+                ) : null}
+                {block.priority ? (
+                  <p className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">
+                    Priority: {block.priority}
+                  </p>
+                ) : null}
+                {block.bullets?.length ? (
+                  <ul className="mt-4 space-y-2 text-sm leading-7 text-[var(--color-muted)]">
+                    {block.bullets.map((bullet) => (
+                      <li key={bullet}>{bullet}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                {block.table ? (
+                  <div className="mt-4 overflow-x-auto rounded-[1rem] border border-[var(--color-border)]">
+                    <table className="min-w-full divide-y divide-[var(--color-border)] text-left text-sm text-[var(--color-muted)]">
+                      <thead className="bg-[var(--color-card)] text-[var(--color-ink)]">
+                        <tr>
+                          {block.table.columns.map((column) => (
+                            <th key={column} className="px-4 py-3 font-semibold">
+                              {column}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {block.table.rows.map((row) => (
+                          <tr key={row.join("|")} className="border-t border-[var(--color-border)]">
+                            {row.map((cell) => (
+                              <td key={cell} className="px-4 py-3 align-top">
+                                {cell}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : null}
+                {block.quickWins?.length ? (
+                  <div className="mt-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">
+                      Quick Wins (30 Days)
+                    </p>
+                    <ul className="mt-3 space-y-2 text-sm leading-7 text-[var(--color-muted)]">
+                      {block.quickWins.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {block.longTermOpportunities?.length ? (
+                  <div className="mt-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">
+                      Long-Term Opportunities (6-24 Months)
+                    </p>
+                    <ul className="mt-3 space-y-2 text-sm leading-7 text-[var(--color-muted)]">
+                      {block.longTermOpportunities.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {block.sourceData?.length ? (
+                  <div className="mt-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">
+                      Source Data
+                    </p>
+                    <ul className="mt-3 space-y-2 text-sm leading-7 text-[var(--color-muted)]">
+                      {block.sourceData.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </>
+            )}
           </article>
         ))}
       </div>
