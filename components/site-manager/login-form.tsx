@@ -18,7 +18,7 @@ export function LoginForm() {
           <input id="password" name="password" type="password" autoComplete="current-password" required minLength={8} className="mt-2 w-full rounded-xl border border-black/15 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-[#9a5f34]" />
         </label>
         {state.error ? <p role="alert" className="text-sm text-red-700">{state.error}</p> : null}
-        <button disabled={pending} className="w-full rounded-xl bg-[#18201d] px-5 py-3 font-semibold text-white disabled:opacity-60">{pending ? "Signing in…" : "Sign in"}</button>
+        <button disabled={pending} className="w-full rounded-xl bg-[#18201d] px-5 py-3 font-semibold !text-white disabled:opacity-60">{pending ? "Signing in…" : "Sign in"}</button>
       </form>
       <form action={resetAction}>
         <input name="email" type="email" aria-label="Email for password reset" placeholder="Email for password reset" className="w-full rounded-xl border border-black/15 bg-white px-4 py-3" />

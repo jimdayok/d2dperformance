@@ -1,6 +1,6 @@
 import type { ContentModelDefinition } from "@/lib/site-manager/types";
 import {
-  contactPageSchema, globalSettingsSchema, homepageHeroSchema, journalPostSchema,
+  aboutPageSchema, contactPageSchema, globalSettingsSchema, homepageHeroSchema, journalPostSchema,
   portfolioProjectSchema, processStepSchema, serviceAreaSchema, serviceSchema, testimonialSchema,
   type GlobalSettings, type HomepageHero,
 } from "@/lib/site-manager/sites/alford-custom-homes/validation";
@@ -55,6 +55,7 @@ const simpleModels: Record<string, ContentModelDefinition<unknown>> = {
   portfolioProject: { key: "portfolio-project", label: "Portfolio Project", description: "Project and room-filtered image gallery.", contentType: "portfolio_project", schema: portfolioProjectSchema, sections: [], previewPath: (value) => `/portfolio/${(value as {slug:string}).slug}`, cacheTags: tags("portfolio_project") },
   journalPost: { key: "journal-post", label: "Journal Post", description: "Restricted structured editorial content.", contentType: "journal_post", schema: journalPostSchema, sections: [], previewPath: (value) => `/journal/${(value as {slug:string}).slug}`, cacheTags: tags("journal_post") },
   contactPage: { key: "contact-page", label: "Contact Page", description: "Displayed contact copy; form behavior remains code controlled.", contentType: "page", schema: contactPageSchema, sections: [], previewPath: () => "/contact", cacheTags: tags("page") },
+  aboutPage: { key: "about-page", label: "About Page", description: "Founder story, values, market focus, and calls to action.", contentType: "page", schema: aboutPageSchema, sections: [], previewPath: () => "/about", cacheTags: tags("page") },
 };
 
 export const alfordContentModels: Record<string, ContentModelDefinition<unknown>> = {

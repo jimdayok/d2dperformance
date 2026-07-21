@@ -50,5 +50,34 @@ export const portfolioProjectSchema = z.object({ title: z.string().min(1).max(14
 export const journalPostSchema = z.object({ title: z.string().min(1).max(160), slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/), excerpt: z.string().min(1).max(500), body: z.array(z.object({ type: z.enum(["paragraph", "heading", "blockquote", "list"]), text: z.string().max(10000) })).max(300), coverImage: imageSchema.optional(), authorDisplayName: z.string().min(1).max(120), publishDate: z.string().date(), seo: seoSchema, visible: z.boolean() });
 export const contactPageSchema = z.object({ seo: seoSchema, eyebrow: z.string().max(60), heading: z.string().min(1).max(160), introduction: z.string().min(1).max(1000), displayedPhone: z.string().min(7).max(40), displayedEmail: z.string().email(), serviceAreaCopy: z.string().max(1000), ctaText: z.string().max(120) });
 
+const titledCopySchema = z.object({
+  title: z.string().min(1).max(140),
+  description: z.string().min(1).max(1200),
+});
+
+export const aboutPageSchema = z.object({
+  seo: seoSchema,
+  eyebrow: z.string().min(1).max(60),
+  heading: z.string().min(1).max(180),
+  introduction: z.string().min(1).max(1200),
+  founderEyebrow: z.string().min(1).max(60),
+  founderTitle: z.string().min(1).max(180),
+  founderDescription: z.string().min(1).max(2000),
+  founderImage: imageSchema,
+  differentiators: z.array(titledCopySchema).min(1).max(12),
+  legacyEyebrow: z.string().min(1).max(60),
+  legacyTitle: z.string().min(1).max(180),
+  legacyParagraphs: z.array(z.string().min(1).max(2000)).min(1).max(6),
+  valuesEyebrow: z.string().min(1).max(60),
+  valuesTitle: z.string().min(1).max(180),
+  valuesDescription: z.string().min(1).max(1200),
+  brandPillars: z.array(titledCopySchema).min(1).max(12),
+  marketFocus: z.array(z.string().min(1).max(120)).min(1).max(20),
+  ctaTitle: z.string().min(1).max(180),
+  ctaDescription: z.string().min(1).max(1000),
+  primaryCtaLabel: z.string().min(1).max(60),
+  secondaryCtaLabel: z.string().min(1).max(60),
+});
+
 export type GlobalSettings = z.infer<typeof globalSettingsSchema>;
 export type HomepageHero = z.infer<typeof homepageHeroSchema>;
