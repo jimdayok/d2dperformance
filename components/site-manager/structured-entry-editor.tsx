@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { resolveEditorStatus } from "@/lib/site-manager/editor-status";
 import type { EditorField, EditorGroup } from "@/lib/site-manager/sites/alford-custom-homes/editor-config";
 
 type ContentBlock = { type: "paragraph" | "heading" | "blockquote" | "list"; text: string };
@@ -107,32 +108,36 @@ export function StructuredEntryEditor({ entry, siteSlug, modelKey, groups, canPu
   const [status, setStatus] = useState(entry.workflow_status);
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const isDirty = useMemo(() => JSON.stringify(data) !== JSON.stringify(savedData), [data, savedData]);
   const update = (path: string, value: unknown) => setData((current) => setValueAt(current, path, value));
 
   async function save(event: React.FormEvent) {
-    event.preventDefault(); setPending(true); setMessage("");
+    event.preventDefault(); setPending(true); setMessage(""); setErrorMessage("");
     const title = typeof data.title === "string" && data.title.trim() ? data.title : entry.title;
     const response = await fetch(`/api/cms/entries/${entry.id}/draft`, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ siteSlug, modelKey, expectedRevision: revision, title, data }) });
     const payload = await response.json().catch(() => ({})); setPending(false);
-    if (!response.ok) { setMessage(response.status === 409 ? "Someone else saved a newer draft. Refresh before continuing." : typeof payload.error === "string" ? payload.error : "The draft could not be saved. Check the highlighted content and try again."); return; }
+    if (!response.ok) { setErrorMessage(response.status === 409 ? "Someone else saved a newer draft. Refresh before continuing." : typeof payload.error === "string" ? payload.error : "The draft could not be saved. Check the highlighted content and try again."); return; }
     const nextRevision = Number(payload.entry?.draft_revision ?? revision + 1); setRevision(nextRevision); setSavedData(data); setStatus(String(payload.entry?.workflow_status ?? "draft")); setMessage("Draft saved.");
   }
 
   async function workflow(action: "submit" | "publish") {
-    setPending(true); setMessage("");
+    setPending(true); setMessage(""); setErrorMessage("");
     const body = action === "publish" ? { siteSlug, modelKey, expectedRevision: revision, path: previewPath(modelKey, data) } : { siteSlug, expectedRevision: revision };
     const response = await fetch(`/api/cms/entries/${entry.id}/${action}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
     const payload = await response.json().catch(() => ({})); setPending(false);
-    if (!response.ok) { setMessage(typeof payload.error === "string" ? payload.error : `${action === "submit" ? "Submission" : "Publishing"} failed.`); return; }
+    if (!response.ok) { setErrorMessage(typeof payload.error === "string" ? payload.error : `${action === "submit" ? "Submission" : "Publishing"} failed.`); return; }
     setStatus(action === "submit" ? "in_review" : "published"); setMessage(action === "submit" ? "Submitted for D2D review." : payload.message ?? "Published.");
   }
 
   async function openPreview() {
+    setErrorMessage("");
     const response = await fetch("/api/cms/preview-token", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ siteSlug, path: previewPath(modelKey, data) }) });
     const payload = await response.json().catch(() => ({}));
-    if (response.ok && payload.url) window.open(payload.url, "_blank", "noopener,noreferrer"); else setMessage(payload.error ?? "Preview could not be opened.");
+    if (response.ok && payload.url) window.open(payload.url, "_blank", "noopener,noreferrer"); else setErrorMessage(payload.error ?? "Preview could not be opened.");
   }
 
-  return <form onSubmit={save} className="space-y-8"><header className="rounded-2xl border border-black/10 bg-white p-6"><div className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs uppercase tracking-wider text-black/45">Workflow status</p><p className="mt-1 font-semibold capitalize">{status.replaceAll("_", " ")}</p></div><div className="text-right text-xs text-black/50"><p>Draft revision {revision}</p><p>Last published {entry.published_at ? new Date(entry.published_at).toLocaleString() : "Never"}</p></div></div></header>{groups.map((group) => <section key={group.title} className="rounded-2xl border border-black/10 bg-white p-6"><h2 className="font-display text-2xl font-semibold">{group.title}</h2>{group.description ? <p className="mt-1 text-sm text-black/55">{group.description}</p> : null}<div className="mt-6 grid gap-5 md:grid-cols-2">{group.fields.map((field) => <div key={field.path} className={field.kind?.includes("list") || field.kind === "content_blocks" || field.kind === "textarea" ? "md:col-span-2" : ""}><Field field={field} data={data} update={update} /></div>)}</div></section>)}<div className="sticky bottom-4 z-10 flex flex-wrap items-center gap-3 rounded-2xl border border-black/10 bg-white/95 p-4 shadow-xl backdrop-blur"><button type="submit" disabled={pending || !isDirty} className="rounded-lg bg-[#18201d] px-4 py-2 text-sm font-semibold !text-white disabled:opacity-40">{pending ? "Working…" : "Save Draft"}</button><button type="button" onClick={() => workflow("submit")} disabled={pending || isDirty || status === "in_review"} className="rounded-lg border border-black/15 px-4 py-2 text-sm font-semibold disabled:opacity-40">Submit for Review</button>{canPublish ? <button type="button" onClick={() => workflow("publish")} disabled={pending || isDirty || status !== "in_review"} className="rounded-lg bg-[#9a5f34] px-4 py-2 text-sm font-semibold !text-white disabled:opacity-40">Publish</button> : null}<button type="button" onClick={openPreview} className="rounded-lg border border-black/15 px-4 py-2 text-sm font-semibold">Open Preview</button><p aria-live="polite" className="ml-auto text-sm text-black/60">{isDirty ? "Unsaved changes" : message || "All changes saved"}</p></div></form>;
+  const editorStatus = resolveEditorStatus({ error: errorMessage, isDirty, message });
+
+  return <form onSubmit={save} className="space-y-8"><header className="rounded-2xl border border-black/10 bg-white p-6"><div className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs uppercase tracking-wider text-black/45">Workflow status</p><p className="mt-1 font-semibold capitalize">{status.replaceAll("_", " ")}</p></div><div className="text-right text-xs text-black/50"><p>Draft revision {revision}</p><p>Last published {entry.published_at ? new Date(entry.published_at).toLocaleString() : "Never"}</p></div></div></header>{groups.map((group) => <section key={group.title} className="rounded-2xl border border-black/10 bg-white p-6"><h2 className="font-display text-2xl font-semibold">{group.title}</h2>{group.description ? <p className="mt-1 text-sm text-black/55">{group.description}</p> : null}<div className="mt-6 grid gap-5 md:grid-cols-2">{group.fields.map((field) => <div key={field.path} className={field.kind?.includes("list") || field.kind === "content_blocks" || field.kind === "textarea" ? "md:col-span-2" : ""}><Field field={field} data={data} update={update} /></div>)}</div></section>)}<div className="sticky bottom-4 z-10 flex flex-wrap items-center gap-3 rounded-2xl border border-black/10 bg-white/95 p-4 shadow-xl backdrop-blur"><button type="submit" disabled={pending || !isDirty} className="rounded-lg bg-[#18201d] px-4 py-2 text-sm font-semibold !text-white disabled:opacity-40">{pending ? "Working…" : "Save Draft"}</button><button type="button" onClick={() => workflow("submit")} disabled={pending || isDirty || status === "in_review"} className="rounded-lg border border-black/15 px-4 py-2 text-sm font-semibold disabled:opacity-40">Submit for Review</button>{canPublish ? <button type="button" onClick={() => workflow("publish")} disabled={pending || isDirty || status !== "in_review"} className="rounded-lg bg-[#9a5f34] px-4 py-2 text-sm font-semibold !text-white disabled:opacity-40">Publish</button> : null}<button type="button" onClick={openPreview} className="rounded-lg border border-black/15 px-4 py-2 text-sm font-semibold">Open Preview</button><p role={editorStatus.isError ? "alert" : undefined} aria-live="polite" className={`ml-auto text-sm ${editorStatus.isError ? "font-medium text-red-700" : "text-black/60"}`}>{editorStatus.text}</p></div></form>;
 }
