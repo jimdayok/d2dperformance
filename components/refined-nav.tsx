@@ -1,38 +1,101 @@
 "use client";
 
-import { Menu, MoveRight, X } from "lucide-react";
+import { ChevronDown, Menu, MoveRight, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { companyName, navigation, parentBrandName } from "@/lib/site-data";
+import { companyName, parentBrandName } from "@/lib/site-data";
 
 const websiteManagementUrl = "https://portal.d2dperformance.com/portal/login";
+const brandVaultUrl = "https://brandvault.d2dperformance.com";
 
-const navItems = navigation.filter((item) =>
-  [
-    "/services",
-    "/brand-development",
-    "/executive-coaching",
-    "/growth-strategy",
-    "/about",
-    "/resources",
-  ].includes(item.href),
-);
+const serviceItems = [
+  {
+    href: "/services",
+    label: "All Services",
+    description: "See how D2D helps leadership teams move forward.",
+  },
+  {
+    href: "/executive-coaching",
+    label: "Executive Coaching",
+    description: "Create stronger leadership rhythm and accountability.",
+  },
+  {
+    href: "/growth-strategy",
+    label: "Growth Strategy",
+    description: "Align market focus, revenue priorities, and execution.",
+  },
+  {
+    href: "/brand-development",
+    label: "Brand Development",
+    description: "Clarify your position, message, and brand system.",
+  },
+] as const;
+
+const primaryItems = [
+  { href: "/process", label: "How We Work" },
+  { href: "/about", label: "About" },
+] as const;
+
+const clientItems = [
+  {
+    href: brandVaultUrl,
+    label: "Brand Vault",
+    description: "Find approved logos, files, and brand guidelines.",
+  },
+  {
+    href: websiteManagementUrl,
+    label: "Website Management",
+    description: "Review and update your D2D-managed website.",
+  },
+] as const;
+
+type DesktopMenu = "services" | "client" | null;
 
 export function RefinedNav() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [desktopMenu, setDesktopMenu] = useState<DesktopMenu>(null);
+
+  const servicesActive = serviceItems.some((item) => item.href === pathname);
 
   useEffect(() => {
     function handleScroll() {
       setIsScrolled(window.scrollY > 24);
     }
 
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setDesktopMenu(null);
+        setIsOpen(false);
+      }
+    }
+
+    function handleOutsideClick(event: PointerEvent) {
+      if (
+        !(event.target instanceof Element) ||
+        !event.target.closest("[data-desktop-menu]")
+      ) {
+        setDesktopMenu(null);
+      }
+    }
+
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("keydown", handleEscape);
+    window.addEventListener("pointerdown", handleOutsideClick);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("keydown", handleEscape);
+      window.removeEventListener("pointerdown", handleOutsideClick);
+    };
   }, []);
+
+  function closeMobileMenu() {
+    setIsOpen(false);
+  }
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-5 pt-4 lg:px-8">
@@ -57,8 +120,69 @@ export function RefinedNav() {
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-8 lg:flex">
-            {navItems.map((item) => {
+          <nav
+            className="hidden items-center gap-7 lg:flex"
+            aria-label="Primary navigation"
+          >
+            <div
+              className="relative"
+              data-desktop-menu
+            >
+              <button
+                type="button"
+                className={`group relative inline-flex items-center gap-1.5 text-[0.82rem] uppercase tracking-[0.18em] transition ${
+                  servicesActive
+                    ? "text-[var(--nav-top-ink,var(--color-ink))]"
+                    : "text-[var(--nav-top-muted,var(--color-muted))] hover:text-[var(--nav-top-ink,var(--color-ink))]"
+                }`}
+                aria-expanded={desktopMenu === "services"}
+                aria-haspopup="true"
+                onClick={() =>
+                  setDesktopMenu((current) =>
+                    current === "services" ? null : "services",
+                  )
+                }
+              >
+                Services
+                <ChevronDown
+                  className={`h-3.5 w-3.5 transition-transform ${
+                    desktopMenu === "services" ? "rotate-180" : ""
+                  }`}
+                />
+                <span
+                  className={`absolute -bottom-2 left-0 h-px bg-[var(--color-accent)] transition-all duration-300 ${
+                    servicesActive ? "w-full" : "w-0 group-hover:w-full"
+                  }`}
+                />
+              </button>
+
+              <div
+                className={`absolute left-0 top-full pt-5 transition ${
+                  desktopMenu === "services"
+                    ? "visible translate-y-0 opacity-100"
+                    : "invisible -translate-y-1 opacity-0"
+                }`}
+              >
+                <div className="paper-panel w-[22rem] rounded-[1.3rem] p-3 shadow-[0_24px_60px_rgba(17,15,12,0.14)] backdrop-blur-xl">
+                  {serviceItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="block rounded-[0.9rem] px-4 py-3 transition hover:bg-[var(--color-surface)] focus:bg-[var(--color-surface)] focus:outline-none"
+                    >
+                      <span className="block text-sm font-semibold text-[var(--color-ink)]">
+                        {item.label}
+                      </span>
+                      <span className="mt-1 block text-xs leading-5 text-[var(--color-muted)]">
+                        {item.description}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {primaryItems.map((item) => {
               const active = pathname === item.href;
 
               return (
@@ -83,12 +207,58 @@ export function RefinedNav() {
           </nav>
 
           <div className="hidden items-center gap-4 lg:flex">
-            <a
-              href={websiteManagementUrl}
-              className="text-[0.72rem] font-medium uppercase tracking-[0.18em] text-[var(--nav-top-muted,var(--color-muted))] transition hover:text-[var(--color-accent)]"
+            <div
+              className="relative"
+              data-desktop-menu
             >
-              Website Management
-            </a>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 text-[0.72rem] font-medium uppercase tracking-[0.18em] text-[var(--nav-top-muted,var(--color-muted))] transition hover:text-[var(--color-accent)]"
+                aria-expanded={desktopMenu === "client"}
+                aria-haspopup="true"
+                onClick={() =>
+                  setDesktopMenu((current) =>
+                    current === "client" ? null : "client",
+                  )
+                }
+              >
+                Client Access
+                <ChevronDown
+                  className={`h-3.5 w-3.5 transition-transform ${
+                    desktopMenu === "client" ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              <div
+                className={`absolute right-0 top-full pt-5 transition ${
+                  desktopMenu === "client"
+                    ? "visible translate-y-0 opacity-100"
+                    : "invisible -translate-y-1 opacity-0"
+                }`}
+              >
+                <div className="paper-panel w-[21rem] rounded-[1.3rem] p-3 shadow-[0_24px_60px_rgba(17,15,12,0.14)] backdrop-blur-xl">
+                  <p className="px-4 pb-2 pt-2 text-[0.65rem] font-semibold uppercase tracking-[0.24em] text-[var(--color-accent)]">
+                    Client sign in
+                  </p>
+                  {clientItems.map((item) => (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      className="block rounded-[0.9rem] px-4 py-3 transition hover:bg-[var(--color-surface)] focus:bg-[var(--color-surface)] focus:outline-none"
+                    >
+                      <span className="block text-sm font-semibold text-[var(--color-ink)]">
+                        {item.label}
+                      </span>
+                      <span className="mt-1 block text-xs leading-5 text-[var(--color-muted)]">
+                        {item.description}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             <Link
               href="/#brand-discovery"
               className="inline-flex items-center gap-2 border-b border-[var(--nav-top-border,var(--color-border-strong))] pb-1 text-[0.82rem] uppercase tracking-[0.18em] text-[var(--nav-top-ink,var(--color-ink))] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
@@ -107,6 +277,7 @@ export function RefinedNav() {
             }`}
             onClick={() => setIsOpen((current) => !current)}
             aria-expanded={isOpen}
+            aria-controls="mobile-navigation"
             aria-label="Toggle navigation"
           >
             {isOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -115,48 +286,75 @@ export function RefinedNav() {
       </div>
 
       <div
+        id="mobile-navigation"
+        hidden={!isOpen}
         className={`mx-auto mt-4 max-w-[88rem] overflow-hidden transition-all duration-400 lg:hidden ${
-          isOpen ? "max-h-[36rem] opacity-100" : "max-h-0 opacity-0"
+          isOpen ? "max-h-[46rem] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="paper-panel rounded-[1.35rem] px-6 py-6 backdrop-blur-xl">
-          <p className="eyebrow-label">Navigation</p>
-          <nav className="mt-6 flex flex-col gap-4">
-            {navItems.map((item) => {
-              const active = pathname === item.href;
+        <div className="paper-panel max-h-[calc(100vh-8rem)] overflow-y-auto rounded-[1.35rem] px-6 py-6 backdrop-blur-xl">
+          <p className="eyebrow-label">Explore</p>
+          <nav className="mt-5 grid gap-1" aria-label="Mobile navigation">
+            {[
+              { href: "/services", label: "Services" },
+              ...primaryItems,
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-[0.8rem] px-3 py-2.5 text-lg tracking-[-0.03em] text-[var(--color-ink)] transition hover:bg-[var(--color-surface)]"
+                onClick={closeMobileMenu}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
 
-              return (
+          <div className="mt-6 border-t border-[var(--color-border-soft)] pt-6">
+            <p className="eyebrow-label">Specialties</p>
+            <nav className="mt-4 grid grid-cols-1 gap-1 sm:grid-cols-3">
+              {serviceItems.slice(1).map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`border-b pb-4 text-lg tracking-[-0.03em] transition ${
-                    active
-                      ? "border-[var(--color-accent)] text-[var(--color-ink)]"
-                      : "border-[var(--color-border-soft)] text-[var(--color-muted)] hover:text-[var(--color-ink)]"
-                  }`}
-                  onClick={() => setIsOpen(false)}
+                  className="rounded-[0.8rem] px-3 py-2.5 text-sm text-[var(--color-muted)] transition hover:bg-[var(--color-surface)] hover:text-[var(--color-ink)]"
+                  onClick={closeMobileMenu}
                 >
                   {item.label}
                 </Link>
-              );
-            })}
-          </nav>
+              ))}
+            </nav>
+          </div>
+
+          <div className="mt-6 border-t border-[var(--color-border-soft)] pt-6">
+            <p className="eyebrow-label">Client Access</p>
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              {clientItems.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-[0.9rem] border border-[var(--color-border-soft)] px-4 py-3 transition hover:border-[var(--color-border)] hover:bg-[var(--color-surface)]"
+                  onClick={closeMobileMenu}
+                >
+                  <span className="block text-sm font-semibold text-[var(--color-ink)]">
+                    {item.label}
+                  </span>
+                  <span className="mt-1 block text-xs leading-5 text-[var(--color-muted)]">
+                    {item.description}
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
+
           <Link
             href="/#brand-discovery"
-            className="mt-8 inline-flex items-center gap-2 border-b border-[var(--color-border-strong)] pb-1 text-sm uppercase tracking-[0.18em] text-[var(--color-ink)]"
-            onClick={() => setIsOpen(false)}
+            className="mt-6 flex items-center justify-between rounded-[0.9rem] bg-[var(--color-charcoal)] px-4 py-3 text-sm uppercase tracking-[0.16em] text-white"
+            onClick={closeMobileMenu}
           >
             Start Brand Discovery
             <MoveRight className="h-4 w-4" />
           </Link>
-          <a
-            href={websiteManagementUrl}
-            className="mt-6 inline-flex items-center gap-2 border-b border-[var(--color-border-strong)] pb-1 text-sm uppercase tracking-[0.18em] text-[var(--color-muted)]"
-            onClick={() => setIsOpen(false)}
-          >
-            Website Management
-            <MoveRight className="h-4 w-4" />
-          </a>
         </div>
       </div>
     </header>

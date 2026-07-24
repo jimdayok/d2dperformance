@@ -18,6 +18,7 @@ const footerLinks = navigation.filter((item) =>
 );
 
 const websiteManagementUrl = "https://portal.d2dperformance.com/portal/login";
+const brandVaultUrl = "https://brandvault.d2dperformance.com";
 
 export function SiteFooter() {
   return (
@@ -58,6 +59,12 @@ export function SiteFooter() {
                   {item.label}
                 </Link>
               ))}
+              <a
+                href={brandVaultUrl}
+                className="w-fit border-b border-transparent pb-1 text-base tracking-[-0.02em] text-[var(--color-muted)] transition hover:border-[var(--color-border)] hover:text-[var(--color-ink)]"
+              >
+                Brand Vault
+              </a>
               <a
                 href={websiteManagementUrl}
                 className="w-fit border-b border-transparent pb-1 text-base tracking-[-0.02em] text-[var(--color-muted)] transition hover:border-[var(--color-border)] hover:text-[var(--color-ink)]"
