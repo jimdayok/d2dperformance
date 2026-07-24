@@ -5,12 +5,13 @@ import { login, requestPasswordReset, type LoginState } from "@/app/(portal)/por
 
 const initialState: LoginState = {};
 
-export function LoginForm() {
+export function LoginForm({ next }: { next?: string }) {
   const [state, loginAction, pending] = useActionState(login, initialState);
   const [resetState, resetAction, resetting] = useActionState(requestPasswordReset, initialState);
   return (
     <div className="space-y-6">
       <form action={loginAction} className="space-y-5">
+        {next ? <input type="hidden" name="next" value={next} /> : null}
         <label className="block text-sm font-medium" htmlFor="email">Email address
           <input id="email" name="email" type="email" autoComplete="email" required className="mt-2 w-full rounded-xl border border-black/15 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-[#9a5f34]" />
         </label>

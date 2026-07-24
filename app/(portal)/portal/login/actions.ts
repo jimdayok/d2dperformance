@@ -5,15 +5,29 @@ import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export type LoginState = { error?: string; message?: string };
-const loginSchema = z.object({ email: z.string().email(), password: z.string().min(8) });
+const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+  next: z.string().optional(),
+});
+
+function safePortalDestination(value?: string) {
+  return value?.startsWith("/portal/") && !value.startsWith("//")
+    ? value
+    : "/portal/dashboard";
+}
 
 export async function login(_: LoginState, formData: FormData): Promise<LoginState> {
-  const parsed = loginSchema.safeParse({ email: formData.get("email"), password: formData.get("password") });
+  const parsed = loginSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+    next: formData.get("next") || undefined,
+  });
   if (!parsed.success) return { error: "Enter a valid email and password." };
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) return { error: "Sign-in failed. Check your details or reset your password." };
-  redirect("/portal/dashboard");
+  redirect(safePortalDestination(parsed.data.next));
 }
 
 export async function requestPasswordReset(_: LoginState, formData: FormData): Promise<LoginState> {

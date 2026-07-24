@@ -17,6 +17,8 @@ const footerLinks = navigation.filter((item) =>
   ].includes(item.href),
 );
 
+const websiteManagementUrl = "https://portal.d2dperformance.com/portal/login";
+
 export function SiteFooter() {
   return (
     <footer className="mt-28 border-t border-[var(--color-border)]">
@@ -56,6 +58,12 @@ export function SiteFooter() {
                   {item.label}
                 </Link>
               ))}
+              <a
+                href={websiteManagementUrl}
+                className="w-fit border-b border-transparent pb-1 text-base tracking-[-0.02em] text-[var(--color-muted)] transition hover:border-[var(--color-border)] hover:text-[var(--color-ink)]"
+              >
+                Website Management
+              </a>
             </nav>
           </div>
 

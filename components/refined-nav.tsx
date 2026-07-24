@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { companyName, navigation, parentBrandName } from "@/lib/site-data";
 
+const websiteManagementUrl = "https://portal.d2dperformance.com/portal/login";
+
 const navItems = navigation.filter((item) =>
   [
     "/services",
@@ -81,6 +83,12 @@ export function RefinedNav() {
           </nav>
 
           <div className="hidden items-center gap-4 lg:flex">
+            <a
+              href={websiteManagementUrl}
+              className="text-[0.72rem] font-medium uppercase tracking-[0.18em] text-[var(--nav-top-muted,var(--color-muted))] transition hover:text-[var(--color-accent)]"
+            >
+              Website Management
+            </a>
             <Link
               href="/#brand-discovery"
               className="inline-flex items-center gap-2 border-b border-[var(--nav-top-border,var(--color-border-strong))] pb-1 text-[0.82rem] uppercase tracking-[0.18em] text-[var(--nav-top-ink,var(--color-ink))] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
@@ -141,6 +149,14 @@ export function RefinedNav() {
             Start Brand Discovery
             <MoveRight className="h-4 w-4" />
           </Link>
+          <a
+            href={websiteManagementUrl}
+            className="mt-6 inline-flex items-center gap-2 border-b border-[var(--color-border-strong)] pb-1 text-sm uppercase tracking-[0.18em] text-[var(--color-muted)]"
+            onClick={() => setIsOpen(false)}
+          >
+            Website Management
+            <MoveRight className="h-4 w-4" />
+          </a>
         </div>
       </div>
     </header>
