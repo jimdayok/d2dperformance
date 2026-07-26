@@ -1309,6 +1309,7 @@ a {
 .instagram-heading,
 .instagram-account-nav,
 .instagram-grid,
+.instagram-carousel,
 .instagram-fallback,
 .instagram-feed-message {
   position: relative;
@@ -1397,6 +1398,58 @@ a {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: clamp(0.75rem, 1.5vw, 1.25rem);
+}
+
+.instagram-carousel {
+  --instagram-carousel-gap: clamp(0.75rem, 1.5vw, 1.25rem);
+}
+
+.instagram-carousel-viewport {
+  overflow: hidden;
+}
+
+.instagram-carousel-track {
+  display: flex;
+  gap: var(--instagram-carousel-gap);
+  transition: transform 760ms var(--ease-luxury);
+  will-change: transform;
+}
+
+.instagram-carousel-track.is-resetting {
+  transition: none;
+}
+
+.instagram-carousel-card {
+  flex: 0 0 calc((100% - (var(--instagram-carousel-gap) * 2)) / 3);
+}
+
+.instagram-rotation-toggle {
+  display: grid;
+  width: 2.65rem;
+  height: 2.65rem;
+  margin: 1rem 0 0 auto;
+  place-items: center;
+  color: var(--taupe-dark);
+  border: 1px solid rgba(121, 92, 92, 0.28);
+  border-radius: 50%;
+  background: rgba(255, 253, 249, 0.7);
+  cursor: pointer;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease;
+}
+
+.instagram-rotation-toggle:hover,
+.instagram-rotation-toggle:focus-visible {
+  color: var(--white);
+  border-color: var(--taupe-dark);
+  background: var(--taupe-dark);
+}
+
+.instagram-rotation-toggle svg {
+  width: 1rem;
+  height: 1rem;
 }
 
 .instagram-card {

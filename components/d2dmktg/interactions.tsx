@@ -7,7 +7,9 @@ import {
   FilePenLine,
   Filter,
   MessagesSquare,
+  Pause,
   PenTool,
+  Play,
   type LucideIcon,
 } from "lucide-react";
 import type { CSSProperties, PointerEvent } from "react";
@@ -229,6 +231,11 @@ export function ServiceAccordion({ services }: { services: Service[] }) {
 export function InstagramFeed() {
   const [accounts, setAccounts] = useState<InstagramAccount[]>([]);
   const [activeHandle, setActiveHandle] = useState("all");
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const [carouselPaused, setCarouselPaused] = useState(false);
+  const [carouselTransition, setCarouselTransition] = useState(true);
+  const [slideDistance, setSlideDistance] = useState(0);
+  const carouselViewportRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "unavailable">(
     "loading",
   );
@@ -267,19 +274,6 @@ export function InstagramFeed() {
     return () => controller.abort();
   }, []);
 
-  if (status === "loading") {
-    return (
-      <>
-        <div className="instagram-account-loading" aria-hidden="true" />
-        <div className="instagram-grid instagram-loading" aria-label="Loading Instagram posts">
-          {Array.from({ length: 6 }, (_, index) => (
-            <div className="instagram-skeleton" aria-hidden="true" key={index} />
-          ))}
-        </div>
-      </>
-    );
-  }
-
   const allPosts = accounts
     .flatMap((account) => account.posts)
     .sort(
@@ -293,6 +287,86 @@ export function InstagramFeed() {
   );
   const visiblePosts =
     activeHandle === "all" ? allPosts : activeAccount?.posts ?? [];
+  const carouselPosts =
+    visiblePosts.length > 3
+      ? [...visiblePosts, ...visiblePosts.slice(0, 3)]
+      : visiblePosts;
+
+  const handleAccountSelect = (handle: string) => {
+    setCarouselTransition(false);
+    setCarouselIndex(0);
+    setActiveHandle(handle);
+
+    window.requestAnimationFrame(() => {
+      setCarouselTransition(true);
+    });
+  };
+
+  useEffect(() => {
+    const viewport = carouselViewportRef.current;
+    if (!viewport || !visiblePosts.length) return;
+
+    const updateSlideDistance = () => {
+      const track = viewport.querySelector<HTMLElement>(
+        ".instagram-carousel-track",
+      );
+      const gap = track
+        ? Number.parseFloat(window.getComputedStyle(track).columnGap) || 0
+        : 0;
+
+      setSlideDistance((viewport.clientWidth + gap) / 3);
+    };
+
+    updateSlideDistance();
+    const observer = new ResizeObserver(updateSlideDistance);
+    observer.observe(viewport);
+
+    return () => observer.disconnect();
+  }, [status, visiblePosts.length]);
+
+  useEffect(() => {
+    if (
+      status !== "ready" ||
+      carouselPaused ||
+      visiblePosts.length <= 3 ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      setCarouselTransition(true);
+      setCarouselIndex((current) => current + 1);
+    }, 5000);
+
+    return () => window.clearInterval(interval);
+  }, [carouselPaused, status, visiblePosts.length]);
+
+  const handleCarouselTransitionEnd = () => {
+    if (carouselIndex < visiblePosts.length) return;
+
+    setCarouselTransition(false);
+    setCarouselIndex(0);
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        setCarouselTransition(true);
+      });
+    });
+  };
+
+  if (status === "loading") {
+    return (
+      <>
+        <div className="instagram-account-loading" aria-hidden="true" />
+        <div className="instagram-grid instagram-loading" aria-label="Loading Instagram posts">
+          {Array.from({ length: 3 }, (_, index) => (
+            <div className="instagram-skeleton" aria-hidden="true" key={index} />
+          ))}
+        </div>
+      </>
+    );
+  }
 
   if (status === "unavailable") {
     return (
@@ -300,7 +374,7 @@ export function InstagramFeed() {
         <InstagramAccountNav
           accounts={accounts}
           activeHandle={activeHandle}
-          onSelect={setActiveHandle}
+          onSelect={handleAccountSelect}
           showAll={false}
         />
         <div className="instagram-fallback">
@@ -332,59 +406,97 @@ export function InstagramFeed() {
       <InstagramAccountNav
         accounts={accounts}
         activeHandle={activeHandle}
-        onSelect={setActiveHandle}
+        onSelect={handleAccountSelect}
         showAll
       />
       {visiblePosts.length ? (
-        <div className="instagram-grid">
-          {visiblePosts.map((post) => {
-            const postDate = post.timestamp
-              ? new Intl.DateTimeFormat("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                }).format(new Date(post.timestamp))
-              : "";
-            const accessibleCaption =
-              post.caption ||
-              `@${post.handle} Instagram post${postDate ? ` from ${postDate}` : ""}`;
+        <div
+          className="instagram-carousel"
+          onPointerEnter={() => setCarouselPaused(true)}
+          onPointerLeave={() => setCarouselPaused(false)}
+          onFocusCapture={() => setCarouselPaused(true)}
+          onBlurCapture={() => setCarouselPaused(false)}
+        >
+          <div
+            className="instagram-carousel-viewport"
+            ref={carouselViewportRef}
+            aria-label="Instagram posts. Three posts are shown at a time."
+          >
+            <div
+              className={`instagram-carousel-track${carouselTransition ? "" : " is-resetting"}`}
+              onTransitionEnd={handleCarouselTransitionEnd}
+              style={{
+                transform: `translate3d(-${carouselIndex * slideDistance}px, 0, 0)`,
+              }}
+            >
+              {carouselPosts.map((post, index) => {
+                const postDate = post.timestamp
+                  ? new Intl.DateTimeFormat("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    }).format(new Date(post.timestamp))
+                  : "";
+                const accessibleCaption =
+                  post.caption ||
+                  `@${post.handle} Instagram post${postDate ? ` from ${postDate}` : ""}`;
 
-            return (
-              <a
-                className="instagram-card"
-                href={post.permalink}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={`View on Instagram: ${accessibleCaption.slice(0, 120)}`}
-                key={`${post.handle}-${post.id}`}
-              >
-                <span className="instagram-image">
-                  <Image
-                    src={post.imageUrl}
-                    alt={accessibleCaption}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    unoptimized
-                  />
-                  {post.mediaType === "VIDEO" ? (
-                    <span className="instagram-media-label">Reel</span>
-                  ) : null}
-                  <span className="instagram-account-label">
-                    @{post.handle}
-                  </span>
-                  <span className="instagram-open" aria-hidden="true">
-                    ↗
-                  </span>
-                </span>
-                <span className="instagram-meta">
-                  <span>{post.caption || `From @${post.handle}`}</span>
-                  {postDate ? (
-                    <time dateTime={post.timestamp}>{postDate}</time>
-                  ) : null}
-                </span>
-              </a>
-            );
-          })}
+                return (
+                  <a
+                    className="instagram-card instagram-carousel-card"
+                    href={post.permalink}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`View on Instagram: ${accessibleCaption.slice(0, 120)}`}
+                    key={`${post.handle}-${post.id}-${index}`}
+                  >
+                    <span className="instagram-image">
+                      <Image
+                        src={post.imageUrl}
+                        alt={accessibleCaption}
+                        fill
+                        sizes="(max-width: 640px) 33vw, (max-width: 1024px) 33vw, 410px"
+                        unoptimized
+                      />
+                      {post.mediaType === "VIDEO" ? (
+                        <span className="instagram-media-label">Reel</span>
+                      ) : null}
+                      <span className="instagram-account-label">
+                        @{post.handle}
+                      </span>
+                      <span className="instagram-open" aria-hidden="true">
+                        ↗
+                      </span>
+                    </span>
+                    <span className="instagram-meta">
+                      <span>{post.caption || `From @${post.handle}`}</span>
+                      {postDate ? (
+                        <time dateTime={post.timestamp}>{postDate}</time>
+                      ) : null}
+                    </span>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+          {visiblePosts.length > 3 ? (
+            <button
+              className="instagram-rotation-toggle"
+              type="button"
+              onClick={() => setCarouselPaused((paused) => !paused)}
+              aria-label={
+                carouselPaused
+                  ? "Resume Instagram rotation"
+                  : "Pause Instagram rotation"
+              }
+            >
+              {carouselPaused ? (
+                <Play aria-hidden="true" />
+              ) : (
+                <Pause aria-hidden="true" />
+              )}
+            </button>
+          ) : null}
         </div>
       ) : (
         <div className="instagram-feed-message">
