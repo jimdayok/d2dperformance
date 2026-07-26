@@ -37,7 +37,7 @@ export default async function LoginPage({
           <p className="relative z-10 text-xs leading-5 text-white/42">Secure content operations by D2D Performance.</p>
         </div>
         <div className="flex flex-col p-7 sm:p-10 lg:p-14">
-          <Link href="/" className="inline-flex items-center gap-2 self-start text-xs font-semibold uppercase tracking-[0.16em] text-[#796b60] transition-colors hover:text-[#9a5f34]"><ArrowLeft size={14} /> Back to D2D Performance</Link>
+          <Link href="/performance" className="inline-flex items-center gap-2 self-start text-xs font-semibold uppercase tracking-[0.16em] text-[#796b60] transition-colors hover:text-[#9a5f34]"><ArrowLeft size={14} /> Back to D2D Performance</Link>
           <div className="my-auto py-10">
             <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#9a5f34]">Authorized access</p>
             <h2 className="mt-4 font-display text-4xl font-semibold text-[#171513] sm:text-5xl">Welcome back.</h2>

@@ -8,6 +8,9 @@ import { companyName, parentBrandName } from "@/lib/site-data";
 
 const websiteManagementUrl = "https://portal.d2dperformance.com/portal/login";
 const brandVaultUrl = "https://brandvault.d2dperformance.com";
+const marketingUrl = "/";
+const digitalUrl = "/digital";
+const performanceUrl = "/performance";
 
 const serviceItems = [
   {
@@ -98,20 +101,36 @@ export function RefinedNav() {
   }
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-5 pt-4 lg:px-8">
+    <header className="performance-site-header">
+      <nav className="performance-ecosystem-nav" aria-label="D2D companies">
+        <span className="performance-ecosystem-label">The D2D system</span>
+        <div>
+          <a href={marketingUrl}>
+            <span>01</span>
+            <strong>D2D Marketing</strong>
+            <small>Clarify + connect</small>
+          </a>
+          <a href={digitalUrl}>
+            <span>02</span>
+            <strong>D2D Digital</strong>
+            <small>Build + integrate</small>
+          </a>
+          <Link className="is-current" href={performanceUrl} aria-current="page">
+            <span>03</span>
+            <strong>D2D Performance</strong>
+            <small>Lead + improve</small>
+          </Link>
+        </div>
+      </nav>
       <div
-        className={`mx-auto max-w-[88rem] transition-all duration-500 ${
-          isScrolled ? "nav-hairline" : ""
+        className={`performance-primary-shell ${
+          isScrolled ? "is-scrolled nav-hairline" : ""
         }`}
       >
         <div
-          className={`flex items-center justify-between gap-5 transition-all duration-500 ${
-            isScrolled
-              ? "rounded-[1.2rem] border border-[var(--color-border)] bg-[color:color-mix(in_oklab,var(--color-card)_78%,transparent)] px-5 py-3 shadow-[0_18px_50px_rgba(17,15,12,0.08)] backdrop-blur-[18px]"
-              : "nav-brand-top rounded-[1.45rem] border border-[rgba(122,70,37,0.16)] px-5 py-4 shadow-[0_18px_44px_rgba(122,70,37,0.10)]"
-          }`}
+          className="performance-primary-inner nav-brand-top"
         >
-          <Link href="/" className="group min-w-0">
+          <Link href={performanceUrl} className="group min-w-0">
             <span className="block text-[0.7rem] font-medium uppercase tracking-[0.38em] text-[var(--nav-top-muted,var(--color-muted))] transition group-hover:text-[var(--nav-top-ink,var(--color-ink))]">
               {parentBrandName}
             </span>
@@ -260,7 +279,7 @@ export function RefinedNav() {
             </div>
 
             <Link
-              href="/#brand-discovery"
+              href="/performance#brand-discovery"
               className="inline-flex items-center gap-2 border-b border-[var(--nav-top-border,var(--color-border-strong))] pb-1 text-[0.82rem] uppercase tracking-[0.18em] text-[var(--nav-top-ink,var(--color-ink))] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
             >
               Start Brand Discovery
@@ -327,6 +346,36 @@ export function RefinedNav() {
           </div>
 
           <div className="mt-6 border-t border-[var(--color-border-soft)] pt-6">
+            <p className="eyebrow-label">D2D System</p>
+            <div className="mt-4 grid gap-2">
+              <a
+                href={marketingUrl}
+                className="rounded-[0.9rem] border border-[var(--color-border-soft)] px-4 py-3"
+                onClick={closeMobileMenu}
+              >
+                <span className="block text-sm font-semibold text-[var(--color-ink)]">
+                  D2D Marketing / Main
+                </span>
+                <span className="mt-1 block text-xs text-[var(--color-muted)]">
+                  Brand clarity and marketing direction
+                </span>
+              </a>
+              <a
+                href={digitalUrl}
+                className="rounded-[0.9rem] border border-[var(--color-border-soft)] px-4 py-3"
+                onClick={closeMobileMenu}
+              >
+                <span className="block text-sm font-semibold text-[var(--color-ink)]">
+                  D2D Digital
+                </span>
+                <span className="mt-1 block text-xs text-[var(--color-muted)]">
+                  Websites, tools, and connected systems
+                </span>
+              </a>
+            </div>
+          </div>
+
+          <div className="mt-6 border-t border-[var(--color-border-soft)] pt-6">
             <p className="eyebrow-label">Client Access</p>
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               {clientItems.map((item) => (
@@ -348,7 +397,7 @@ export function RefinedNav() {
           </div>
 
           <Link
-            href="/#brand-discovery"
+            href="/performance#brand-discovery"
             className="mt-6 flex items-center justify-between rounded-[0.9rem] bg-[var(--color-charcoal)] px-4 py-3 text-sm uppercase tracking-[0.16em] text-white"
             onClick={closeMobileMenu}
           >

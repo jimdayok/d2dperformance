@@ -1,0 +1,27 @@
+export const siteConfig = {
+  businessName: "DAY2DAY Marketing",
+  phone: "269-788-7067",
+  phoneHref: "+12697887067",
+  email: "andrea@d2dmktg.com",
+  location: "Dallas–Fort Worth",
+  links: {
+    calendly: "https://calendly.com/d2dmktg/30min",
+    newsletter: "https://d2dmktg.com/sign-up-for-our-newsletter",
+    review: "https://g.page/r/CdjDff4JSDGeEAI/review",
+    kajabiPartner: "https://d2dmktg.com/official-kajabi-partner",
+    brandDevelopment: "https://tandemtool.com/",
+    clientLogin: "https://portal.d2dperformance.com/portal/login",
+    websiteEditing: "https://portal.d2dperformance.com/portal/login",
+    brandVault: "https://d2d-brand-vault.vercel.app/auth/login",
+    d2dDigital: "/digital",
+    d2dPerformance: "/performance",
+    facebook: "https://www.facebook.com/day2daymktg2016",
+    instagram: "https://www.instagram.com/day2daymarketing/",
+    linkedin: "https://linkedin.com/in/mckinneymarketingandreaday",
+  },
+  analytics: {
+    googleTagManager: null,
+    facebookPixel: null,
+  },
+  contactFormDestination: null,
+} as const;

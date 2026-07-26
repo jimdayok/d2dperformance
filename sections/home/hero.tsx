@@ -1,58 +1,112 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowDown, ArrowRight, Crosshair, Gauge, TimerReset } from "lucide-react";
 import { ButtonLink } from "@/components/button-link";
 
 export function HomeHero() {
+  const performanceLanes = [
+    {
+      label: "Strategy",
+      note: "Choose the field",
+      progress: "84%",
+    },
+    {
+      label: "Leadership",
+      note: "Set the cadence",
+      progress: "72%",
+    },
+    {
+      label: "Systems",
+      note: "Build repeatability",
+      progress: "91%",
+    },
+    {
+      label: "Execution",
+      note: "Close the gap",
+      progress: "78%",
+    },
+  ] as const;
+
   return (
-    <section className="mx-auto max-w-[88rem] px-6 pt-28 pb-14 lg:px-8 lg:pt-36 lg:pb-18">
-      <div className="grid gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:gap-16">
-        <div>
-          <p className="eyebrow-label">Brand Discovery</p>
-          <h1 className="mt-6 max-w-5xl font-display text-[clamp(3.2rem,8vw,7.6rem)] leading-[0.92] tracking-[-0.065em] text-[var(--color-ink)]">
-            Start here.
-            <br />
-            Answer the full discovery
-            <br />
-            before anything else.
-          </h1>
-          <p className="mt-7 max-w-2xl text-lg leading-8 text-[var(--color-muted)]">
-            D2D starts with the complete brand discovery. It is the first thing we want people
-            to do when they arrive, because it gives us the business, customer, market, story,
-            and growth context before strategy turns into opinions.
+    <section className="performance-hero">
+      <div className="performance-field" aria-hidden="true" />
+      <div className="performance-hero-inner">
+        <div className="performance-hero-copy">
+          <p className="performance-kicker">
+            <span />
+            Strategy · Leadership · Execution
           </p>
-          <div className="mt-9 flex flex-wrap items-center gap-6">
+          <h1>
+            Better businesses are
+            <span>trained, not wished into being.</span>
+          </h1>
+          <p className="performance-lede">
+            D2D Performance helps owners and leadership teams create the
+            clarity, systems, and operating rhythm required to improve on
+            purpose—one decision, one rep, and one quarter at a time.
+          </p>
+          <div className="performance-actions">
             <ButtonLink href="#brand-discovery">
               <span className="inline-flex items-center gap-2">
-                Start Brand Discovery
+                Establish your baseline
                 <ArrowRight className="h-4 w-4" />
               </span>
             </ButtonLink>
-            <p className="text-sm uppercase tracking-[0.18em] text-[var(--color-muted)]">
-              Exact 40-question discovery
-            </p>
+            <a className="performance-text-link" href="#performance-framework">
+              See the framework
+              <ArrowDown aria-hidden="true" className="h-4 w-4" />
+            </a>
+          </div>
+          <div className="performance-principles" aria-label="D2D performance approach">
+            <span><Crosshair aria-hidden="true" /> Clear target</span>
+            <span><TimerReset aria-hidden="true" /> Consistent cadence</span>
+            <span><Gauge aria-hidden="true" /> Measured improvement</span>
           </div>
         </div>
 
-        <div className="paper-panel operating-lines rounded-[1.6rem] px-7 py-8">
-          <p className="eyebrow-label">What Happens</p>
-          <div className="mt-6 space-y-6">
-            {[
-              "You answer the full discovery in a guided sequence.",
-              "Each completed section is emailed to Jim and Andrea as progress.",
-              "The final submission becomes the starting point for the engagement.",
-            ].map((item, index) => (
-              <div
-                key={item}
-                className="grid gap-3 border-t border-[var(--color-border)] pt-5 md:grid-cols-[4rem_minmax(0,1fr)]"
-              >
-                <span className="font-display text-4xl tracking-[-0.06em] text-[color:color-mix(in_oklab,var(--color-accent)_48%,white)]">
-                  0{index + 1}
-                </span>
-                <p className="text-base leading-8 text-[var(--color-muted)]">{item}</p>
+        <div className="performance-board" aria-label="Performance framework">
+          <div className="performance-board-top">
+            <div>
+              <p>D2D / PERFORMANCE SYSTEM</p>
+              <span>Leadership operating framework</span>
+            </div>
+            <strong>ACTIVE</strong>
+          </div>
+          <div className="performance-score">
+            <div>
+              <span>THE</span>
+              <strong>DAY2DAY</strong>
+              <small>is where performance compounds.</small>
+            </div>
+            <div className="performance-cycle">
+              <span>Baseline</span>
+              <i aria-hidden="true" />
+              <span>Build</span>
+              <i aria-hidden="true" />
+              <span>Optimize</span>
+            </div>
+          </div>
+          <div className="performance-lanes">
+            {performanceLanes.map((lane, index) => (
+              <div key={lane.label}>
+                <span>0{index + 1}</span>
+                <div>
+                  <strong>{lane.label}</strong>
+                  <small>{lane.note}</small>
+                </div>
+                <i aria-hidden="true">
+                  <b style={{ width: lane.progress }} />
+                </i>
               </div>
             ))}
           </div>
+          <div className="performance-board-bottom">
+            <span>ASSESS</span>
+            <span>ALIGN</span>
+            <span>ACT</span>
+            <span>ADJUST</span>
+          </div>
         </div>
       </div>
+      <p className="performance-side-note">Built for the work between the big moments</p>
     </section>
   );
 }

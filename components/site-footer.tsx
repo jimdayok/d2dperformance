@@ -19,10 +19,33 @@ const footerLinks = navigation.filter((item) =>
 
 const websiteManagementUrl = "https://portal.d2dperformance.com/portal/login";
 const brandVaultUrl = "https://brandvault.d2dperformance.com";
+const marketingUrl = "/";
+const digitalUrl = "/digital";
+const performanceUrl = "/performance";
 
 export function SiteFooter() {
   return (
-    <footer className="mt-28 border-t border-[var(--color-border)]">
+    <footer className="performance-footer mt-28 border-t border-[var(--color-border)]">
+      <div className="performance-footer-journey">
+        <p>The connected D2D system</p>
+        <div>
+          <a href={marketingUrl}>
+            <span>01</span>
+            <strong>D2D Marketing</strong>
+            <small>Clarify + connect · Main practice</small>
+          </a>
+          <a href={digitalUrl}>
+            <span>02</span>
+            <strong>D2D Digital</strong>
+            <small>Build + integrate</small>
+          </a>
+          <Link className="is-current" href={performanceUrl} aria-current="page">
+            <span>03</span>
+            <strong>D2D Performance</strong>
+            <small>Lead + improve</small>
+          </Link>
+        </div>
+      </div>
       <div className="mx-auto max-w-[88rem] px-6 py-16 lg:px-8 lg:py-20">
         <div className="grid gap-10 lg:grid-cols-[1.15fr_0.7fr_0.8fr] lg:gap-14">
           <div className="max-w-xl">
@@ -32,8 +55,8 @@ export function SiteFooter() {
             </h2>
             <p className="mt-5 max-w-lg text-base leading-8 text-[var(--color-muted)]">
               {tagline} Advisory work for companies that have outgrown informal
-              leadership habits and need the business to feel lighter, clearer,
-              and more executable.
+              leadership habits and need a clearer target, stronger cadence,
+              and more repeatable execution.
             </p>
             <div className="mt-8 space-y-2 text-sm uppercase tracking-[0.18em] text-[var(--color-muted)]">
               <p>Dallas-Fort Worth</p>
@@ -85,7 +108,7 @@ export function SiteFooter() {
               advice gets layered on top.
             </p>
             <Link
-              href="/#brand-discovery"
+              href="/performance#brand-discovery"
               className="mt-6 inline-flex items-center gap-2 border-b border-[var(--color-border-strong)] pb-1 text-sm uppercase tracking-[0.18em] text-[var(--color-ink)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
             >
               Start Brand Discovery

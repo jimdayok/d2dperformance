@@ -4,11 +4,11 @@ import { processSteps } from "@/lib/site-data";
 export function HomeProcessSection() {
   return (
     <section className="mx-auto max-w-7xl px-6 py-18 lg:px-8">
-      <div className="rounded-[2.25rem] border border-[var(--color-border)] bg-[color:color-mix(in_oklab,var(--color-card)_88%,transparent)] px-6 py-10 shadow-[0_22px_55px_rgba(16,24,34,0.06)] backdrop-blur-sm md:px-8 lg:px-10">
+      <div className="performance-playbook rounded-[2.25rem] border border-[var(--color-border)] px-6 py-10 md:px-8 lg:px-10">
         <SectionHeading
-          eyebrow="Our Process"
-          title="A clear operating sequence for stronger businesses."
-          description="Every engagement begins with understanding the business, then building the strategic and operational clarity required to scale it."
+          eyebrow="The Playbook"
+          title="A repeatable progression from potential to performance."
+          description="Every engagement begins with a clear baseline, then moves through a practical operating sequence designed to create focus, ownership, and continuous improvement."
         />
         <div className="mt-10 grid gap-5 xl:grid-cols-5">
           {processSteps.map((step, index) => (
