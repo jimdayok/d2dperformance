@@ -14,7 +14,7 @@ export const siteConfig = {
     websiteEditing: "https://portal.d2dperformance.com/portal/login",
     brandVault: "https://d2d-brand-vault.vercel.app/auth/login",
     d2dDigital: "/digital",
-    d2dPerformance: "/performance",
+    d2dPerformance: "/performance#top",
     facebook: "https://www.facebook.com/day2daymktg2016",
     instagram: "https://www.instagram.com/day2daymarketing/",
     linkedin: "https://linkedin.com/in/mckinneymarketingandreaday",

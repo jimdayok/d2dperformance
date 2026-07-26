@@ -26,7 +26,7 @@ export function HomeHero() {
   ] as const;
 
   return (
-    <section className="performance-hero">
+    <section className="performance-hero" id="top">
       <div className="performance-field" aria-hidden="true" />
       <div className="performance-hero-inner">
         <div className="performance-hero-copy">

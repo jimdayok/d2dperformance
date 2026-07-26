@@ -15,7 +15,7 @@ import type { Metadata } from "next";
 import "./digital.css";
 
 const marketingUrl = "/";
-const performanceUrl = "/performance";
+const performanceUrl = "/performance#top";
 const digitalContactUrl = "/#contact";
 
 export const metadata: Metadata = {

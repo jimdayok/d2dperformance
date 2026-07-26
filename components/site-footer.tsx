@@ -22,7 +22,7 @@ const websiteManagementUrl = "https://portal.d2dperformance.com/portal/login";
 const brandVaultUrl = "https://brandvault.d2dperformance.com";
 const marketingUrl = "/";
 const digitalUrl = "/digital";
-const performanceUrl = "/performance";
+const performanceUrl = "/performance#top";
 
 export function SiteFooter() {
   return (
