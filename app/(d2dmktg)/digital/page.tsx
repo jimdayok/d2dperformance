@@ -3,8 +3,10 @@ import {
   ArrowRight,
   Blocks,
   Braces,
+  Code2,
   Gauge,
   Layers3,
+  Megaphone,
   MonitorSmartphone,
   PanelsTopLeft,
   Workflow,
@@ -86,17 +88,17 @@ export default function Home() {
           <span className="ecosystem-label">The D2D system</span>
           <div className="ecosystem-links">
             <a href={marketingUrl}>
-              <span>01</span>
+              <Megaphone aria-hidden="true" />
               <strong>D2D Marketing</strong>
               <small>Clarify + connect</small>
             </a>
             <a className="is-current" href="#top" aria-current="page">
-              <span>02</span>
+              <Code2 aria-hidden="true" />
               <strong>D2D Digital</strong>
               <small>Build + integrate</small>
             </a>
             <a href={performanceUrl}>
-              <span>03</span>
+              <Gauge aria-hidden="true" />
               <strong>D2D Performance</strong>
               <small>Lead + improve</small>
             </a>
@@ -216,7 +218,7 @@ export default function Home() {
           <div className="ecosystem-stages">
             <a href={marketingUrl}>
               <div className="stage-top">
-                <span>01 / Start here</span>
+                <span>Start here</span>
               </div>
               <h3>D2D Marketing</h3>
               <p>
@@ -228,7 +230,7 @@ export default function Home() {
             </a>
             <article className="is-current">
               <div className="stage-top">
-                <span>02 / Build it</span>
+                <span>Build it</span>
                 <em>Current</em>
               </div>
               <h3>D2D Digital</h3>
@@ -241,7 +243,7 @@ export default function Home() {
             </article>
             <a href={performanceUrl}>
               <div className="stage-top">
-                <span>03 / Improve it</span>
+                <span>Improve it</span>
               </div>
               <h3>D2D Performance</h3>
               <p>
@@ -381,9 +383,9 @@ export default function Home() {
           </div>
           <div>
             <h2>D2D system</h2>
-            <a href={marketingUrl}>01 · D2D Marketing / Main <Arrow /></a>
-            <a href="#top" aria-current="page">02 · D2D Digital / Build</a>
-            <a href={performanceUrl}>03 · D2D Performance / Improve <Arrow /></a>
+            <a href={marketingUrl}>D2D Marketing / Main <Arrow /></a>
+            <a href="#top" aria-current="page">D2D Digital / Build</a>
+            <a href={performanceUrl}>D2D Performance / Improve <Arrow /></a>
           </div>
         </div>
         <div className="footer-bottom">

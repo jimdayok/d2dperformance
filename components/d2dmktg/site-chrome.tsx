@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Code2, Gauge, Megaphone } from "lucide-react";
 import type { ReactNode } from "react";
 import { MotionController } from "@/components/d2dmktg/interactions";
 import { siteConfig } from "@/lib/d2dmktg/site-config";
@@ -25,18 +26,21 @@ const d2dEcosystem = [
     role: "Clarify + connect",
     href: "/",
     current: true,
+    icon: Megaphone,
   },
   {
     name: "D2D Digital",
     role: "Build + integrate",
     href: siteConfig.links.d2dDigital,
     current: false,
+    icon: Code2,
   },
   {
     name: "D2D Performance",
     role: "Lead + improve",
     href: siteConfig.links.d2dPerformance,
     current: false,
+    icon: Gauge,
   },
 ] as const;
 
@@ -46,26 +50,28 @@ export function D2DEcosystemNav() {
       <div className="d2d-ecosystem-inner">
         <span className="d2d-ecosystem-label">The D2D system</span>
         <div className="d2d-ecosystem-links">
-          {d2dEcosystem.map((item, index) =>
-            item.current ? (
+          {d2dEcosystem.map((item) => {
+            const Icon = item.icon;
+
+            return item.current ? (
               <Link
                 className="is-current"
                 href={item.href}
                 key={item.name}
                 aria-current="page"
               >
-                <span>0{index + 1}</span>
+                <Icon aria-hidden="true" />
                 <strong>{item.name}</strong>
                 <small>{item.role}</small>
               </Link>
             ) : (
               <a href={item.href} key={item.name}>
-                <span>0{index + 1}</span>
+                <Icon aria-hidden="true" />
                 <strong>{item.name}</strong>
                 <small>{item.role}</small>
               </a>
-            ),
-          )}
+            );
+          })}
         </div>
       </div>
     </nav>
@@ -172,7 +178,7 @@ export function D2DJourney() {
       <div className="d2d-journey-grid">
         <article className="d2d-journey-card is-current" data-reveal>
           <div className="d2d-journey-card-top">
-            <span>01 / Start here</span>
+            <span>Start here</span>
             <strong>Current</strong>
           </div>
           <h3>D2D Marketing</h3>
@@ -188,7 +194,7 @@ export function D2DJourney() {
 
         <article className="d2d-journey-card" data-reveal>
           <div className="d2d-journey-card-top">
-            <span>02 / Build it</span>
+            <span>Build it</span>
           </div>
           <h3>D2D Digital</h3>
           <p>
@@ -203,7 +209,7 @@ export function D2DJourney() {
 
         <article className="d2d-journey-card" data-reveal>
           <div className="d2d-journey-card-top">
-            <span>03 / Improve it</span>
+            <span>Improve it</span>
           </div>
           <h3>D2D Performance</h3>
           <p>

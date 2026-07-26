@@ -33,10 +33,19 @@ type InstagramPost = {
   imageUrl: string;
   permalink: string;
   timestamp: string;
+  handle: string;
+};
+
+type InstagramAccount = {
+  handle: string;
+  label: string;
+  profileUrl: string;
+  available: boolean;
+  posts: InstagramPost[];
 };
 
 type InstagramFeedResponse = {
-  posts?: InstagramPost[];
+  accounts?: InstagramAccount[];
   available?: boolean;
 };
 
@@ -217,8 +226,9 @@ export function ServiceAccordion({ services }: { services: Service[] }) {
   );
 }
 
-export function InstagramFeed({ instagramUrl }: { instagramUrl: string }) {
-  const [posts, setPosts] = useState<InstagramPost[]>([]);
+export function InstagramFeed() {
+  const [accounts, setAccounts] = useState<InstagramAccount[]>([]);
+  const [activeHandle, setActiveHandle] = useState("all");
   const [status, setStatus] = useState<"loading" | "ready" | "unavailable">(
     "loading",
   );
@@ -236,14 +246,15 @@ export function InstagramFeed({ instagramUrl }: { instagramUrl: string }) {
         if (!response.ok) throw new Error("Instagram feed unavailable");
 
         const payload = (await response.json()) as InstagramFeedResponse;
-        const nextPosts = payload.posts ?? [];
+        const nextAccounts = payload.accounts ?? [];
 
-        if (!payload.available || nextPosts.length === 0) {
+        setAccounts(nextAccounts);
+
+        if (!payload.available) {
           setStatus("unavailable");
           return;
         }
 
-        setPosts(nextPosts);
         setStatus("ready");
       } catch (error) {
         if ((error as Error).name !== "AbortError") {
@@ -258,78 +269,173 @@ export function InstagramFeed({ instagramUrl }: { instagramUrl: string }) {
 
   if (status === "loading") {
     return (
-      <div className="instagram-grid instagram-loading" aria-label="Loading Instagram posts">
-        {Array.from({ length: 6 }, (_, index) => (
-          <div className="instagram-skeleton" aria-hidden="true" key={index} />
-        ))}
-      </div>
+      <>
+        <div className="instagram-account-loading" aria-hidden="true" />
+        <div className="instagram-grid instagram-loading" aria-label="Loading Instagram posts">
+          {Array.from({ length: 6 }, (_, index) => (
+            <div className="instagram-skeleton" aria-hidden="true" key={index} />
+          ))}
+        </div>
+      </>
     );
   }
 
+  const allPosts = accounts
+    .flatMap((account) => account.posts)
+    .sort(
+      (left, right) =>
+        new Date(right.timestamp).getTime() -
+        new Date(left.timestamp).getTime(),
+    )
+    .slice(0, 9);
+  const activeAccount = accounts.find(
+    (account) => account.handle === activeHandle,
+  );
+  const visiblePosts =
+    activeHandle === "all" ? allPosts : activeAccount?.posts ?? [];
+
   if (status === "unavailable") {
     return (
-      <div className="instagram-fallback" data-reveal>
-        <p>The latest posts are taking a moment to load.</p>
-        <a
-          className="button button-dark"
-          href={instagramUrl}
-          target="_blank"
-          rel="noreferrer"
-        >
-          Visit @day2daymarketing <span aria-hidden="true">↗</span>
-        </a>
-      </div>
+      <>
+        <InstagramAccountNav
+          accounts={accounts}
+          activeHandle={activeHandle}
+          onSelect={setActiveHandle}
+          showAll={false}
+        />
+        <div className="instagram-fallback">
+          <div>
+            <span>Instagram network</span>
+            <p>Follow the work happening across the brands we support.</p>
+          </div>
+          <div className="instagram-profile-links">
+            {accounts.map((account) => (
+              <a
+                href={account.profileUrl}
+                target="_blank"
+                rel="noreferrer"
+                key={account.handle}
+              >
+                <span>{account.label}</span>
+                <strong>@{account.handle}</strong>
+                <i aria-hidden="true">↗</i>
+              </a>
+            ))}
+          </div>
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="instagram-grid">
-      {posts.map((post, index) => {
-        const postDate = post.timestamp
-          ? new Intl.DateTimeFormat("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            }).format(new Date(post.timestamp))
-          : "";
-        const accessibleCaption =
-          post.caption || `DAY2DAY Marketing Instagram post${postDate ? ` from ${postDate}` : ""}`;
+    <>
+      <InstagramAccountNav
+        accounts={accounts}
+        activeHandle={activeHandle}
+        onSelect={setActiveHandle}
+        showAll
+      />
+      {visiblePosts.length ? (
+        <div className="instagram-grid">
+          {visiblePosts.map((post) => {
+            const postDate = post.timestamp
+              ? new Intl.DateTimeFormat("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                }).format(new Date(post.timestamp))
+              : "";
+            const accessibleCaption =
+              post.caption ||
+              `@${post.handle} Instagram post${postDate ? ` from ${postDate}` : ""}`;
 
-        return (
-          <a
-            className="instagram-card"
-            href={post.permalink}
-            target="_blank"
-            rel="noreferrer"
-            aria-label={`View on Instagram: ${accessibleCaption.slice(0, 120)}`}
-            key={post.id}
-            data-reveal
-            style={{ "--reveal-delay": `${index * 70}ms` } as CSSProperties}
-          >
-            <span className="instagram-image">
-              <Image
-                src={post.imageUrl}
-                alt={accessibleCaption}
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                unoptimized
-              />
-              {post.mediaType === "VIDEO" ? (
-                <span className="instagram-media-label">Reel</span>
-              ) : null}
-              <span className="instagram-open" aria-hidden="true">
-                ↗
-              </span>
-            </span>
-            <span className="instagram-meta">
-              <span>{post.caption || "From DAY2DAY Marketing"}</span>
-              {postDate ? (
-                <time dateTime={post.timestamp}>{postDate}</time>
-              ) : null}
-            </span>
-          </a>
-        );
-      })}
+            return (
+              <a
+                className="instagram-card"
+                href={post.permalink}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`View on Instagram: ${accessibleCaption.slice(0, 120)}`}
+                key={`${post.handle}-${post.id}`}
+              >
+                <span className="instagram-image">
+                  <Image
+                    src={post.imageUrl}
+                    alt={accessibleCaption}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    unoptimized
+                  />
+                  {post.mediaType === "VIDEO" ? (
+                    <span className="instagram-media-label">Reel</span>
+                  ) : null}
+                  <span className="instagram-account-label">
+                    @{post.handle}
+                  </span>
+                  <span className="instagram-open" aria-hidden="true">
+                    ↗
+                  </span>
+                </span>
+                <span className="instagram-meta">
+                  <span>{post.caption || `From @${post.handle}`}</span>
+                  {postDate ? (
+                    <time dateTime={post.timestamp}>{postDate}</time>
+                  ) : null}
+                </span>
+              </a>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="instagram-feed-message">
+          <p>Posts for @{activeAccount?.handle} are not available yet.</p>
+          {activeAccount ? (
+            <a href={activeAccount.profileUrl} target="_blank" rel="noreferrer">
+              Open Instagram <span aria-hidden="true">↗</span>
+            </a>
+          ) : null}
+        </div>
+      )}
+    </>
+  );
+}
+
+function InstagramAccountNav({
+  accounts,
+  activeHandle,
+  onSelect,
+  showAll,
+}: {
+  accounts: InstagramAccount[];
+  activeHandle: string;
+  onSelect: (handle: string) => void;
+  showAll: boolean;
+}) {
+  return (
+    <div className="instagram-account-nav" aria-label="Instagram accounts">
+      {showAll ? (
+        <button
+          className={activeHandle === "all" ? "is-active" : undefined}
+          onClick={() => onSelect("all")}
+          type="button"
+        >
+          All brands
+        </button>
+      ) : null}
+      {accounts.map((account) => (
+        <button
+          className={activeHandle === account.handle ? "is-active" : undefined}
+          onClick={() => onSelect(account.handle)}
+          type="button"
+          key={account.handle}
+        >
+          @{account.handle}
+          <span
+            className={account.posts.length ? "is-live" : undefined}
+            aria-hidden="true"
+          />
+        </button>
+      ))}
     </div>
   );
 }

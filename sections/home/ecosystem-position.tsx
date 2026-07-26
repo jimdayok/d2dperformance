@@ -22,7 +22,7 @@ export function EcosystemPositionSection() {
       <div className="performance-ecosystem-stages">
         <a href={marketingUrl}>
           <div className="performance-stage-top">
-            <span>01 / Start here</span>
+            <span>Start here</span>
           </div>
           <h3 className="font-display">D2D Marketing</h3>
           <p>
@@ -37,7 +37,7 @@ export function EcosystemPositionSection() {
 
         <a href={digitalUrl}>
           <div className="performance-stage-top">
-            <span>02 / Build it</span>
+            <span>Build it</span>
           </div>
           <h3 className="font-display">D2D Digital</h3>
           <p>
@@ -52,7 +52,7 @@ export function EcosystemPositionSection() {
 
         <article className="is-current">
           <div className="performance-stage-top">
-            <span>03 / Improve it</span>
+            <span>Improve it</span>
             <em>Current</em>
           </div>
           <h3 className="font-display">D2D Performance</h3>

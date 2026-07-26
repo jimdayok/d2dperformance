@@ -356,11 +356,13 @@ textarea {
   box-shadow: inset 0 -2px 0 #ef8e53;
 }
 
-.performance-ecosystem-nav a > span {
+.performance-ecosystem-nav a > svg {
   grid-row: 1 / 3;
   align-self: center;
+  width: 0.82rem;
+  height: 0.82rem;
   color: #ef8e53;
-  font-size: 0.5rem;
+  stroke-width: 1.6;
 }
 
 .performance-ecosystem-nav strong {
@@ -952,11 +954,13 @@ textarea {
   background: rgba(239, 142, 83, 0.08);
 }
 
-.performance-footer-journey a > span {
+.performance-footer-journey a > svg {
   grid-row: 1 / 3;
   align-self: center;
+  width: 0.88rem;
+  height: 0.88rem;
   color: #ef8e53;
-  font-size: 0.5rem;
+  stroke-width: 1.6;
 }
 
 .performance-footer-journey strong,
@@ -1092,7 +1096,7 @@ textarea {
     text-align: center;
   }
 
-  .performance-ecosystem-nav a > span {
+  .performance-ecosystem-nav a > svg {
     display: none;
   }
 

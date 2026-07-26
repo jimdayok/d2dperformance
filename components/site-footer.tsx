@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Code2, Gauge, Megaphone } from "lucide-react";
 import {
   companyName,
   navigation,
@@ -30,17 +31,17 @@ export function SiteFooter() {
         <p>The connected D2D system</p>
         <div>
           <a href={marketingUrl}>
-            <span>01</span>
+            <Megaphone aria-hidden="true" />
             <strong>D2D Marketing</strong>
             <small>Clarify + connect · Main practice</small>
           </a>
           <a href={digitalUrl}>
-            <span>02</span>
+            <Code2 aria-hidden="true" />
             <strong>D2D Digital</strong>
             <small>Build + integrate</small>
           </a>
           <Link className="is-current" href={performanceUrl} aria-current="page">
-            <span>03</span>
+            <Gauge aria-hidden="true" />
             <strong>D2D Performance</strong>
             <small>Lead + improve</small>
           </Link>

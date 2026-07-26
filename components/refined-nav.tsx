@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Menu, MoveRight, X } from "lucide-react";
+import { ChevronDown, Code2, Gauge, Megaphone, Menu, MoveRight, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -106,17 +106,17 @@ export function RefinedNav() {
         <span className="performance-ecosystem-label">The D2D system</span>
         <div>
           <a href={marketingUrl}>
-            <span>01</span>
+            <Megaphone aria-hidden="true" />
             <strong>D2D Marketing</strong>
             <small>Clarify + connect</small>
           </a>
           <a href={digitalUrl}>
-            <span>02</span>
+            <Code2 aria-hidden="true" />
             <strong>D2D Digital</strong>
             <small>Build + integrate</small>
           </a>
           <Link className="is-current" href={performanceUrl} aria-current="page">
-            <span>03</span>
+            <Gauge aria-hidden="true" />
             <strong>D2D Performance</strong>
             <small>Lead + improve</small>
           </Link>

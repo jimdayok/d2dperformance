@@ -326,12 +326,12 @@ export default function Home() {
           <div className="instagram-heading" data-reveal>
             <div>
               <p className="eyebrow dark">From Instagram</p>
-              <h2 id="instagram-heading">See what’s happening DAY2DAY.</h2>
+              <h2 id="instagram-heading">See what’s happening across the network.</h2>
             </div>
             <div>
               <p>
-                Ideas, client work, useful observations, and a closer look at
-                how strategy becomes practical marketing.
+                DAY2DAY Marketing and the brands we support—one connected look
+                at ideas, client work, and momentum in market.
               </p>
               <a
                 className="text-link"
@@ -343,7 +343,7 @@ export default function Home() {
               </a>
             </div>
           </div>
-          <InstagramFeed instagramUrl={siteConfig.links.instagram} />
+          <InstagramFeed />
         </section>
 
         <section
