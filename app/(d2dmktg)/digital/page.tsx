@@ -31,29 +31,29 @@ export const metadata: Metadata = {
 
 const capabilities = [
   {
-    number: "01",
     icon: MonitorSmartphone,
+    label: "Web experience",
     title: "Websites",
     copy: "Clear, responsive websites shaped around how real customers search, decide, and take action.",
     tags: ["Strategy", "UX", "Development"],
   },
   {
-    number: "02",
     icon: Blocks,
+    label: "Useful products",
     title: "Digital tools",
     copy: "Focused calculators, diagnostics, forms, portals, and resources that turn expertise into something people can use.",
     tags: ["Product thinking", "Automation", "Utility"],
   },
   {
-    number: "03",
     icon: Workflow,
+    label: "Integrated operations",
     title: "Connected systems",
     copy: "Practical workflows that reduce duplicate work and connect the public experience to the team behind it.",
     tags: ["Integrations", "CMS", "Operations"],
   },
   {
-    number: "04",
     icon: Gauge,
+    label: "Continuous improvement",
     title: "Optimization",
     copy: "Ongoing refinement across performance, accessibility, content structure, and conversion paths.",
     tags: ["Speed", "Accessibility", "Iteration"],
@@ -290,15 +290,19 @@ export default function Home() {
               return (
                 <article key={capability.title} className="capability-card">
                   <div className="card-top">
-                    <span>{capability.number}</span>
-                    <Icon aria-hidden="true" size={24} strokeWidth={1.35} />
+                    <span className="capability-icon">
+                      <Icon aria-hidden="true" size={24} strokeWidth={1.35} />
+                    </span>
+                    <span className="capability-label">{capability.label}</span>
                   </div>
-                  <h3>{capability.title}</h3>
-                  <p>{capability.copy}</p>
-                  <div className="tag-row">
-                    {capability.tags.map((tag) => (
-                      <span key={tag}>{tag}</span>
-                    ))}
+                  <div className="capability-copy">
+                    <h3>{capability.title}</h3>
+                    <p>{capability.copy}</p>
+                    <div className="tag-row">
+                      {capability.tags.map((tag) => (
+                        <span key={tag}>{tag}</span>
+                      ))}
+                    </div>
                   </div>
                 </article>
               );
