@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 import { MobileScrollHeader } from "@/components/mobile-scroll-header";
+import { PublicPagePolish } from "@/components/public-page-polish";
 import "./digital.css";
 
 const marketingUrl = "/";
@@ -86,6 +87,10 @@ export default function Home() {
         ecosystemSelector=".ecosystem-nav"
         headerSelector=".site-header"
         menuSelector=".mobile-nav"
+      />
+      <PublicPagePolish
+        rootSelector=".digital-site"
+        targetSelector="main > section"
       />
       <a className="skip-link" href="#main">
         Skip to content

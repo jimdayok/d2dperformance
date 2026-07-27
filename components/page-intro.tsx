@@ -18,10 +18,13 @@ export function PageIntro({
   secondaryCta,
 }: PageIntroProps) {
   return (
-    <section className="mx-auto max-w-7xl px-6 pt-16 lg:px-8 lg:pt-24">
-      <div className="editorial-frame overflow-hidden px-8 py-14 md:px-12">
-        <div className="grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-end">
-          <div>
+    <section className="page-intro mx-auto max-w-7xl px-6 pt-16 lg:px-8 lg:pt-24">
+      <div className="page-intro-frame editorial-frame overflow-hidden px-8 py-14 md:px-12">
+        <p className="page-intro-marker" aria-hidden="true">
+          D2D / {eyebrow}
+        </p>
+        <div className="relative grid gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-end">
+          <div className="page-intro-copy">
             <SectionHeading eyebrow={eyebrow} title={title} description={description} />
             {primaryCta || secondaryCta ? (
               <div className="mt-8 flex flex-wrap gap-4">
@@ -36,7 +39,7 @@ export function PageIntro({
               </div>
             ) : null}
           </div>
-          <div className="rounded-[2rem] border border-[var(--color-border)] bg-[color:color-mix(in_oklab,var(--color-card)_92%,transparent)] p-8 shadow-[0_18px_45px_rgba(16,24,34,0.05)] backdrop-blur-sm">
+          <div className="page-intro-aside rounded-[2rem] border border-[var(--color-border)] bg-[color:color-mix(in_oklab,var(--color-card)_92%,transparent)] p-8 shadow-[0_18px_45px_rgba(16,24,34,0.05)] backdrop-blur-sm">
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--color-accent)]">
               D2D Perspective
             </p>

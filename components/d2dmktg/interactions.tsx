@@ -6,13 +6,15 @@ import {
   Compass,
   FilePenLine,
   Filter,
+  ExternalLink,
+  Eye,
   MessagesSquare,
   Pause,
   PenTool,
   Play,
   type LucideIcon,
 } from "lucide-react";
-import type { CSSProperties, PointerEvent } from "react";
+import type { CSSProperties } from "react";
 import { useEffect, useRef, useState } from "react";
 
 type Service = {
@@ -571,20 +573,6 @@ export function WorkGallery({ work }: { work: WorkItem[] }) {
 
   const closePreview = () => setActiveIndex(null);
 
-  const handlePointerMove = (
-    event: PointerEvent<HTMLButtonElement>,
-  ) => {
-    const bounds = event.currentTarget.getBoundingClientRect();
-    event.currentTarget.style.setProperty(
-      "--pointer-x",
-      `${event.clientX - bounds.left}px`,
-    );
-    event.currentTarget.style.setProperty(
-      "--pointer-y",
-      `${event.clientY - bounds.top}px`,
-    );
-  };
-
   return (
     <>
       <div className="work-grid">
@@ -594,7 +582,7 @@ export function WorkGallery({ work }: { work: WorkItem[] }) {
             type="button"
             key={item.name}
             onClick={() => setActiveIndex(index)}
-            onPointerMove={handlePointerMove}
+            aria-label={`Preview ${item.name} project`}
             data-reveal
             style={{ "--reveal-delay": `${index * 90}ms` } as CSSProperties}
           >
@@ -606,16 +594,17 @@ export function WorkGallery({ work }: { work: WorkItem[] }) {
                 sizes="(max-width: 800px) 100vw, 33vw"
                 unoptimized
               />
-              <span className="work-cursor" aria-hidden="true">
-                ↗
-              </span>
+              <span className="work-image-wash" aria-hidden="true" />
             </div>
             <div className="work-meta">
               <div>
                 <h3>{item.name}</h3>
                 <p>{item.services}</p>
               </div>
-              <span aria-hidden="true">↗</span>
+              <span className="work-action">
+                <Eye aria-hidden="true" />
+                Preview project
+              </span>
             </div>
           </button>
         ))}
@@ -665,7 +654,8 @@ export function WorkGallery({ work }: { work: WorkItem[] }) {
                 rel="noreferrer"
                 aria-label={`Visit ${activeItem.name}`}
               >
-                ↗
+                Visit live site
+                <ExternalLink aria-hidden="true" />
               </a>
             </div>
           </div>
