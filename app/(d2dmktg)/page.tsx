@@ -82,6 +82,7 @@ const work = [
     image: "/assets/original/ima-foodservice.jpg",
     alt: "IMA Foodservice campaign work by DAY2DAY Marketing",
     href: "https://imafoodservice.com",
+    embeddable: true,
     services: "Point of sale · Product guides · Digital content",
   },
   {

@@ -1784,6 +1784,82 @@ a {
   background: transparent;
 }
 
+.dialog-static-preview {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  padding: clamp(2rem, 5vw, 5rem);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  color: var(--cream);
+  background:
+    linear-gradient(
+      90deg,
+      rgba(45, 32, 34, 0.92) 0%,
+      rgba(45, 32, 34, 0.72) 46%,
+      rgba(45, 32, 34, 0.14) 100%
+    ),
+    linear-gradient(0deg, rgba(45, 32, 34, 0.78), transparent 60%);
+}
+
+.dialog-static-preview > span {
+  margin-bottom: 1.25rem;
+  color: var(--blush);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+}
+
+.dialog-static-preview > strong {
+  max-width: 12ch;
+  font-family: var(--font-cantata), Georgia, serif;
+  font-size: clamp(2.8rem, 6vw, 6.5rem);
+  font-weight: 400;
+  line-height: 0.94;
+  letter-spacing: -0.045em;
+}
+
+.dialog-static-preview > p {
+  max-width: 36rem;
+  margin: 1.35rem 0 1.75rem;
+  color: rgba(245, 242, 236, 0.76);
+  font-size: clamp(0.82rem, 1.2vw, 1rem);
+  line-height: 1.7;
+}
+
+.dialog-static-preview > a {
+  min-height: 3.2rem;
+  padding: 0.85rem 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--cream);
+  color: var(--plum);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  transition:
+    background-color 300ms ease,
+    color 300ms ease,
+    transform 400ms var(--ease-luxury);
+}
+
+.dialog-static-preview > a:hover {
+  background: var(--blush);
+  color: var(--plum-dark);
+  transform: translateY(-2px);
+}
+
+.dialog-static-preview > a svg {
+  width: 1rem;
+  height: 1rem;
+  stroke-width: 1.5;
+}
+
 .dialog-meta {
   display: flex;
   align-items: center;
@@ -1803,6 +1879,14 @@ a {
   margin: 0;
   color: rgba(245, 242, 236, 0.66);
   font-size: 0.76rem;
+}
+
+.dialog-site-note {
+  color: rgba(245, 242, 236, 0.52);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
 }
 
 .dialog-meta > a {

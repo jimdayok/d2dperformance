@@ -27,6 +27,7 @@ type WorkItem = {
   image: string;
   alt: string;
   href: string;
+  embeddable?: boolean;
   services: string;
 };
 
@@ -637,26 +638,49 @@ export function WorkGallery({ work }: { work: WorkItem[] }) {
                 sizes="(max-width: 800px) 100vw, 70vw"
                 unoptimized
               />
-              <iframe
-                src={activeItem.href}
-                title={`${activeItem.name} website preview`}
-                loading="eager"
-              />
+              {activeItem.embeddable ? (
+                <iframe
+                  src={activeItem.href}
+                  title={`${activeItem.name} website preview`}
+                  loading="eager"
+                />
+              ) : (
+                <div className="dialog-static-preview">
+                  <span>Featured project</span>
+                  <strong>{activeItem.name}</strong>
+                  <p>
+                    This website protects its pages from embedded previews.
+                    Open the live site to explore the complete experience.
+                  </p>
+                  <a
+                    href={activeItem.href}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Open live site
+                    <ExternalLink aria-hidden="true" />
+                  </a>
+                </div>
+              )}
             </div>
             <div className="dialog-meta">
               <div>
                 <h3>{activeItem.name}</h3>
                 <p>{activeItem.services}</p>
               </div>
-              <a
-                href={activeItem.href}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={`Visit ${activeItem.name}`}
-              >
-                Visit live site
-                <ExternalLink aria-hidden="true" />
-              </a>
+              {activeItem.embeddable ? (
+                <a
+                  href={activeItem.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`Visit ${activeItem.name}`}
+                >
+                  Visit live site
+                  <ExternalLink aria-hidden="true" />
+                </a>
+              ) : (
+                <span className="dialog-site-note">Protected external site</span>
+              )}
             </div>
           </div>
         ) : null}
