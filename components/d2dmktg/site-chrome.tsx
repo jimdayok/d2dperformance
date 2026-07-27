@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Code2, Gauge, Megaphone } from "lucide-react";
+import { Code2, Gauge, Megaphone, Menu } from "lucide-react";
 import type { ReactNode } from "react";
 import { MotionController } from "@/components/d2dmktg/interactions";
+import { MobileScrollHeader } from "@/components/mobile-scroll-header";
 import { siteConfig } from "@/lib/d2dmktg/site-config";
 
 function Arrow() {
@@ -82,6 +83,12 @@ export function SiteHeader() {
   return (
     <>
       <MotionController />
+      <MobileScrollHeader
+        breakpoint={980}
+        ecosystemSelector=".d2d-ecosystem-nav"
+        headerSelector=".site-header"
+        menuSelector=".mobile-nav"
+      />
       <a className="skip-link" href="#main">
         Skip to content
       </a>
@@ -132,13 +139,22 @@ export function SiteHeader() {
           </details>
 
           <details className="mobile-nav">
-            <summary aria-label="Open navigation">Menu</summary>
+            <summary aria-label="Open navigation">
+              <Menu aria-hidden="true" />
+              <span>Menu</span>
+            </summary>
             <nav aria-label="Mobile navigation">
               {navigation.map((item) => (
                 <Link href={item.href} key={item.href}>
                   {item.label}
                 </Link>
               ))}
+              <span className="mobile-login-label">The D2D System</span>
+              <Link href="/">D2D Marketing / Main</Link>
+              <Link href={siteConfig.links.d2dDigital}>D2D Digital</Link>
+              <Link href={siteConfig.links.d2dPerformance}>
+                D2D Performance
+              </Link>
               <span className="mobile-login-label">Client Login</span>
               <a
                 href={siteConfig.links.brandVault}

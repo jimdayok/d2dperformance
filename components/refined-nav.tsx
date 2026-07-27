@@ -59,6 +59,7 @@ export function RefinedNav() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileCompact, setIsMobileCompact] = useState(false);
   const [desktopMenu, setDesktopMenu] = useState<DesktopMenu>(null);
 
   const servicesActive = serviceItems.some((item) => item.href === pathname);
@@ -96,12 +97,66 @@ export function RefinedNav() {
     };
   }, []);
 
+  useEffect(() => {
+    const mobile = window.matchMedia("(max-width: 680px)");
+    let compactTimer: number | undefined;
+
+    function clearCompactTimer() {
+      if (compactTimer !== undefined) {
+        window.clearTimeout(compactTimer);
+        compactTimer = undefined;
+      }
+    }
+
+    function updateMobileHeader() {
+      if (!mobile.matches || window.scrollY < 96 || isOpen) {
+        clearCompactTimer();
+        setIsMobileCompact(false);
+        return;
+      }
+
+      if (compactTimer === undefined) {
+        compactTimer = window.setTimeout(() => {
+          compactTimer = undefined;
+
+          if (mobile.matches && window.scrollY >= 96 && !isOpen) {
+            setIsMobileCompact(true);
+          }
+        }, 1800);
+      }
+    }
+
+    const initialFrame = window.requestAnimationFrame(updateMobileHeader);
+    window.addEventListener("scroll", updateMobileHeader, { passive: true });
+    mobile.addEventListener("change", updateMobileHeader);
+
+    return () => {
+      clearCompactTimer();
+      window.cancelAnimationFrame(initialFrame);
+      window.removeEventListener("scroll", updateMobileHeader);
+      mobile.removeEventListener("change", updateMobileHeader);
+    };
+  }, [isOpen]);
+
   function closeMobileMenu() {
     setIsOpen(false);
   }
 
+  function toggleMobileMenu() {
+    const nextOpen = !isOpen;
+    setIsOpen(nextOpen);
+
+    if (nextOpen) {
+      setIsMobileCompact(false);
+    }
+  }
+
   return (
-    <header className="performance-site-header">
+    <header
+      className={`performance-site-header${
+        isMobileCompact && !isOpen ? " is-mobile-compact" : ""
+      }`}
+    >
       <nav className="performance-ecosystem-nav" aria-label="D2D companies">
         <span className="performance-ecosystem-label">The D2D system</span>
         <div>
@@ -294,7 +349,7 @@ export function RefinedNav() {
                 ? "rounded-[1rem] border-[var(--color-border)] bg-[var(--color-card)]"
                 : "rounded-[1rem] border-transparent bg-[color:color-mix(in_oklab,var(--color-card)_44%,transparent)]"
             }`}
-            onClick={() => setIsOpen((current) => !current)}
+            onClick={toggleMobileMenu}
             aria-expanded={isOpen}
             aria-controls="mobile-navigation"
             aria-label="Toggle navigation"
@@ -372,6 +427,19 @@ export function RefinedNav() {
                   Websites, tools, and connected systems
                 </span>
               </a>
+              <Link
+                href={performanceUrl}
+                aria-current="page"
+                className="rounded-[0.9rem] border border-[var(--color-accent)] bg-[var(--color-surface)] px-4 py-3"
+                onClick={closeMobileMenu}
+              >
+                <span className="block text-sm font-semibold text-[var(--color-ink)]">
+                  D2D Performance
+                </span>
+                <span className="mt-1 block text-xs text-[var(--color-muted)]">
+                  Leadership, operating rhythm, and improvement
+                </span>
+              </Link>
             </div>
           </div>
 

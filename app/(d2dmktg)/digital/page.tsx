@@ -6,12 +6,14 @@ import {
   Code2,
   Gauge,
   Layers3,
+  Menu,
   Megaphone,
   MonitorSmartphone,
   PanelsTopLeft,
   Workflow,
 } from "lucide-react";
 import type { Metadata } from "next";
+import { MobileScrollHeader } from "@/components/mobile-scroll-header";
 import "./digital.css";
 
 const marketingUrl = "/";
@@ -79,6 +81,12 @@ function Arrow() {
 export default function Home() {
   return (
     <div className="digital-site">
+      <MobileScrollHeader
+        breakpoint={760}
+        ecosystemSelector=".ecosystem-nav"
+        headerSelector=".site-header"
+        menuSelector=".mobile-nav"
+      />
       <a className="skip-link" href="#main">
         Skip to content
       </a>
@@ -123,7 +131,10 @@ export default function Home() {
         </a>
 
         <details className="mobile-nav">
-          <summary>Menu</summary>
+          <summary>
+            <Menu aria-hidden="true" />
+            <span>Menu</span>
+          </summary>
           <nav aria-label="Mobile navigation">
             <a href="#capabilities">Capabilities</a>
             <a href="#approach">Approach</a>

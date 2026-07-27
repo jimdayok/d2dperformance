@@ -82,6 +82,10 @@ summary {
   border-bottom: 1px solid rgba(241, 236, 226, 0.24);
   background: rgba(6, 17, 22, 0.34);
   backdrop-filter: blur(10px);
+  transition:
+    background-color 420ms ease,
+    min-height 420ms ease,
+    top 420ms ease;
 }
 
 .ecosystem-nav {
@@ -92,6 +96,9 @@ summary {
   color: var(--cream);
   background: rgba(4, 13, 18, 0.96);
   border-bottom: 1px solid rgba(99, 228, 255, 0.15);
+  transition:
+    opacity 380ms ease,
+    transform 420ms ease;
 }
 
 .ecosystem-inner {
@@ -1132,6 +1139,9 @@ summary {
   .mobile-nav summary {
     cursor: pointer;
     list-style: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
     color: var(--cream);
     font-size: 0.65rem;
     letter-spacing: 0.15em;
@@ -1140,6 +1150,12 @@ summary {
 
   .mobile-nav summary::-webkit-details-marker {
     display: none;
+  }
+
+  .mobile-nav summary svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    stroke-width: 1.5;
   }
 
   .mobile-nav nav {
@@ -1180,6 +1196,27 @@ summary {
     display: flex;
     justify-content: center;
     text-align: center;
+  }
+
+  .ecosystem-nav.is-mobile-compact {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-100%);
+  }
+
+  .site-header.is-mobile-compact {
+    top: 0.5rem;
+    min-height: 54px;
+    background: rgba(6, 17, 22, 0.96);
+    backdrop-filter: blur(16px);
+  }
+
+  .site-header.is-mobile-compact .brand-parent {
+    display: none;
+  }
+
+  .site-header.is-mobile-compact .brand-name {
+    font-size: 0.95rem;
   }
 
   .ecosystem-position-heading {
