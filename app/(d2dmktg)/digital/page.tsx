@@ -17,7 +17,7 @@ import { PublicPagePolish } from "@/components/public-page-polish";
 import { createMetadata } from "@/lib/metadata";
 import "./digital.css";
 
-const marketingUrl = "/";
+const marketingUrl = "https://d2dmktg.com";
 const performanceUrl = "/#top";
 const digitalContactUrl = "/#contact";
 

@@ -24,7 +24,7 @@ const footerLinks = navigation.filter((item) =>
 
 const websiteManagementUrl = "https://portal.d2dperformance.com/portal/login";
 const brandVaultUrl = "https://brandvault.d2dperformance.com";
-const marketingUrl = "/";
+const marketingUrl = "https://d2dmktg.com";
 const digitalUrl = "/digital";
 
 export function SiteFooter() {

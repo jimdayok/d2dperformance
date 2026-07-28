@@ -2,12 +2,17 @@
 
 Last updated: 2026-07-28
 
+> Architecture correction: the DAY2DAY Marketing proposal site is the primary
+> site at `d2dmktg.com`. The Performance application is a subsite at
+> `performance.d2dmktg.com`; it is not the apex website.
+
 ## Working checklist
 
 ### Code changes
 
 - [x] Preserve the existing working tree and create `migration/d2dmktg-production`.
-- [x] Make the newer consulting website the root website.
+- [x] Move the DAY2DAY Marketing proposal website to the root domain.
+- [x] Move the Performance website to `performance.d2dmktg.com`.
 - [x] Remove route-group conflicts without discarding unrelated work.
 - [x] Add explicit legacy-path redirects and redirect tests.
 - [x] Add privacy, terms, and not-found coverage where missing.
@@ -25,7 +30,10 @@ Last updated: 2026-07-28
 - [x] Confirm linked project `jimdayoks-projects/d2dperformance`.
 - [x] Confirm Vercel authentication and current production deployment.
 - [x] Inventory environment-variable names without reading values.
-- [x] Add `d2dmktg.com` and `www.d2dmktg.com` after cutover approval.
+- [x] Attach `d2dmktg.com` and `www.d2dmktg.com` to the
+  `jimdayoks-projects/d2dmktg-proposal` project after cutover approval.
+- [x] Attach `performance.d2dmktg.com` to
+  `jimdayoks-projects/d2dperformance`.
 - [x] Retrieve exact Vercel DNS recommendations through the authenticated domain-config API.
 - [x] Keep both `d2dperformance.com` hostnames attached for permanent redirects.
 
@@ -39,7 +47,8 @@ Last updated: 2026-07-28
 
 ### Redirects
 
-- [x] Implement redirects for both D2D Performance hostnames path-for-path to `https://d2dmktg.com`.
+- [x] Implement redirects for both D2D Performance hostnames path-for-path to
+  `https://performance.d2dmktg.com`.
 - [x] Implement the `www.d2dmktg.com` path-for-path redirect to the apex hostname.
 - [x] Map legacy D2D Marketing paths to legitimate current destinations.
 - [x] Verify one-hop HTTPS redirects with query-string preservation locally.
@@ -58,7 +67,8 @@ Last updated: 2026-07-28
 
 ### SEO work
 
-- [x] Set `https://d2dmktg.com` as the metadata base and canonical origin.
+- [x] Set `https://d2dmktg.com` as the proposal site's metadata base and
+  canonical origin.
 - [x] Update sitemap, robots, Open Graph, X/Twitter, and structured-data URLs.
 - [x] Preserve the newer site route inventory and map obsolete old-site routes.
 - [x] Preserve the existing GTM and Meta Pixel identifiers with environment overrides.
@@ -98,14 +108,19 @@ Last updated: 2026-07-28
 
 ## Current production snapshot
 
-- `d2dmktg.com`: primary Vercel production domain.
+- `d2dmktg.com`: primary production domain for Vercel project
+  `d2dmktg-proposal`.
 - `www.d2dmktg.com`: one-hop `308` redirect to the apex domain.
-- `d2dperformance.com`: one-hop, path-preserving `308` redirect to the new apex.
-- `www.d2dperformance.com`: one-hop, path-preserving `308` redirect to the new apex.
+- `performance.d2dmktg.com`: production domain for Vercel project
+  `d2dperformance`.
+- `d2dperformance.com`: one-hop, path-preserving `308` redirect to the
+  Performance subsite.
+- `www.d2dperformance.com`: one-hop, path-preserving `308` redirect to the
+  Performance subsite.
 - `d2dmktg.com` nameservers: `ns1.s416.sureserver.com`, `ns2.s416.sureserver.com`.
 - `d2dmktg.com` MX: priority `0`, `mail.d2dmktg.com`.
-- Production deployment: `dpl_34sQ928A7uAF2pEwzvTC2eEgV6uC`.
-- Vercel certificate: `cert_CAsinUD4HXLnY25q0JOAQi0W`.
+- Proposal production deployment:
+  `dpl_3C3zEyGyjjD6SguxU7erqGNhHCZF`.
 
 ## Applied DNS plan
 
@@ -118,6 +133,7 @@ explicit `www` record were changed.
 | A | `@` | `192.252.151.38` | `76.76.21.21` | Modified | Serve the apex from Vercel | None; the MX and explicit mail-host A records remain on ICDSoft |
 | `www` inherited wildcard | `www` | `192.252.151.38` | — | Superseded with explicit record | Remove the old website endpoint | None |
 | CNAME | `www` | — | `cname.vercel-dns.com.` | Added | Route `www` to Vercel for the one-hop apex redirect | None |
+| A | `performance` | — | `76.76.21.21` | Added | Route the Performance subsite to Vercel | None |
 | MX | `@` | `0 mail.d2dmktg.com.` | Unchanged | Protect | ICDSoft inbound mail | Must remain unchanged |
 | A | `mail` | `192.252.151.38` | Unchanged | Protect | ICDSoft mail host | Must remain unchanged |
 | A | `mbox` | `192.252.151.38` | Unchanged | Protect | ICDSoft webmail | Unchanged |
@@ -127,26 +143,33 @@ explicit `www` record were changed.
 | TXT | `_dmarc` | No record existed | Unchanged | Protect | DMARC policy | Unchanged |
 | NS | `@` | `ns1.s416.sureserver.com`, `ns2.s416.sureserver.com` | Unchanged | Protect | Authoritative DNS remains at ICDSoft | Must remain unchanged |
 
-## Verified candidate deployment
+## Verified proposal deployment
 
-- Preview: `https://d2dperformance-2rbtuu8hv-jimdayoks-projects.vercel.app`
-- Vercel deployment: `dpl_34bQnoocqsnhT1oYhpVMsugoGPgZ`
-- Local lint, TypeScript, 31 automated tests, and production build passed.
-- All 13 public content routes plus sitemap, robots, and manifest returned `200`
-  from the protected Vercel preview.
+- Preview:
+  `https://d2dmktg-proposal-awuoj778d-jimdayoks-projects.vercel.app`
+- Vercel production deployment: `dpl_3C3zEyGyjjD6SguxU7erqGNhHCZF`
+- Local lint, TypeScript, 22 automated tests, production build, and static
+  export passed.
+- All proposal routes plus sitemap and robots returned `200` from the Vercel
+  preview and production deployment.
 - Desktop and mobile browser checks found no overflow, broken images,
   navigation failure, hydration failure, or unexpected console errors.
 
 ## Production verification
 
-- Production deployment `dpl_34sQ928A7uAF2pEwzvTC2eEgV6uC` is `READY`.
-- All 13 public routes return `200` from the canonical Vercel origin.
+- Proposal production deployment `dpl_3C3zEyGyjjD6SguxU7erqGNhHCZF` is
+  `READY`.
+- The apex serves the DAY2DAY Marketing proposal site. Representative proposal
+  routes, legal pages, sitemap, and robots return `200`.
+- `performance.d2dmktg.com` serves the Performance application.
 - Every tested page has one canonical URL on `https://d2dmktg.com`, correct
   D2D Marketing titles, and no former company-name reference.
 - Sitemap, robots, manifest, Open Graph, JSON-LD, analytics tags, and social
   images are reachable and use the canonical origin.
-- All alternate hostnames redirect in one `308` hop while preserving the path
-  and query string.
+- `www.d2dmktg.com` redirects to the proposal apex in one `308` hop.
+- Both legacy Performance hostnames redirect to
+  `performance.d2dmktg.com` in one `308` hop while preserving the path and
+  query string.
 - A single clearly labeled contact-form test returned `200`; ICDSoft's
   post-cutover mail-delivery log records successful local delivery to the
   established mailbox.
@@ -169,4 +192,10 @@ explicit `www` record were changed.
 
 ## Rollback principle
 
-Until post-launch verification is complete, keep the ICDSoft website files and all email services intact. A website-only rollback consists of restoring the prior apex and `www` DNS records to `192.252.151.38`; no MX, TXT, mail, webmail, autodiscover, autoconfig, nameserver, registrar, mailbox, or calendar record is part of the migration.
+Until post-launch verification is complete, keep the ICDSoft website files and
+all email services intact. A website-only rollback consists of reattaching the
+apex and `www` domains to the prior Vercel project, or restoring the prior apex
+and `www` DNS records to `192.252.151.38`. The Performance subsite can be rolled
+back by removing only its explicit `performance` web record. No MX, TXT, mail,
+webmail, autodiscover, autoconfig, nameserver, registrar, mailbox, or calendar
+record is part of the migration.

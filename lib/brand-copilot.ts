@@ -97,6 +97,7 @@ function getExpectedOrigins(headerList: Headers) {
       .split(",")
       .map((value) => value.trim())
       .filter(Boolean),
+    "https://performance.d2dmktg.com",
     "https://d2dmktg.com",
   ];
 }

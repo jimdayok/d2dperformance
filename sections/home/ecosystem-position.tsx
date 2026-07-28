@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 
-const marketingUrl = "/";
+const marketingUrl = "https://d2dmktg.com";
 const digitalUrl = "/digital";
 
 export function EcosystemPositionSection() {

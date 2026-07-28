@@ -1,15 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const canonicalWebsiteHost = "d2dmktg.com";
-const redirectWebsiteHosts = new Set([
-  "www.d2dmktg.com",
+const canonicalWebsiteHost = "performance.d2dmktg.com";
+const performanceRedirectHosts = new Set([
   "d2dperformance.com",
   "www.d2dperformance.com",
 ]);
 const publicWebsiteHosts = new Set([
   canonicalWebsiteHost,
-  ...redirectWebsiteHosts,
+  ...performanceRedirectHosts,
 ]);
 
 export async function proxy(request: NextRequest) {
@@ -17,9 +16,16 @@ export async function proxy(request: NextRequest) {
   const isPortalHost = hostname === "portal.d2dperformance.com" || hostname === "portal.localhost";
   const url = request.nextUrl.clone();
 
-  if (redirectWebsiteHosts.has(hostname)) {
+  if (performanceRedirectHosts.has(hostname)) {
     url.protocol = "https:";
     url.hostname = canonicalWebsiteHost;
+    url.port = "";
+    return NextResponse.redirect(url, 308);
+  }
+
+  if (hostname === "www.d2dmktg.com") {
+    url.protocol = "https:";
+    url.hostname = "d2dmktg.com";
     url.port = "";
     return NextResponse.redirect(url, 308);
   }

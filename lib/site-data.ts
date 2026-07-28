@@ -3,7 +3,7 @@ const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
 export const siteUrl =
   configuredSiteUrl && /^https?:\/\//.test(configuredSiteUrl)
     ? configuredSiteUrl.replace(/\/+$/, "")
-    : "https://d2dmktg.com";
+    : "https://performance.d2dmktg.com";
 
 export const companyName = "D2D Marketing";
 export const parentBrandName = "DAY2DAY Marketing";

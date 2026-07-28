@@ -10,7 +10,7 @@ import { proxy } from "@/proxy";
 describe("D2D Marketing production migration", () => {
   it("uses the approved brand and canonical origin", () => {
     expect(companyName).toBe("D2D Marketing");
-    expect(siteUrl).toBe("https://d2dmktg.com");
+    expect(siteUrl).toBe("https://performance.d2dmktg.com");
   });
 
   it("publishes only canonical sitemap URLs", () => {
@@ -66,8 +66,21 @@ describe("D2D Marketing production migration", () => {
   it.each([
     "d2dperformance.com",
     "www.d2dperformance.com",
-    "www.d2dmktg.com",
-  ])("redirects %s to the canonical host while preserving path and query", async (host) => {
+  ])("redirects %s to the Performance subsite while preserving path and query", async (host) => {
+    const request = new NextRequest(
+      `https://${host}/services/example?campaign=migration`,
+      { headers: { host } },
+    );
+    const response = await proxy(request);
+
+    expect(response.status).toBe(308);
+    expect(response.headers.get("location")).toBe(
+      "https://performance.d2dmktg.com/services/example?campaign=migration",
+    );
+  });
+
+  it("redirects the Marketing www hostname to the Marketing apex", async () => {
+    const host = "www.d2dmktg.com";
     const request = new NextRequest(
       `https://${host}/services/example?campaign=migration`,
       { headers: { host } },
@@ -91,13 +104,13 @@ describe("D2D Marketing production migration", () => {
     expect(
       hasTrustedPublicOrigin(
         new Request("https://preview.example/api/contact/submit", {
-          headers: { origin: "https://d2dmktg.com" },
+          headers: { origin: "https://performance.d2dmktg.com" },
         }),
       ),
     ).toBe(true);
     expect(
       hasTrustedPublicOrigin(
-        new Request("https://d2dmktg.com/api/contact/submit", {
+        new Request("https://performance.d2dmktg.com/api/contact/submit", {
           headers: { origin: "https://example.com" },
         }),
       ),
