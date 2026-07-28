@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { MobileScrollHeader } from "@/components/mobile-scroll-header";
 import { PublicPagePolish } from "@/components/public-page-polish";
+import { SiteFooter } from "@/components/site-footer";
 import { createMetadata } from "@/lib/metadata";
 import "./digital.css";
 
@@ -384,34 +385,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="site-footer">
-        <div className="footer-main">
-          <div>
-            <p className="brand-parent">DAY2DAY</p>
-            <p className="footer-logo">D2D DIGITAL<span aria-hidden="true">_</span></p>
-            <p className="footer-statement">
-              Websites, tools, and systems built to support the work that
-              happens DAY2DAY.
-            </p>
-          </div>
-          <div>
-            <h2>Explore</h2>
-            <a href="#capabilities">Capabilities</a>
-            <a href="#approach">Approach</a>
-            <a href="#systems">Systems</a>
-          </div>
-          <div>
-            <h2>D2D system</h2>
-            <a href={marketingUrl}>D2D Marketing / Main <Arrow /></a>
-            <a href="#top" aria-current="page">D2D Digital / Build</a>
-            <a href={performanceUrl}>D2D Performance / Improve <Arrow /></a>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} D2D Digital.</span>
-          <span>Designed and built for the DAY2DAY.</span>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
