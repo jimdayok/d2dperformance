@@ -64,8 +64,10 @@ Last updated: 2026-07-28
 - [x] Preserve the existing GTM and Meta Pixel identifiers with environment overrides.
 - [x] Preserve the existing Google verification record and add the
   `d2dmktg.com` domain property to the available Search Console account.
-- [ ] Verify the new Search Console property and submit the sitemap after the
-  newly issued TXT record is approved and added.
+- [x] Add the newly approved Search Console TXT record, verify domain
+  ownership, and submit the production sitemap successfully.
+- [ ] Verify `d2dperformance.com` in the available Search Console account and
+  complete Google's Change of Address process.
 
 ### Deployment
 
@@ -90,9 +92,8 @@ Last updated: 2026-07-28
 - [x] One clearly labeled production form submission.
 - [ ] One new outbound message from an `@d2dmktg.com` mailbox; mailbox
   credentials were not available through the signed-in hosting session.
-- [ ] Approval to add Search Console's newly issued root TXT verification
-  record; it was not added because the approved DNS scope covered only web
-  records and protected existing verification records.
+- [x] Approval to add Search Console's newly issued root TXT verification
+  record.
 - [ ] Search Console, Bing, Business Profile, analytics, and social-account login where unavailable.
 
 ## Current production snapshot
@@ -121,6 +122,7 @@ explicit `www` record were changed.
 | A | `mail` | `192.252.151.38` | Unchanged | Protect | ICDSoft mail host | Must remain unchanged |
 | A | `mbox` | `192.252.151.38` | Unchanged | Protect | ICDSoft webmail | Unchanged |
 | TXT | SPF and verification records | Captured in ICDSoft | Unchanged | Protect | Mail authentication and ownership verification | Unchanged |
+| TXT | `@` | — | Google Search Console token | Added after separate approval | Verify `d2dmktg.com` domain-property ownership | None |
 | TXT | `dkim._domainkey` | Captured in ICDSoft | Unchanged | Protect | DKIM signing | Unchanged |
 | TXT | `_dmarc` | No record existed | Unchanged | Protect | DMARC policy | Unchanged |
 | NS | `@` | `ns1.s416.sureserver.com`, `ns2.s416.sureserver.com` | Unchanged | Protect | Authoritative DNS remains at ICDSoft | Must remain unchanged |
@@ -151,10 +153,13 @@ explicit `www` record were changed.
 - ICDSoft SMTP on port `465` and IMAP on port `993` both complete TLS 1.3
   handshakes with valid certificates. A new authenticated outbound mailbox
   message still requires mailbox access.
-- The `d2dmktg.com` Search Console domain property has been added to the
-  available Google account. Verification and sitemap submission are waiting on
-  the newly issued root TXT record; that record was not added without approval
-  to expand the protected DNS scope.
+- The `d2dmktg.com` Search Console domain property is verified through its
+  separately approved root TXT record. Google accepted
+  `https://d2dmktg.com/sitemap.xml` with a successful submission status on
+  2026-07-28.
+- The available Search Console account does not currently contain a
+  `d2dperformance.com` property, so Google's Change of Address process remains
+  pending legacy-domain verification.
 - Vercel reports both new domains valid with SSL. Its newer anycast DNS targets
   are optional recommendations; the approved `76.76.21.21` and
   `cname.vercel-dns.com.` targets remain valid and are serving production.
