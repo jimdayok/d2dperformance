@@ -206,7 +206,7 @@ function buildBeautifulEmailHtml(
     <div style="background:#f6f0e8; padding:32px 20px; font-family: 'IBM Plex Sans', Arial, sans-serif; color:#151515;">
       <div style="max-width:980px; margin:0 auto; background:#fbf6ef; border:1px solid rgba(21,21,21,0.12);">
         <div style="padding:28px 32px; border-bottom:1px solid rgba(21,21,21,0.12); background:linear-gradient(180deg, rgba(255,255,255,0.45), rgba(239,230,218,0.65));">
-          <div style="font-size:11px; letter-spacing:0.32em; text-transform:uppercase; color:#9a5f34; font-weight:600;">D2D Performance</div>
+          <div style="font-size:11px; letter-spacing:0.32em; text-transform:uppercase; color:#9a5f34; font-weight:600;">D2D Marketing</div>
           <h1 style="margin:16px 0 10px; font-family: Georgia, 'Times New Roman', serif; font-size:42px; line-height:1.02; letter-spacing:-0.04em; font-weight:600; color:#151515;">
             ${escapeHtml(options.label)}
           </h1>
@@ -391,7 +391,7 @@ function buildPartialNotificationHtml(payload: DiscoveryProgressPayload) {
     <div style="background:#f6f0e8; padding:32px 20px; font-family:'IBM Plex Sans', Arial, sans-serif; color:#151515;">
       <div style="max-width:980px; margin:0 auto; background:#fbf6ef; border:1px solid rgba(21,21,21,0.12);">
         <div style="padding:28px 32px; border-bottom:1px solid rgba(21,21,21,0.12); background:linear-gradient(180deg, rgba(255,255,255,0.45), rgba(239,230,218,0.65));">
-          <div style="font-size:11px; letter-spacing:0.32em; text-transform:uppercase; color:#9a5f34; font-weight:600;">D2D Performance</div>
+          <div style="font-size:11px; letter-spacing:0.32em; text-transform:uppercase; color:#9a5f34; font-weight:600;">D2D Marketing</div>
           <h1 style="margin:16px 0 10px; font-family:Georgia, 'Times New Roman', serif; font-size:42px; line-height:1.02; letter-spacing:-0.04em; color:#151515;">
             Partial Brand Discovery Started
           </h1>
@@ -771,7 +771,7 @@ function buildCustomerConfirmationHtml() {
   return `
     <div style="background:#f6f0e8; padding:32px 20px; font-family:'IBM Plex Sans', Arial, sans-serif; color:#151515;">
       <div style="max-width:640px; margin:0 auto; background:#fbf6ef; border:1px solid rgba(21,21,21,0.12); padding:32px;">
-        <div style="font-size:11px; letter-spacing:0.32em; text-transform:uppercase; color:#9a5f34; font-weight:600;">D2D Performance</div>
+        <div style="font-size:11px; letter-spacing:0.32em; text-transform:uppercase; color:#9a5f34; font-weight:600;">D2D Marketing</div>
         <h1 style="margin:16px 0 0; font-family:Georgia, 'Times New Roman', serif; font-size:34px; line-height:1.08; letter-spacing:-0.04em; color:#151515;">
           Your brand discovery request has been received.
         </h1>
@@ -809,7 +809,7 @@ async function generateDiscoveryInsight(
   };
 
   const systemPrompt = [
-    "You are preparing an internal advisory intake brief for D2D Performance.",
+    "You are preparing an internal advisory intake brief for D2D Marketing.",
     "Return strict JSON only.",
     "Create two sections:",
     "1) an executive summary of the discovery answers",

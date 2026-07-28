@@ -7,15 +7,14 @@ export function EcosystemPositionSection() {
   return (
     <section className="performance-ecosystem-position">
       <div className="performance-ecosystem-heading">
-        <p className="eyebrow-label">Where Performance fits</p>
+        <p className="eyebrow-label">How the work connects</p>
         <h2 className="font-display">
           The improvement stage of a connected business journey.
         </h2>
         <p>
-          D2D Performance is a distinct advisory practice. It becomes especially
-          powerful when the brand is clear, the right digital systems are in
-          place, and leadership is ready to make the whole business perform
-          better.
+          D2D Marketing brings brand clarity, growth strategy, leadership
+          alignment, and digital execution into one practical operating
+          conversation.
         </p>
       </div>
 
@@ -55,7 +54,7 @@ export function EcosystemPositionSection() {
             <span>Improve it</span>
             <em>Current</em>
           </div>
-          <h3 className="font-display">D2D Performance</h3>
+          <h3 className="font-display">D2D Marketing</h3>
           <p>
             Align leadership, establish the operating cadence, and improve the
             systems that turn strategy into repeatable execution.

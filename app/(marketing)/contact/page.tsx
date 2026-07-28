@@ -2,12 +2,20 @@ import { Mail, PhoneCall, ShieldCheck } from "lucide-react";
 import { ButtonLink } from "@/components/button-link";
 import { ContactForm } from "@/components/contact-form";
 import { PageIntro } from "@/components/page-intro";
-import { contactAudience, leadershipProfiles } from "@/lib/site-data";
+import {
+  companyName,
+  contactAudience,
+  leadershipProfiles,
+  primaryEmail,
+  primaryPhone,
+  primaryPhoneHref,
+  serviceArea,
+} from "@/lib/site-data";
 import { createMetadata } from "@/lib/metadata";
 
 export const metadata = createMetadata({
   title: "Contact",
-  description: "Start a discovery conversation with D2D Performance.",
+  description: "Start a discovery conversation with D2D Marketing.",
   path: "/contact",
 });
 
@@ -67,7 +75,7 @@ export default function ContactPage() {
               Contact
             </p>
             <h2 className="mt-4 font-display text-4xl font-semibold tracking-[-0.03em]">
-              D2D Performance
+              {companyName}
             </h2>
             <p className="mt-5 text-base leading-8 text-white/75">
               Discovery conversations are designed for owners, founders, and
@@ -75,17 +83,23 @@ export default function ContactPage() {
               execution.
             </p>
             <div className="mt-8 space-y-4 text-sm text-white/78">
-              <p className="inline-flex items-center gap-3">
+              <a
+                href={`mailto:${primaryEmail}`}
+                className="flex items-center gap-3 transition hover:text-white"
+              >
                 <Mail className="h-4 w-4 text-[var(--color-sand)]" />
-                Brand discovery lives inside the site, not an email handoff.
-              </p>
-              <p className="inline-flex items-center gap-3">
+                {primaryEmail}
+              </a>
+              <a
+                href={`tel:${primaryPhoneHref}`}
+                className="flex items-center gap-3 transition hover:text-white"
+              >
                 <PhoneCall className="h-4 w-4 text-[var(--color-sand)]" />
-                Discovery calls by appointment
-              </p>
+                {primaryPhone}
+              </a>
               <p className="inline-flex items-center gap-3">
                 <ShieldCheck className="h-4 w-4 text-[var(--color-sand)]" />
-                Strategy-first, relationship-first, practical
+                {serviceArea}
               </p>
             </div>
             <div className="mt-8">

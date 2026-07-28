@@ -8,6 +8,7 @@ export type ContactSubmission = {
   message: string;
   page?: string | null;
   source?: string | null;
+  website?: string | null;
 };
 
 const {
@@ -58,10 +59,10 @@ export function validateContactSubmission(payload: ContactSubmission) {
 }
 
 export function getContactFormConfig() {
-  const to = normalizeOptional(CONTACT_FORM_TO_EMAIL) ?? "brand@d2dperformance.com";
+  const to = normalizeOptional(CONTACT_FORM_TO_EMAIL) ?? "andrea@d2dmktg.com";
   const preferredFrom =
     normalizeOptional(CONTACT_FORM_FROM_EMAIL) ??
-    "D2D Performance <brand@d2dperformance.com>";
+    "D2D Marketing <andrea@d2dmktg.com>";
   const fallbackFrom = normalizeOptional(BRAND_DISCOVERY_FROM_EMAIL);
 
   return {
@@ -75,7 +76,7 @@ export function getContactFormConfig() {
 
 function buildContactEmailText(payload: ContactSubmission, submittedAt: string) {
   return [
-    "New contact form submission",
+    "New D2D Marketing contact form submission",
     "",
     `Name: ${payload.name.trim()}`,
     `Company: ${normalizeOptional(payload.company) ?? "Not provided"}`,
@@ -106,6 +107,7 @@ function buildContactEmailHtml(payload: ContactSubmission, submittedAt: string) 
 
   return `
     <div style="font-family: Arial, sans-serif; color: #171717; line-height: 1.6;">
+      <p style="font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: #9a5f34;">D2D Marketing</p>
       <h1 style="font-size: 22px; margin-bottom: 16px;">New contact form submission</h1>
       <table style="border-collapse: collapse; width: 100%; max-width: 720px;">
         <tbody>
@@ -144,7 +146,7 @@ export async function sendContactSubmissionEmail(payload: ContactSubmission) {
   const emailPayload = {
     to: config.to,
     replyTo: payload.email.trim(),
-    subject: `New Contact Form Submission: ${subjectTarget}`,
+    subject: `D2D Marketing Contact: ${subjectTarget}`,
     text: buildContactEmailText(payload, submittedAt),
     html: buildContactEmailHtml(payload, submittedAt),
   };

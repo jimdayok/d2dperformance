@@ -14,7 +14,7 @@ import { leadershipProfiles, operatingPrinciples } from "@/lib/site-data";
 export const metadata = createMetadata({
   title: "About",
   description:
-    "Learn how D2D Performance approaches executive advising with clarity, discipline, and practical business judgment.",
+    "Learn how D2D Marketing approaches brand strategy and business growth with clarity, discipline, and practical judgment.",
   path: "/about",
 });
 
@@ -24,7 +24,7 @@ export default function AboutPage() {
       <PageIntro
         eyebrow="About"
         title="Senior-level guidance for companies that need sharper leadership, stronger brand clarity, and better execution."
-        description="D2D Performance combines practical brand strategy, executive perspective, commercial thinking, and digital systems discipline so growth feels more intentional and less reactive."
+        description="D2D Marketing combines practical brand strategy, executive perspective, commercial thinking, and digital systems discipline so growth feels more intentional and less reactive."
         primaryCta={{ href: "/#brand-discovery", label: "Start Brand Discovery" }}
         secondaryCta={{ href: "/brand-development#brand-discovery", label: "Open Discovery Page" }}
       />
@@ -32,13 +32,13 @@ export default function AboutPage() {
         <div className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
           <article className="editorial-frame p-8">
             <h2 className="font-display text-4xl font-semibold tracking-[-0.03em] text-[var(--color-taupe)]">
-              What D2D Performance believes
+              What D2D Marketing believes
             </h2>
             <p className="mt-5 text-base leading-8 text-[var(--color-muted)]">
               Businesses do not scale on ambition alone. They scale when
               leadership alignment, strategic clarity, operating systems, and
               market credibility reinforce one another. That is where D2D
-              Performance works.
+              Marketing works.
             </p>
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               {operatingPrinciples.map((item) => (
@@ -58,7 +58,7 @@ export default function AboutPage() {
           </article>
           <article className="rounded-[2rem] bg-[var(--color-charcoal)] p-8 text-white">
             <h2 className="font-display text-4xl font-semibold tracking-[-0.03em]">
-              What D2D Performance is not
+              What D2D Marketing is not
             </h2>
             <p className="mt-5 text-base leading-8 text-white/75">
               It is not a generic marketing agency and it is not a deck-heavy
@@ -104,7 +104,10 @@ export default function AboutPage() {
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-          <article className="rounded-[2rem] bg-[color:color-mix(in_oklab,var(--color-accent)_18%,white)] p-8">
+          <article
+            id="better-together"
+            className="scroll-mt-32 rounded-[2rem] bg-[color:color-mix(in_oklab,var(--color-accent)_18%,white)] p-8"
+          >
             <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.28em] text-[var(--color-accent)]">
               <Sparkles className="h-4 w-4" />
               Better Together
@@ -113,7 +116,7 @@ export default function AboutPage() {
               Strategy, commercial thinking, and execution quality in one operating conversation.
             </h3>
             <p className="mt-4 max-w-4xl text-base leading-8 text-[var(--color-muted)]">
-              D2D Performance is strongest when brand thinking, leadership
+              D2D Marketing is strongest when brand thinking, leadership
               judgment, sales clarity, and build quality work together. That
               creates a more credible customer experience and a business that
               can actually carry the strategy it claims to have.

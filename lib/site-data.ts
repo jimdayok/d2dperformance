@@ -1,8 +1,18 @@
-export const siteUrl = "https://d2dperformance.com";
+const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
 
-export const companyName = "D2D Performance";
-export const parentBrandName = "DAY2DAY";
-export const tagline = "Performance Built for the Day2Day.";
+export const siteUrl =
+  configuredSiteUrl && /^https?:\/\//.test(configuredSiteUrl)
+    ? configuredSiteUrl.replace(/\/+$/, "")
+    : "https://d2dmktg.com";
+
+export const companyName = "D2D Marketing";
+export const parentBrandName = "DAY2DAY Marketing";
+export const legalBusinessName = "DAY2DAY LLC";
+export const tagline = "Strategy Built for the DAY2DAY.";
+export const primaryEmail = "andrea@d2dmktg.com";
+export const primaryPhone = "269-788-7067";
+export const primaryPhoneHref = "+12697887067";
+export const serviceArea = "Dallas–Fort Worth, McKinney, and North Texas";
 
 export const leadershipProfiles = [
   {
@@ -246,7 +256,7 @@ export const discoverySteps = [
     title: "Company",
     helper: "Capture the current shape of the business, including size, structure, and stage of growth.",
     fields: [
-      { id: "companyName", label: "Company name", type: "text", placeholder: "D2D Performance" },
+      { id: "companyName", label: "Company name", type: "text", placeholder: "Your company" },
       { id: "industry", label: "Industry", type: "text", placeholder: "Construction, manufacturing, professional services..." },
       { id: "revenueRange", label: "Revenue range", type: "text", placeholder: "$2M-$50M" },
       { id: "teamSize", label: "Team size", type: "text", placeholder: "25 employees" },

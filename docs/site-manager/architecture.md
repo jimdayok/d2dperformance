@@ -2,13 +2,14 @@
 
 ## Decision
 
-D2D Site Manager is a multi-tenant content operations application inside the existing D2D Performance Next.js application. Supabase provides authentication, PostgreSQL, and Storage. Client websites retain their source-controlled presentation and consume only validated published content through a narrow public database function. Draft content is available only through the authenticated D2D preview API.
+D2D Site Manager is a multi-tenant content operations application inside the D2D Marketing Next.js application. Supabase provides authentication, PostgreSQL, and Storage. Client websites retain their source-controlled presentation and consume only validated published content through a narrow public database function. Draft content is available only through the authenticated D2D preview API.
 
 The platform deliberately edits content, not layouts. Site adapters define fields, schemas, navigation, preview paths, cache tags, and role requirements in version-controlled TypeScript. The first adapter is `alford-custom-homes`; future sites reuse the same tables and portal shell.
 
 ## Runtime boundaries
 
-- `d2dperformance.com` and `www.d2dperformance.com`: unchanged marketing routes and chrome.
+- `d2dmktg.com`: primary D2D Marketing website.
+- `d2dperformance.com` and `www.d2dperformance.com`: permanent path-preserving redirects to `d2dmktg.com`.
 - `portal.d2dperformance.com`: hostname rewrite to `/portal`, with authentication, tenant-aware navigation, and `noindex` metadata.
 - Supabase: auth, tenant data, immutable versions, review notes, publish events, and site-scoped media.
 - Alford public site: anonymous read of the `get_published_content` RPC only, Zod validation, cache tags, and static fallback.

@@ -86,16 +86,19 @@ function decodeSession(rawValue?: string | null) {
   }
 }
 
-function getExpectedOrigin(headerList: Headers) {
-  if (process.env.BRAND_DISCOVERY_ALLOWED_ORIGIN) {
-    return process.env.BRAND_DISCOVERY_ALLOWED_ORIGIN;
-  }
-
+function getExpectedOrigins(headerList: Headers) {
   const host =
     headerList.get("x-forwarded-host") || headerList.get("host") || "localhost:3000";
   const protocol = headerList.get("x-forwarded-proto") || "https";
 
-  return `${protocol}://${host}`;
+  return [
+    `${protocol}://${host}`,
+    ...(process.env.BRAND_DISCOVERY_ALLOWED_ORIGIN ?? "")
+      .split(",")
+      .map((value) => value.trim())
+      .filter(Boolean),
+    "https://d2dmktg.com",
+  ];
 }
 
 async function assertTrustedOrigin() {
@@ -106,13 +109,13 @@ async function assertTrustedOrigin() {
     return;
   }
 
-  const expected = getExpectedOrigin(headerList);
+  const expected = getExpectedOrigins(headerList);
 
   try {
     const originUrl = new URL(origin);
-    const expectedUrl = new URL(expected);
+    const expectedHosts = expected.map((value) => new URL(value).host);
 
-    if (originUrl.host !== expectedUrl.host) {
+    if (!expectedHosts.includes(originUrl.host)) {
       throw new Error("Origin mismatch");
     }
   } catch {

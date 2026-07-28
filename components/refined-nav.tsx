@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Code2, Gauge, Megaphone, Menu, MoveRight, X } from "lucide-react";
+import { ChevronDown, Code2, Megaphone, Menu, MoveRight, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -10,7 +10,6 @@ const websiteManagementUrl = "https://portal.d2dperformance.com/portal/login";
 const brandVaultUrl = "https://brandvault.d2dperformance.com";
 const marketingUrl = "/";
 const digitalUrl = "/digital";
-const performanceUrl = "/performance#top";
 
 const serviceItems = [
   {
@@ -163,18 +162,13 @@ export function RefinedNav() {
           <a href={marketingUrl}>
             <Megaphone aria-hidden="true" />
             <strong>D2D Marketing</strong>
-            <small>Clarify + connect</small>
+            <small>Strategy + brand + growth</small>
           </a>
           <a href={digitalUrl}>
             <Code2 aria-hidden="true" />
             <strong>D2D Digital</strong>
             <small>Build + integrate</small>
           </a>
-          <Link className="is-current" href={performanceUrl} aria-current="page">
-            <Gauge aria-hidden="true" />
-            <strong>D2D Performance</strong>
-            <small>Lead + improve</small>
-          </Link>
         </div>
       </nav>
       <div
@@ -185,7 +179,7 @@ export function RefinedNav() {
         <div
           className="performance-primary-inner nav-brand-top"
         >
-          <Link href={performanceUrl} className="group min-w-0">
+          <Link href="/" className="group min-w-0">
             <span className="block text-[0.7rem] font-medium uppercase tracking-[0.38em] text-[var(--nav-top-muted,var(--color-muted))] transition group-hover:text-[var(--nav-top-ink,var(--color-ink))]">
               {parentBrandName}
             </span>
@@ -334,7 +328,7 @@ export function RefinedNav() {
             </div>
 
             <Link
-              href="/performance#brand-discovery"
+              href="/#brand-discovery"
               className="inline-flex items-center gap-2 border-b border-[var(--nav-top-border,var(--color-border-strong))] pb-1 text-[0.82rem] uppercase tracking-[0.18em] text-[var(--nav-top-ink,var(--color-ink))] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
             >
               Start Brand Discovery
@@ -427,19 +421,6 @@ export function RefinedNav() {
                   Websites, tools, and connected systems
                 </span>
               </a>
-              <Link
-                href={performanceUrl}
-                aria-current="page"
-                className="rounded-[0.9rem] border border-[var(--color-accent)] bg-[var(--color-surface)] px-4 py-3"
-                onClick={closeMobileMenu}
-              >
-                <span className="block text-sm font-semibold text-[var(--color-ink)]">
-                  D2D Performance
-                </span>
-                <span className="mt-1 block text-xs text-[var(--color-muted)]">
-                  Leadership, operating rhythm, and improvement
-                </span>
-              </Link>
             </div>
           </div>
 
@@ -465,7 +446,7 @@ export function RefinedNav() {
           </div>
 
           <Link
-            href="/performance#brand-discovery"
+            href="/#brand-discovery"
             className="mt-6 flex items-center justify-between rounded-[0.9rem] bg-[var(--color-charcoal)] px-4 py-3 text-sm uppercase tracking-[0.16em] text-white"
             onClick={closeMobileMenu}
           >

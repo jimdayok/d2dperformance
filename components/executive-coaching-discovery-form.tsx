@@ -128,7 +128,7 @@ export function ExecutiveCoachingDiscoveryForm() {
       ? {
           id: "submit",
           title: "Submit",
-          description: "Send your discovery privately to the D2D Performance team.",
+          description: "Send your discovery privately to the D2D Marketing team.",
         }
       : currentSection;
 
@@ -483,7 +483,7 @@ export function ExecutiveCoachingDiscoveryForm() {
                     Final check
                   </p>
                   <p className="mt-4 text-base leading-8 text-[var(--color-muted)]">
-                    When you submit, your contact details, answers, and timestamps will be sent privately to the D2D Performance team.
+                    When you submit, your contact details, answers, and timestamps will be sent privately to the D2D Marketing team.
                   </p>
                   {submitState === "error" ? (
                     <p className="mt-4 text-sm text-rose-700 dark:text-rose-300">

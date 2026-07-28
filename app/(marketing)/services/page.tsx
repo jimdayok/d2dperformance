@@ -7,7 +7,7 @@ import { servicesPageItems } from "@/lib/site-data";
 export const metadata = createMetadata({
   title: "Services",
   description:
-    "Explore D2D Performance services across executive coaching, growth strategy, and brand development.",
+    "Explore D2D Marketing services across brand development, growth strategy, executive coaching, and practical marketing support.",
   path: "/services",
 });
 
@@ -31,7 +31,7 @@ export default function ServicesPage() {
               Built around the business first.
             </h2>
             <p className="mt-4 text-base leading-8 text-white/75">
-              D2D Performance works upstream of tactics. We clarify the
+              D2D Marketing works upstream of tactics. We clarify the
               business, the leadership decisions, the commercial message, and
               the operating rhythm before asking marketing or design to solve
               problems they cannot solve alone.

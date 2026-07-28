@@ -12,22 +12,21 @@ import {
   PanelsTopLeft,
   Workflow,
 } from "lucide-react";
-import type { Metadata } from "next";
 import { MobileScrollHeader } from "@/components/mobile-scroll-header";
 import { PublicPagePolish } from "@/components/public-page-polish";
+import { createMetadata } from "@/lib/metadata";
 import "./digital.css";
 
 const marketingUrl = "/";
-const performanceUrl = "/performance#top";
+const performanceUrl = "/#top";
 const digitalContactUrl = "/#contact";
 
-export const metadata: Metadata = {
-  title: {
-    absolute: "D2D Digital | Websites, Tools & Digital Systems",
-  },
+export const metadata = createMetadata({
+  title: "D2D Digital | Websites, Tools & Digital Systems",
   description:
     "D2D Digital builds focused websites, useful digital tools, and connected systems that make good businesses easier to find, use, and grow.",
-};
+  path: "/digital",
+});
 
 const capabilities = [
   {
@@ -110,11 +109,6 @@ export default function Home() {
               <strong>D2D Digital</strong>
               <small>Build + integrate</small>
             </a>
-            <a href={performanceUrl}>
-              <Gauge aria-hidden="true" />
-              <strong>D2D Performance</strong>
-              <small>Lead + improve</small>
-            </a>
           </div>
         </div>
       </nav>
@@ -145,7 +139,7 @@ export default function Home() {
             <a href="#approach">Approach</a>
             <a href="#systems">Systems</a>
             <a href={marketingUrl}>D2D Marketing / Main</a>
-            <a href={performanceUrl}>D2D Performance</a>
+            <a href={performanceUrl}>D2D Marketing</a>
             <a href={digitalContactUrl}>Plan a digital build</a>
           </nav>
         </details>
@@ -236,7 +230,7 @@ export default function Home() {
               <div className="stage-top">
                 <span>Start here</span>
               </div>
-              <h3>D2D Marketing</h3>
+              <h3>D2D Marketing Advisory</h3>
               <p>
                 Clarify the brand, sharpen the message, and create the marketing
                 rhythm that connects the business to the right people.
@@ -261,13 +255,13 @@ export default function Home() {
               <div className="stage-top">
                 <span>Improve it</span>
               </div>
-              <h3>D2D Performance</h3>
+              <h3>D2D Marketing</h3>
               <p>
                 Align leadership, establish an operating cadence, and improve
                 the systems that turn strategy into repeatable execution.
               </p>
               <small>Strategy · Leadership · Systems · Optimization</small>
-              <strong>Continue to D2D Performance <Arrow /></strong>
+              <strong>Continue to D2D Marketing <Arrow /></strong>
             </a>
           </div>
         </section>
@@ -405,7 +399,7 @@ export default function Home() {
             <h2>D2D system</h2>
             <a href={marketingUrl}>D2D Marketing / Main <Arrow /></a>
             <a href="#top" aria-current="page">D2D Digital / Build</a>
-            <a href={performanceUrl}>D2D Performance / Improve <Arrow /></a>
+            <a href={performanceUrl}>D2D Marketing / Advisory <Arrow /></a>
           </div>
         </div>
         <div className="footer-bottom">

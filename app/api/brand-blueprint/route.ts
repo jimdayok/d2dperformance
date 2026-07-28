@@ -4,9 +4,17 @@ import {
 } from "@/lib/submission-service";
 import { safeJsonParse } from "@/lib/brand-discovery-storage";
 import type { DiscoverySubmission } from "@/types/brand-discovery";
+import {
+  hasTrustedPublicOrigin,
+  untrustedOriginResponse,
+} from "@/lib/public-origin";
 
 export async function POST(request: Request) {
   try {
+    if (!hasTrustedPublicOrigin(request)) {
+      return untrustedOriginResponse();
+    }
+
     const bodyText = await request.text();
     const payload = safeJsonParse<DiscoverySubmission | null>(bodyText, null);
 

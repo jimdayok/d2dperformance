@@ -1,0 +1,7 @@
+# Preserve local duplicate working files without including them in deployments.
+**/* 2.ts
+**/* 2.tsx
+
+# Local QA artifacts.
+.playwright-cli/
+output/

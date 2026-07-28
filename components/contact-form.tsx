@@ -8,6 +8,7 @@ type FormValues = {
   email: string;
   phone: string;
   message: string;
+  website: string;
 };
 
 type FieldErrors = Partial<Record<keyof FormValues, string>>;
@@ -18,6 +19,7 @@ const initialValues: FormValues = {
   email: "",
   phone: "",
   message: "",
+  website: "",
 };
 
 function isValidEmail(value: string) {
@@ -44,8 +46,21 @@ function validate(values: FormValues): FieldErrors {
   return errors;
 }
 
-export function ContactForm() {
-  const [values, setValues] = useState<FormValues>(initialValues);
+type ContactFormProps = {
+  initialMessage?: string;
+  messageLabel?: string;
+  messagePlaceholder?: string;
+  submitLabel?: string;
+};
+
+export function ContactForm({
+  initialMessage = "",
+  messageLabel = "What are you trying to solve?",
+  messagePlaceholder = "Share the business challenge, growth objective, or leadership issue you want to discuss.",
+  submitLabel = "Send Message",
+}: ContactFormProps = {}) {
+  const startingValues = { ...initialValues, message: initialMessage };
+  const [values, setValues] = useState<FormValues>(startingValues);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitState, setSubmitState] = useState<"idle" | "sending" | "success" | "error">(
     "idle",
@@ -107,7 +122,7 @@ export function ContactForm() {
         );
       }
 
-      setValues(initialValues);
+      setValues(startingValues);
       setErrors({});
       setSubmitState("success");
       setFeedback(
@@ -127,6 +142,18 @@ export function ContactForm() {
   return (
     <form className="editorial-frame p-8" onSubmit={handleSubmit} noValidate>
       <div className="grid gap-5">
+        <label className="absolute -left-[10000px] h-px w-px overflow-hidden" aria-hidden="true">
+          Website
+          <input
+            type="text"
+            name="website"
+            aria-hidden="true"
+            value={values.website}
+            onChange={(event) => updateField("website", event.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+          />
+        </label>
         <label className="grid gap-3">
           <span className="text-sm font-medium text-[var(--color-ink)]">Name</span>
           <input
@@ -191,13 +218,13 @@ export function ContactForm() {
 
         <label className="grid gap-3">
           <span className="text-sm font-medium text-[var(--color-ink)]">
-            What are you trying to solve?
+            {messageLabel}
           </span>
           <textarea
             rows={8}
             value={values.message}
             onChange={(event) => updateField("message", event.target.value)}
-            placeholder="Share the business challenge, growth objective, or leadership issue you want to discuss."
+            placeholder={messagePlaceholder}
             aria-invalid={Boolean(errors.message)}
             aria-describedby={errors.message ? "contact-message-error" : undefined}
             className="min-h-40 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-4 text-base text-[var(--color-ink)] outline-none transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-accent)]"
@@ -214,7 +241,7 @@ export function ContactForm() {
           disabled={submitState === "sending"}
           className="inline-flex min-h-14 items-center justify-center rounded-full bg-[var(--color-accent)] px-6 py-4 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-charcoal)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {submitState === "sending" ? "Sending..." : "Send Message"}
+          {submitState === "sending" ? "Sending..." : submitLabel}
         </button>
 
         {feedback ? (

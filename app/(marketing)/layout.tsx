@@ -1,16 +1,27 @@
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { PublicPagePolish } from "@/components/public-page-polish";
-import { companyName, siteUrl } from "@/lib/site-data";
+import {
+  companyName,
+  legalBusinessName,
+  primaryEmail,
+  primaryPhoneHref,
+  serviceArea,
+  siteUrl,
+} from "@/lib/site-data";
 import { sanitizeJsonLd } from "@/lib/metadata";
 
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: companyName,
+  legalName: legalBusinessName,
   url: siteUrl,
   description:
-    "Executive performance consulting for owners, founders, and leadership teams building companies that scale.",
+    "Brand strategy, marketing direction, leadership alignment, and practical growth support for established businesses.",
+  email: primaryEmail,
+  telephone: primaryPhoneHref,
+  areaServed: serviceArea,
 };
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {

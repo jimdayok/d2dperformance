@@ -5,7 +5,7 @@ import { resources } from "@/lib/site-data";
 export const metadata = createMetadata({
   title: "Resources",
   description:
-    "Read executive perspectives and future resource content from D2D Performance.",
+    "Read practical perspectives and resources from D2D Marketing.",
   path: "/resources",
 });
 

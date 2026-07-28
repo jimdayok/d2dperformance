@@ -5,7 +5,7 @@ import { processSteps } from "@/lib/site-data";
 export const metadata = createMetadata({
   title: "Process",
   description:
-    "See the D2D Performance engagement process from discovery through optimization.",
+    "See the D2D Marketing engagement process from discovery through optimization.",
   path: "/process",
 });
 

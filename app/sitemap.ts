@@ -2,10 +2,18 @@ import type { MetadataRoute } from "next";
 import { navigation, siteUrl } from "@/lib/site-data";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return navigation.map((item) => ({
-    url: new URL(item.href, siteUrl).toString(),
+  const routes = [
+    ...navigation.map((item) => item.href),
+    "/digital",
+    "/privacy-policy",
+    "/sign-up-for-our-newsletter",
+    "/terms-of-use",
+  ];
+
+  return [...new Set(routes)].map((path) => ({
+    url: new URL(path, siteUrl).toString(),
     lastModified: new Date(),
-    changeFrequency: item.href === "/" ? "weekly" : "monthly",
-    priority: item.href === "/" ? 1 : 0.7,
+    changeFrequency: path === "/" ? "weekly" : "monthly",
+    priority: path === "/" ? 1 : path === "/privacy-policy" || path === "/terms-of-use" ? 0.3 : 0.7,
   }));
 }

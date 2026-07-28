@@ -1,9 +1,13 @@
 import Link from "next/link";
-import { Code2, Gauge, Megaphone } from "lucide-react";
+import { Code2, Megaphone } from "lucide-react";
 import {
   companyName,
   navigation,
   parentBrandName,
+  primaryEmail,
+  primaryPhone,
+  primaryPhoneHref,
+  serviceArea,
   tagline,
 } from "@/lib/site-data";
 
@@ -22,7 +26,6 @@ const websiteManagementUrl = "https://portal.d2dperformance.com/portal/login";
 const brandVaultUrl = "https://brandvault.d2dperformance.com";
 const marketingUrl = "/";
 const digitalUrl = "/digital";
-const performanceUrl = "/performance#top";
 
 export function SiteFooter() {
   return (
@@ -33,18 +36,13 @@ export function SiteFooter() {
           <a href={marketingUrl}>
             <Megaphone aria-hidden="true" />
             <strong>D2D Marketing</strong>
-            <small>Clarify + connect · Main practice</small>
+            <small>Strategy + brand + growth · Main practice</small>
           </a>
           <a href={digitalUrl}>
             <Code2 aria-hidden="true" />
             <strong>D2D Digital</strong>
             <small>Build + integrate</small>
           </a>
-          <Link className="is-current" href={performanceUrl} aria-current="page">
-            <Gauge aria-hidden="true" />
-            <strong>D2D Performance</strong>
-            <small>Lead + improve</small>
-          </Link>
         </div>
       </div>
       <div className="mx-auto max-w-[88rem] px-6 py-16 lg:px-8 lg:py-20">
@@ -55,13 +53,25 @@ export function SiteFooter() {
               {companyName}
             </h2>
             <p className="mt-5 max-w-lg text-base leading-8 text-[var(--color-muted)]">
-              {tagline} Advisory work for companies that have outgrown informal
-              leadership habits and need a clearer target, stronger cadence,
-              and more repeatable execution.
+              {tagline} Brand, marketing, leadership, and growth support for
+              established companies that need clearer direction and more
+              repeatable execution.
             </p>
             <div className="mt-8 space-y-2 text-sm uppercase tracking-[0.18em] text-[var(--color-muted)]">
-              <p>Dallas-Fort Worth</p>
+              <p>{serviceArea}</p>
               <p>Advisory work by appointment</p>
+              <a
+                href={`mailto:${primaryEmail}`}
+                className="block w-fit normal-case tracking-normal text-[var(--color-ink)] transition hover:text-[var(--color-accent)]"
+              >
+                {primaryEmail}
+              </a>
+              <a
+                href={`tel:${primaryPhoneHref}`}
+                className="block w-fit normal-case tracking-normal text-[var(--color-ink)] transition hover:text-[var(--color-accent)]"
+              >
+                {primaryPhone}
+              </a>
               <Link
                 href="/contact"
                 className="inline-block border-b border-[var(--color-border-strong)] pb-1 text-[var(--color-ink)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
@@ -109,13 +119,23 @@ export function SiteFooter() {
               advice gets layered on top.
             </p>
             <Link
-              href="/performance#brand-discovery"
+              href="/#brand-discovery"
               className="mt-6 inline-flex items-center gap-2 border-b border-[var(--color-border-strong)] pb-1 text-sm uppercase tracking-[0.18em] text-[var(--color-ink)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
             >
               Start Brand Discovery
             </Link>
           </div>
         </div>
+      </div>
+      <div className="border-t border-[var(--color-border)] px-6 py-6 text-center text-xs text-[var(--color-muted)]">
+        © {new Date().getFullYear()} DAY2DAY Marketing.{" "}
+        <Link href="/privacy-policy" className="underline underline-offset-4">
+          Privacy
+        </Link>{" "}
+        ·{" "}
+        <Link href="/terms-of-use" className="underline underline-offset-4">
+          Terms
+        </Link>
       </div>
     </footer>
   );

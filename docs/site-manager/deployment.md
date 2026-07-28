@@ -42,7 +42,7 @@ Generate an RSA key pair with an approved secret-management workflow. Store the 
 
 ## DNS and hosting
 
-Add `portal.d2dperformance.com` to the same D2D hosting project, then create the exact CNAME/A record supplied by that host. Keep both marketing hostnames attached. Verify TLS before enabling secure auth callbacks. The hostname-aware proxy rewrites clean portal paths internally and redirects `/portal` on marketing hosts to the portal hostname.
+Keep `portal.d2dperformance.com` attached to the D2D hosting project until a separate portal-domain migration is approved. The public marketing site uses `d2dmktg.com`; the apex and `www` forms of `d2dperformance.com` remain attached only for permanent redirects. Verify TLS before enabling secure auth callbacks. The hostname-aware proxy rewrites clean portal paths internally and redirects `/portal` on the marketing hostname to the portal hostname.
 
 ## Release sequence
 

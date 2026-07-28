@@ -39,7 +39,7 @@ export function HomeHero() {
             <span>trained, not wished into being.</span>
           </h1>
           <p className="performance-lede">
-            D2D Performance helps owners and leadership teams create the
+            D2D Marketing helps owners and leadership teams create the
             clarity, systems, and operating rhythm required to improve on
             purpose—one decision, one rep, and one quarter at a time.
           </p>
@@ -55,7 +55,7 @@ export function HomeHero() {
               <ArrowDown aria-hidden="true" className="h-4 w-4" />
             </a>
           </div>
-          <div className="performance-principles" aria-label="D2D performance approach">
+          <div className="performance-principles" aria-label="D2D Marketing approach">
             <span><Crosshair aria-hidden="true" /> Clear target</span>
             <span><TimerReset aria-hidden="true" /> Consistent cadence</span>
             <span><Gauge aria-hidden="true" /> Measured improvement</span>
@@ -65,7 +65,7 @@ export function HomeHero() {
         <div className="performance-board" aria-label="Performance framework">
           <div className="performance-board-top">
             <div>
-              <p>D2D / PERFORMANCE SYSTEM</p>
+              <p>D2D / GROWTH SYSTEM</p>
               <span>Leadership operating framework</span>
             </div>
             <strong>ACTIVE</strong>

@@ -13,7 +13,7 @@ export function PortalShell({ children, definition, access, displayName, siteCou
         <Link href="/portal/dashboard" className="group flex items-center gap-3">
           <span className="grid size-11 place-items-center border border-[#d6a77f]/55 bg-[#d6a77f] text-sm font-semibold tracking-[-0.08em] text-[#17201d] transition-transform group-hover:-rotate-2">D2D</span>
           <span>
-            <span className="block text-[9px] font-semibold uppercase tracking-[0.32em] text-[#d6a77f]">Performance</span>
+            <span className="block text-[9px] font-semibold uppercase tracking-[0.32em] text-[#d6a77f]">Marketing</span>
             <span className="mt-1 block font-display text-[1.65rem] leading-none">Site Manager</span>
           </span>
         </Link>
@@ -34,10 +34,10 @@ export function PortalShell({ children, definition, access, displayName, siteCou
         <PortalNav items={nav} />
 
         <div className="mt-6 grid grid-cols-2 gap-2 lg:mt-auto lg:grid-cols-1">
-          <a href="https://www.d2dperformance.com" target="_blank" rel="noreferrer" className="portal-sidebar-link">
-            <Globe2 size={15} /> D2D Performance
+          <a href="https://d2dmktg.com" target="_blank" rel="noreferrer" className="portal-sidebar-link">
+            <Globe2 size={15} /> D2D Marketing
           </a>
-          <a href="mailto:info@d2dperformance.com" className="portal-sidebar-link">
+          <a href="mailto:andrea@d2dmktg.com" className="portal-sidebar-link">
             <CircleHelp size={15} /> Support
           </a>
         </div>

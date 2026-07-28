@@ -34,7 +34,7 @@ export default async function DashboardPage() {
             </article>
           ))}
         </div>
-        {sites.length === 0 ? <p className="portal-panel mt-8 p-5">Your account is valid, but it has not been assigned to a website. Contact D2D Performance.</p> : null}
+        {sites.length === 0 ? <p className="portal-panel mt-8 p-5">Your account is valid, but it has not been assigned to a website. Contact D2D Marketing.</p> : null}
       </div>
     </PortalShell>
   );

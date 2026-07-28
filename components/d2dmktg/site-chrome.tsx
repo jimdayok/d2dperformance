@@ -37,7 +37,7 @@ const d2dEcosystem = [
     icon: Code2,
   },
   {
-    name: "D2D Performance",
+    name: "D2D Marketing Advisory",
     role: "Lead + improve",
     href: siteConfig.links.d2dPerformance,
     current: false,
@@ -153,7 +153,7 @@ export function SiteHeader() {
               <Link href="/">D2D Marketing / Main</Link>
               <Link href={siteConfig.links.d2dDigital}>D2D Digital</Link>
               <Link href={siteConfig.links.d2dPerformance}>
-                D2D Performance
+                D2D Marketing Advisory
               </Link>
               <span className="mobile-login-label">Client Login</span>
               <a
@@ -187,7 +187,7 @@ export function D2DJourney() {
         <p>
           Each D2D company solves a different part of the same business
           challenge. D2D Marketing is the main starting point, then Digital and
-          Performance extend the work when the next problem becomes clear.
+            advisory support extend the work when the next problem becomes clear.
         </p>
       </div>
 
@@ -227,14 +227,14 @@ export function D2DJourney() {
           <div className="d2d-journey-card-top">
             <span>Improve it</span>
           </div>
-          <h3>D2D Performance</h3>
+          <h3>D2D Marketing Advisory</h3>
           <p>
             Align leadership, establish an operating cadence, and improve the
             systems that turn strategy into repeatable execution.
           </p>
           <small>Strategy · Leadership · Systems · Optimization</small>
           <a href={siteConfig.links.d2dPerformance}>
-            Continue to D2D Performance <Arrow />
+            Continue to D2D Marketing <Arrow />
           </a>
         </article>
       </div>
@@ -390,7 +390,7 @@ export function SiteFooter() {
         </span>
         <div>
           <a href={siteConfig.links.d2dDigital}>D2D Digital</a>
-          <a href={siteConfig.links.d2dPerformance}>D2D Performance</a>
+          <a href={siteConfig.links.d2dPerformance}>D2D Marketing Advisory</a>
           <a
             href="https://d2dmktg.com/terms-of-use"
             target="_blank"

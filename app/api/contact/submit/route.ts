@@ -4,6 +4,10 @@ import {
 } from "@/lib/contact-form";
 import { safeJsonParse } from "@/lib/brand-discovery-storage";
 import type { ContactSubmission } from "@/lib/contact-form";
+import {
+  hasTrustedPublicOrigin,
+  untrustedOriginResponse,
+} from "@/lib/public-origin";
 
 function jsonError(error: string, status: number) {
   return Response.json({ ok: false, error }, { status });
@@ -11,11 +15,22 @@ function jsonError(error: string, status: number) {
 
 export async function POST(request: Request) {
   try {
+    if (!hasTrustedPublicOrigin(request)) {
+      return untrustedOriginResponse();
+    }
+
     const bodyText = await request.text();
     const payload = safeJsonParse<ContactSubmission | null>(bodyText, null);
 
     if (!payload) {
       return jsonError("Invalid contact form submission.", 400);
+    }
+
+    if (payload.website?.trim()) {
+      return Response.json({
+        ok: true,
+        message: "Thanks for reaching out. Your message has been received.",
+      });
     }
 
     const validationError = validateContactSubmission(payload);

@@ -3,6 +3,7 @@ import { Fraunces, IBM_Plex_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SiteAnalytics } from "@/components/site-analytics";
 import { companyName, siteUrl, tagline } from "@/lib/site-data";
 
 const ibmPlexSans = IBM_Plex_Sans({
@@ -22,19 +23,19 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: `${companyName} | Executive Performance Consulting`,
+    default: `${companyName} | Brand Strategy & Business Growth`,
     template: `%s | ${companyName}`,
   },
   description:
-    "D2D Performance helps leadership teams scale through strategy, leadership, systems, execution, and brand clarity.",
+    "D2D Marketing helps Dallas–Fort Worth businesses grow through brand strategy, leadership alignment, marketing systems, and practical execution.",
   applicationName: companyName,
   category: "business",
   openGraph: {
     type: "website",
     siteName: companyName,
-    title: `${companyName} | Executive Performance Consulting`,
+    title: `${companyName} | Brand Strategy & Business Growth`,
     description:
-      "Build a better business through strategy, leadership, systems, and brand clarity.",
+      "Build a stronger brand and a better business through strategy, leadership, marketing systems, and practical execution.",
     url: siteUrl,
     images: [{ url: "/opengraph-image" }],
   },
@@ -62,6 +63,7 @@ export default function RootLayout({
           {children}
           <Toaster richColors position="top-right" />
         </ThemeProvider>
+        <SiteAnalytics />
       </body>
     </html>
   );
