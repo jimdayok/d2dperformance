@@ -1,6 +1,6 @@
 # D2D Marketing production migration
 
-Last updated: 2026-07-27
+Last updated: 2026-07-28
 
 ## Working checklist
 
@@ -25,17 +25,17 @@ Last updated: 2026-07-27
 - [x] Confirm linked project `jimdayoks-projects/d2dperformance`.
 - [x] Confirm Vercel authentication and current production deployment.
 - [x] Inventory environment-variable names without reading values.
-- [ ] Add `d2dmktg.com` and `www.d2dmktg.com` only after cutover approval.
+- [x] Add `d2dmktg.com` and `www.d2dmktg.com` after cutover approval.
 - [x] Retrieve exact Vercel DNS recommendations through the authenticated domain-config API.
-- [ ] Keep both `d2dperformance.com` hostnames attached for permanent redirects.
+- [x] Keep both `d2dperformance.com` hostnames attached for permanent redirects.
 
 ### DNS changes
 
 - [x] Confirm `d2dmktg.com` uses ICDSoft/SureSupport nameservers.
 - [x] Confirm current apex and `www` resolve to the ICDSoft web server.
-- [ ] Capture the authoritative DNS zone before cutover.
-- [ ] Change only approved apex and `www` website records.
-- [ ] Validate DNS propagation and Vercel certificates.
+- [x] Capture the authoritative DNS zone before cutover.
+- [x] Change only approved apex and `www` website records.
+- [x] Validate authoritative DNS propagation and Vercel certificates.
 
 ### Redirects
 
@@ -49,9 +49,12 @@ Last updated: 2026-07-27
 - [x] Confirm ICDSoft remains authoritative for D2D Marketing DNS and mail.
 - [x] Confirm the public MX target remains `mail.d2dmktg.com`.
 - [x] Confirm common mail, webmail, autodiscover, and autoconfig hosts resolve to ICDSoft.
-- [ ] Capture MX, SPF, DKIM, DMARC, and service records from the authoritative zone.
-- [ ] Confirm those records are byte-for-byte unchanged after cutover.
-- [ ] Confirm real send and receive operation with the account owner after cutover.
+- [x] Capture MX, SPF, DKIM, DMARC, and service records from the authoritative zone.
+- [x] Confirm those records are unchanged after cutover.
+- [x] Confirm production form delivery into the existing ICDSoft mailbox after cutover.
+- [x] Confirm authenticated SMTP and IMAP service endpoints remain on ICDSoft
+  with valid TLS.
+- [ ] Confirm one new outbound message from an `@d2dmktg.com` mailbox.
 
 ### SEO work
 
@@ -59,58 +62,67 @@ Last updated: 2026-07-27
 - [x] Update sitemap, robots, Open Graph, X/Twitter, and structured-data URLs.
 - [x] Preserve the newer site route inventory and map obsolete old-site routes.
 - [x] Preserve the existing GTM and Meta Pixel identifiers with environment overrides.
-- [ ] Prepare Search Console, Bing, Business Profile, analytics, and directory actions.
+- [x] Preserve the existing Google verification record and add the
+  `d2dmktg.com` domain property to the available Search Console account.
+- [ ] Verify the new Search Console property and submit the sitemap after the
+  newly issued TXT record is approved and added.
 
 ### Deployment
 
 - [x] Complete local validation.
 - [x] Deploy a non-production Vercel preview and validate it.
-- [ ] Present the exact production cutover and rollback plan for approval.
-- [ ] Deploy the approved production build.
-- [ ] Apply only the approved domain and DNS changes.
+- [x] Present the exact production cutover and rollback plan for approval.
+- [x] Deploy the approved production build.
+- [x] Apply only the approved domain and DNS changes.
 
 ### Post-deployment verification
 
-- [ ] Validate apex, `www`, HTTP-to-HTTPS, old-domain, path, and query redirects.
-- [ ] Validate primary routes, assets, forms, analytics, sitemap, robots, and metadata.
-- [ ] Validate desktop and mobile navigation and layout.
-- [ ] Confirm the ICDSoft website no longer serves on the apex domain.
-- [ ] Confirm ICDSoft email still sends and receives.
+- [x] Validate apex, `www`, HTTP-to-HTTPS, old-domain, path, and query redirects.
+- [x] Validate primary routes, assets, forms, analytics, sitemap, robots, and metadata.
+- [x] Validate desktop and mobile navigation and layout.
+- [x] Confirm the ICDSoft website no longer serves on the authoritative apex record.
+- [x] Confirm ICDSoft mailbox delivery and mail-service continuity.
 
 ### Items requiring owner input or approval
 
-- [ ] One approval immediately before the production Vercel/domain/DNS cutover.
-- [ ] Access to the authoritative ICDSoft DNS editor if no authenticated integration is available.
-- [ ] One clearly labeled form submission destination if delivery cannot be verified safely.
-- [ ] One post-cutover send/receive confirmation from an `@d2dmktg.com` mailbox.
+- [x] One approval immediately before the production Vercel/domain/DNS cutover.
+- [x] Access to the authoritative ICDSoft DNS editor.
+- [x] One clearly labeled production form submission.
+- [ ] One new outbound message from an `@d2dmktg.com` mailbox; mailbox
+  credentials were not available through the signed-in hosting session.
+- [ ] Approval to add Search Console's newly issued root TXT verification
+  record; it was not added because the approved DNS scope covered only web
+  records and protected existing verification records.
 - [ ] Search Console, Bing, Business Profile, analytics, and social-account login where unavailable.
 
 ## Current production snapshot
 
-- `www.d2dperformance.com`: Vercel project `d2dperformance`, proxied by Cloudflare.
-- `d2dperformance.com`: redirects to `https://www.d2dperformance.com`.
-- `d2dmktg.com`: ICDSoft/Apache website at `192.252.151.38`.
-- `www.d2dmktg.com`: redirects to the apex on ICDSoft/Apache.
+- `d2dmktg.com`: primary Vercel production domain.
+- `www.d2dmktg.com`: one-hop `308` redirect to the apex domain.
+- `d2dperformance.com`: one-hop, path-preserving `308` redirect to the new apex.
+- `www.d2dperformance.com`: one-hop, path-preserving `308` redirect to the new apex.
 - `d2dmktg.com` nameservers: `ns1.s416.sureserver.com`, `ns2.s416.sureserver.com`.
 - `d2dmktg.com` MX: priority `0`, `mail.d2dmktg.com`.
+- Production deployment: `dpl_34sQ928A7uAF2pEwzvTC2eEgV6uC`.
+- Vercel certificate: `cert_CAsinUD4HXLnY25q0JOAQi0W`.
 
-## Approved-record candidate
+## Applied DNS plan
 
-The exact website targets below were returned by Vercel's authenticated domain
-configuration API on 2026-07-27. Domain attachment and DNS mutation have not yet
-occurred.
+The website targets below were returned by Vercel's authenticated domain
+configuration API and approved before cutover. Only the apex web record and an
+explicit `www` record were changed.
 
 | Type | Host | Current value | Proposed value | Action | Purpose | Email impact |
 | --- | --- | --- | --- | --- | --- | --- |
-| A | `@` | `192.252.151.38` | `76.76.21.21` | Modify after approval | Serve the apex from Vercel | None; the MX and explicit mail-host A records remain on ICDSoft |
-| A | `www` | `192.252.151.38` | — | Replace after approval | Remove the old website endpoint | None |
-| CNAME | `www` | — | `cname.vercel-dns.com.` | Add after approval | Route `www` to Vercel for the one-hop apex redirect | None |
+| A | `@` | `192.252.151.38` | `76.76.21.21` | Modified | Serve the apex from Vercel | None; the MX and explicit mail-host A records remain on ICDSoft |
+| `www` inherited wildcard | `www` | `192.252.151.38` | — | Superseded with explicit record | Remove the old website endpoint | None |
+| CNAME | `www` | — | `cname.vercel-dns.com.` | Added | Route `www` to Vercel for the one-hop apex redirect | None |
 | MX | `@` | `0 mail.d2dmktg.com.` | Unchanged | Protect | ICDSoft inbound mail | Must remain unchanged |
 | A | `mail` | `192.252.151.38` | Unchanged | Protect | ICDSoft mail host | Must remain unchanged |
-| A | `webmail` | `192.252.151.38` | Unchanged | Protect | ICDSoft webmail | Must remain unchanged |
-| A | `autodiscover` | `192.252.151.38` | Unchanged | Protect | Mail client configuration | Must remain unchanged |
-| A | `autoconfig` | `192.252.151.38` | Unchanged | Protect | Mail client configuration | Must remain unchanged |
-| TXT/CNAME | SPF, DKIM, DMARC, verification records | Capture in ICDSoft before mutation | Unchanged | Protect | Mail authentication and ownership verification | Must remain byte-for-byte unchanged |
+| A | `mbox` | `192.252.151.38` | Unchanged | Protect | ICDSoft webmail | Unchanged |
+| TXT | SPF and verification records | Captured in ICDSoft | Unchanged | Protect | Mail authentication and ownership verification | Unchanged |
+| TXT | `dkim._domainkey` | Captured in ICDSoft | Unchanged | Protect | DKIM signing | Unchanged |
+| TXT | `_dmarc` | No record existed | Unchanged | Protect | DMARC policy | Unchanged |
 | NS | `@` | `ns1.s416.sureserver.com`, `ns2.s416.sureserver.com` | Unchanged | Protect | Authoritative DNS remains at ICDSoft | Must remain unchanged |
 
 ## Verified candidate deployment
@@ -122,6 +134,33 @@ occurred.
   from the protected Vercel preview.
 - Desktop and mobile browser checks found no overflow, broken images,
   navigation failure, hydration failure, or unexpected console errors.
+
+## Production verification
+
+- Production deployment `dpl_34sQ928A7uAF2pEwzvTC2eEgV6uC` is `READY`.
+- All 13 public routes return `200` from the canonical Vercel origin.
+- Every tested page has one canonical URL on `https://d2dmktg.com`, correct
+  D2D Marketing titles, and no former company-name reference.
+- Sitemap, robots, manifest, Open Graph, JSON-LD, analytics tags, and social
+  images are reachable and use the canonical origin.
+- All alternate hostnames redirect in one `308` hop while preserving the path
+  and query string.
+- A single clearly labeled contact-form test returned `200`; ICDSoft's
+  post-cutover mail-delivery log records successful local delivery to the
+  established mailbox.
+- ICDSoft SMTP on port `465` and IMAP on port `993` both complete TLS 1.3
+  handshakes with valid certificates. A new authenticated outbound mailbox
+  message still requires mailbox access.
+- The `d2dmktg.com` Search Console domain property has been added to the
+  available Google account. Verification and sitemap submission are waiting on
+  the newly issued root TXT record; that record was not added without approval
+  to expand the protected DNS scope.
+- Vercel reports both new domains valid with SSL. Its newer anycast DNS targets
+  are optional recommendations; the approved `76.76.21.21` and
+  `cname.vercel-dns.com.` targets remain valid and are serving production.
+- The workstation's local router may retain the former apex A record until its
+  prior TTL expires. Authoritative DNS and public DNS-over-HTTPS resolvers
+  already return the new Vercel record.
 
 ## Rollback principle
 
