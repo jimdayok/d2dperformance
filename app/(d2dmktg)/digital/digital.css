@@ -243,9 +243,10 @@ summary {
   min-height: min(950px, 100svh);
   padding: clamp(9rem, 15vw, 14rem) clamp(1.25rem, 5vw, 5rem) 5rem;
   display: grid;
-  grid-template-columns: minmax(0, 1.02fr) minmax(340px, 0.78fr);
+  grid-template-columns: minmax(0, 900px) minmax(340px, 600px);
+  justify-content: start;
   align-items: center;
-  gap: clamp(3rem, 7vw, 8rem);
+  gap: clamp(2.5rem, 4vw, 5rem);
   overflow: hidden;
   color: var(--cream);
   background:
@@ -399,7 +400,7 @@ summary {
 .system-window {
   width: 100%;
   max-width: 600px;
-  justify-self: end;
+  justify-self: start;
   border: 1px solid rgba(99, 228, 255, 0.25);
   background: rgba(5, 18, 25, 0.76);
   box-shadow: 0 42px 100px rgba(0, 0, 0, 0.35);

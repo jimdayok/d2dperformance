@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { NextRequest } from "next/server";
 import nextConfig from "@/next.config";
@@ -8,6 +9,24 @@ import { companyName, siteUrl } from "@/lib/site-data";
 import { proxy } from "@/proxy";
 
 describe("D2D Marketing production migration", () => {
+  it("keeps all three D2D ecosystem labels and current-state indicators", () => {
+    const digitalPage = readFileSync(
+      "app/(d2dmktg)/digital/page.tsx",
+      "utf8",
+    );
+    const performanceNav = readFileSync("components/refined-nav.tsx", "utf8");
+
+    expect(digitalPage).toContain("<strong>D2D Marketing</strong>");
+    expect(digitalPage).toContain("<strong>D2D Digital</strong>");
+    expect(digitalPage).toContain("<strong>D2D Performance</strong>");
+    expect(digitalPage).toContain(
+      'className="is-current" href="#top" aria-current="page"',
+    );
+    expect(performanceNav).toContain(
+      'className="is-current" href="/#top" aria-current="page"',
+    );
+  });
+
   it("uses the approved brand and canonical origin", () => {
     expect(companyName).toBe("D2D Marketing");
     expect(siteUrl).toBe("https://performance.d2dmktg.com");

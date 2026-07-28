@@ -1,6 +1,14 @@
 "use client";
 
-import { ChevronDown, Code2, Megaphone, Menu, MoveRight, X } from "lucide-react";
+import {
+  ChartNoAxesCombined,
+  ChevronDown,
+  Code2,
+  Megaphone,
+  Menu,
+  MoveRight,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -169,6 +177,11 @@ export function RefinedNav() {
             <strong>D2D Digital</strong>
             <small>Build + integrate</small>
           </a>
+          <Link className="is-current" href="/#top" aria-current="page">
+            <ChartNoAxesCombined aria-hidden="true" />
+            <strong>D2D Performance</strong>
+            <small>Lead + improve</small>
+          </Link>
         </div>
       </nav>
       <div
@@ -421,6 +434,19 @@ export function RefinedNav() {
                   Websites, tools, and connected systems
                 </span>
               </a>
+              <Link
+                href="/#top"
+                aria-current="page"
+                className="rounded-[0.9rem] border border-[var(--color-border-soft)] bg-[var(--color-surface)] px-4 py-3"
+                onClick={closeMobileMenu}
+              >
+                <span className="block text-sm font-semibold text-[var(--color-ink)]">
+                  D2D Performance
+                </span>
+                <span className="mt-1 block text-xs text-[var(--color-muted)]">
+                  Leadership, systems, and measured improvement
+                </span>
+              </Link>
             </div>
           </div>
 
