@@ -78,7 +78,26 @@ describe("D2D Marketing production migration", () => {
           destination: "/about#better-together",
           permanent: true,
         }),
+        expect.objectContaining({
+          source: "/client-brand-library",
+          destination: "https://brandvault.d2dmktg.com",
+          permanent: true,
+        }),
       ]),
+    );
+  });
+
+  it("redirects the legacy portal hostname to webadmin while preserving path and query", async () => {
+    const host = "portal.d2dperformance.com";
+    const request = new NextRequest(
+      `https://${host}/portal/login?next=/portal/dashboard`,
+      { headers: { host } },
+    );
+    const response = await proxy(request);
+
+    expect(response.status).toBe(308);
+    expect(response.headers.get("location")).toBe(
+      "https://webadmin.d2dmktg.com/portal/login?next=/portal/dashboard",
     );
   });
 

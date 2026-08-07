@@ -2,6 +2,8 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 const canonicalWebsiteHost = "performance.d2dmktg.com";
+const canonicalPortalHost = "webadmin.d2dmktg.com";
+const portalRedirectHosts = new Set(["portal.d2dperformance.com"]);
 const performanceRedirectHosts = new Set([
   "d2dperformance.com",
   "www.d2dperformance.com",
@@ -13,8 +15,15 @@ const publicWebsiteHosts = new Set([
 
 export async function proxy(request: NextRequest) {
   const hostname = (request.headers.get("host") ?? "").split(":")[0].toLowerCase();
-  const isPortalHost = hostname === "portal.d2dperformance.com" || hostname === "portal.localhost";
+  const isPortalHost = hostname === canonicalPortalHost || hostname === "portal.localhost";
   const url = request.nextUrl.clone();
+
+  if (portalRedirectHosts.has(hostname)) {
+    url.protocol = "https:";
+    url.hostname = canonicalPortalHost;
+    url.port = "";
+    return NextResponse.redirect(url, 308);
+  }
 
   if (performanceRedirectHosts.has(hostname)) {
     url.protocol = "https:";
@@ -40,7 +49,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.rewrite(url);
   }
   if (publicWebsiteHosts.has(hostname) && url.pathname.startsWith("/portal")) {
-    const portalUrl = new URL(process.env.NEXT_PUBLIC_PORTAL_URL ?? "https://portal.d2dperformance.com");
+    const portalUrl = new URL(process.env.NEXT_PUBLIC_PORTAL_URL ?? "https://webadmin.d2dmktg.com");
     portalUrl.pathname = url.pathname.replace(/^\/portal/, "") || "/dashboard";
     portalUrl.search = url.search;
     return NextResponse.redirect(portalUrl);
