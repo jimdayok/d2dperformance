@@ -25,7 +25,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/client-brand-library",
-        destination: "https://brandvault.d2dperformance.com",
+        destination: "https://brandvault.d2dmktg.com",
         permanent: true,
       },
       {

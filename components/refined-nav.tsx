@@ -14,8 +14,8 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { companyName, parentBrandName } from "@/lib/site-data";
 
-const websiteManagementUrl = "https://portal.d2dperformance.com/portal/login";
-const brandVaultUrl = "https://brandvault.d2dperformance.com";
+const websiteManagementUrl = "https://webadmin.d2dmktg.com";
+const brandVaultUrl = "https://brandvault.d2dmktg.com";
 const marketingUrl = "https://d2dmktg.com";
 const digitalUrl = "/digital";
 
