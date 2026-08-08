@@ -4,23 +4,23 @@ import { ButtonLink } from "@/components/button-link";
 export function HomeHero() {
   const performanceLanes = [
     {
-      label: "Strategy",
-      note: "Choose the field",
+      label: "Revenue",
+      note: "Find the levers",
       progress: "84%",
     },
     {
-      label: "Leadership",
-      note: "Set the cadence",
+      label: "Customers",
+      note: "See the signals",
       progress: "72%",
     },
     {
       label: "Systems",
-      note: "Build repeatability",
+      note: "Connect the work",
       progress: "91%",
     },
     {
       label: "Execution",
-      note: "Close the gap",
+      note: "Improve objectively",
       progress: "78%",
     },
   ] as const;
@@ -32,32 +32,32 @@ export function HomeHero() {
         <div className="performance-hero-copy">
           <p className="performance-kicker">
             <span />
-            Strategy · Leadership · Execution
+            Revenue · Information · Decisions
           </p>
           <h1>
-            Better businesses are
-            <span>trained, not wished into being.</span>
+            Turn business information into
+            <span>better operating decisions.</span>
           </h1>
           <p className="performance-lede">
-            D2D Marketing helps owners and leadership teams create the
-            clarity, systems, and operating rhythm required to improve on
-            purpose—one decision, one rep, and one quarter at a time.
+            D2D Performance helps leaders improve revenue and operations with
+            connected information systems, decision-ready dashboards, objective
+            analysis, and technology that supports how the business actually works.
           </p>
           <div className="performance-actions">
-            <ButtonLink href="#brand-discovery">
+            <ButtonLink href="#performance-framework">
               <span className="inline-flex items-center gap-2">
-                Establish your baseline
+                Build the operating picture
                 <ArrowRight className="h-4 w-4" />
               </span>
             </ButtonLink>
-            <a className="performance-text-link" href="#performance-framework">
-              See the framework
+            <a className="performance-text-link" href="#analysis">
+              Explore the analysis tools
               <ArrowDown aria-hidden="true" className="h-4 w-4" />
             </a>
           </div>
-          <div className="performance-principles" aria-label="D2D Marketing approach">
-            <span><Crosshair aria-hidden="true" /> Clear target</span>
-            <span><TimerReset aria-hidden="true" /> Consistent cadence</span>
+          <div className="performance-principles" aria-label="D2D Performance approach">
+            <span><Crosshair aria-hidden="true" /> Objective baseline</span>
+            <span><TimerReset aria-hidden="true" /> Operating cadence</span>
             <span><Gauge aria-hidden="true" /> Measured improvement</span>
           </div>
         </div>
@@ -65,8 +65,8 @@ export function HomeHero() {
         <div className="performance-board" aria-label="Performance framework">
           <div className="performance-board-top">
             <div>
-              <p>D2D / GROWTH SYSTEM</p>
-              <span>Leadership operating framework</span>
+              <p>D2D / PERFORMANCE SYSTEM</p>
+              <span>Business information framework</span>
             </div>
             <strong>ACTIVE</strong>
           </div>
@@ -106,7 +106,7 @@ export function HomeHero() {
           </div>
         </div>
       </div>
-      <p className="performance-side-note">Built for the work between the big moments</p>
+      <p className="performance-side-note">Clarity for the decisions that move the business</p>
     </section>
   );
 }

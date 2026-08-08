@@ -9,11 +9,11 @@ import { SectionHeading } from "@/components/section-heading";
 
 export function WhyStallSection() {
   const reasons = [
-    "Leadership priorities are unclear.",
-    "Marketing looks active, but the strategy underneath is weak.",
-    "Sales performance is inconsistent because the process is not owned.",
-    "Operations become reactive as complexity increases.",
-    "The brand is not differentiated enough to command confidence.",
+    "Critical information is scattered across disconnected systems and spreadsheets.",
+    "Teams debate whose numbers are right instead of deciding what to do next.",
+    "Dashboards report activity without clarifying ownership, cause, or action.",
+    "Revenue and margin decisions rely too heavily on instinct or incomplete data.",
+    "The technology stack records work but does not support the way the business operates.",
   ];
   const icons = [Network, Compass, Target, Workflow, ShieldAlert];
 
@@ -22,8 +22,8 @@ export function WhyStallSection() {
       <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
         <SectionHeading
           eyebrow="Why Companies Stall"
-          title="Most growth problems are not marketing problems."
-          description="Companies stall when leadership, systems, brand, and execution stop reinforcing one another."
+          title="Performance problems are often information problems."
+          description="Companies lose operating leverage when leaders cannot see the same facts, understand the drivers, and act through a shared decision rhythm."
         />
         <div className="grid gap-4">
           {reasons.map((reason, index) => {

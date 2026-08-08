@@ -24,11 +24,11 @@ const icons = [
 
 export function ServicesGridSection() {
   return (
-    <section className="mx-auto max-w-7xl px-6 py-18 lg:px-8">
+    <section className="mx-auto max-w-7xl px-6 py-18 lg:px-8" id="analysis">
       <SectionHeading
         eyebrow="Services"
-        title="Built for companies that have outgrown generic advice."
-        description="Our work spans strategy, leadership, brand, operations, and the commercial systems that make growth sustainable."
+        title="Analysis and tools built around the way your business works."
+        description="D2D combines consulting, information design, dashboards, operating analysis, and pragmatic technology implementation in one improvement system."
       />
       <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {serviceList.map((service, index) => {

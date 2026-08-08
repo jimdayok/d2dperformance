@@ -17,28 +17,28 @@ import { companyName, parentBrandName } from "@/lib/site-data";
 const websiteManagementUrl = "https://portal.d2dperformance.com/portal/login";
 const brandVaultUrl = "https://brandvault.d2dperformance.com";
 const marketingUrl = "https://d2dmktg.com";
-const digitalUrl = "/digital";
+const digitalUrl = "https://d2d-digital.vercel.app";
 
 const serviceItems = [
   {
-    href: "/services",
+    href: "/#performance-framework",
     label: "All Services",
-    description: "See how D2D helps leadership teams move forward.",
+    description: "See the connected D2D Performance framework.",
   },
   {
-    href: "/executive-coaching",
-    label: "Executive Coaching",
-    description: "Create stronger leadership rhythm and accountability.",
+    href: "/#performance-framework",
+    label: "Revenue Improvement",
+    description: "Find and improve the commercial levers that matter.",
   },
   {
-    href: "/growth-strategy",
-    label: "Growth Strategy",
-    description: "Align market focus, revenue priorities, and execution.",
+    href: "/#analysis",
+    label: "Dashboards & Analysis",
+    description: "Turn operating data into decision-ready information.",
   },
   {
-    href: "/brand-development",
-    label: "Brand Development",
-    description: "Clarify your position, message, and brand system.",
+    href: "/#analysis",
+    label: "Information Systems",
+    description: "Connect tools, definitions, workflows, and ownership.",
   },
 ] as const;
 
@@ -247,7 +247,7 @@ export function RefinedNav() {
                 <div className="paper-panel w-[22rem] rounded-[1.3rem] p-3 shadow-[0_24px_60px_rgba(17,15,12,0.14)] backdrop-blur-xl">
                   {serviceItems.map((item) => (
                     <Link
-                      key={item.href}
+                      key={item.label}
                       href={item.href}
                       className="block rounded-[0.9rem] px-4 py-3 transition hover:bg-[var(--color-surface)] focus:bg-[var(--color-surface)] focus:outline-none"
                     >
@@ -268,7 +268,7 @@ export function RefinedNav() {
 
               return (
                 <Link
-                  key={item.href}
+                  key={item.label}
                   href={item.href}
                   className={`group relative text-[0.82rem] uppercase tracking-[0.18em] transition ${
                     active
@@ -341,10 +341,10 @@ export function RefinedNav() {
             </div>
 
             <Link
-              href="/#brand-discovery"
+              href="/contact"
               className="inline-flex items-center gap-2 border-b border-[var(--nav-top-border,var(--color-border-strong))] pb-1 text-[0.82rem] uppercase tracking-[0.18em] text-[var(--nav-top-ink,var(--color-ink))] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
             >
-              Start Brand Discovery
+              Discuss Performance
               <MoveRight className="h-4 w-4" />
             </Link>
           </div>
@@ -377,7 +377,7 @@ export function RefinedNav() {
           <p className="eyebrow-label">Explore</p>
           <nav className="mt-5 grid gap-1" aria-label="Mobile navigation">
             {[
-              { href: "/services", label: "Services" },
+              { href: "/#performance-framework", label: "Services" },
               ...primaryItems,
             ].map((item) => (
               <Link
@@ -396,7 +396,7 @@ export function RefinedNav() {
             <nav className="mt-4 grid grid-cols-1 gap-1 sm:grid-cols-3">
               {serviceItems.slice(1).map((item) => (
                 <Link
-                  key={item.href}
+                  key={item.label}
                   href={item.href}
                   className="rounded-[0.8rem] px-3 py-2.5 text-sm text-[var(--color-muted)] transition hover:bg-[var(--color-surface)] hover:text-[var(--color-ink)]"
                   onClick={closeMobileMenu}
@@ -444,7 +444,7 @@ export function RefinedNav() {
                   D2D Performance
                 </span>
                 <span className="mt-1 block text-xs text-[var(--color-muted)]">
-                  Leadership, systems, and measured improvement
+                  Revenue, information systems, and measured improvement
                 </span>
               </Link>
             </div>
@@ -472,11 +472,11 @@ export function RefinedNav() {
           </div>
 
           <Link
-            href="/#brand-discovery"
+            href="/contact"
             className="mt-6 flex items-center justify-between rounded-[0.9rem] bg-[var(--color-charcoal)] px-4 py-3 text-sm uppercase tracking-[0.16em] text-white"
             onClick={closeMobileMenu}
           >
-            Start Brand Discovery
+            Discuss Performance
             <MoveRight className="h-4 w-4" />
           </Link>
         </div>

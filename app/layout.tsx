@@ -23,19 +23,19 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: `${companyName} | Brand Strategy & Business Growth`,
+    default: `${companyName} | Revenue Improvement & Business Intelligence`,
     template: `%s | ${companyName}`,
   },
   description:
-    "D2D Marketing helps Dallas–Fort Worth businesses grow through brand strategy, leadership alignment, marketing systems, and practical execution.",
+    "D2D Performance helps leadership teams improve revenue and operations through objective analysis, dashboards, business information systems, and practical technology advisory.",
   applicationName: companyName,
   category: "business",
   openGraph: {
     type: "website",
     siteName: companyName,
-    title: `${companyName} | Brand Strategy & Business Growth`,
+    title: `${companyName} | Revenue Improvement & Business Intelligence`,
     description:
-      "Build a stronger brand and a better business through strategy, leadership, marketing systems, and practical execution.",
+      "Improve revenue and operations with decision-ready dashboards, connected business information, objective analysis, and practical technology advisory.",
     url: siteUrl,
     images: [{ url: "/opengraph-image" }],
   },

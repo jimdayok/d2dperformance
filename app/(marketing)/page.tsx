@@ -1,5 +1,3 @@
-import { BrandDiscoveryForm } from "@/components/brand-discovery-form";
-import { BrandCtaSection } from "@/sections/home/brand-cta";
 import { HomeHero } from "@/sections/home/hero";
 import { HomeProcessSection } from "@/sections/home/process";
 import { ResultsSection } from "@/sections/home/results";
@@ -10,9 +8,9 @@ import { companyName, siteUrl } from "@/lib/site-data";
 import { createMetadata, sanitizeJsonLd } from "@/lib/metadata";
 
 export const metadata = createMetadata({
-  title: "Build a Better Business",
+  title: "Revenue Improvement & Business Intelligence",
   description:
-    "Executive consulting for leadership teams that need clearer strategy, stronger execution, and scalable growth.",
+    "Objective business analysis, revenue improvement, dashboards, information systems, and technology-supported operating advisory.",
 });
 
 const homeJsonLd = {
@@ -21,7 +19,7 @@ const homeJsonLd = {
   name: companyName,
   url: siteUrl,
   description:
-    "D2D Marketing helps business owners and leadership teams grow through brand strategy, leadership alignment, marketing systems, execution, and customer clarity.",
+    "D2D Performance helps business owners improve revenue and operations with objective analysis, dashboards, business information systems, and practical technology advisory.",
 };
 
 export default function Home() {
@@ -32,12 +30,10 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: sanitizeJsonLd(homeJsonLd) }}
       />
       <HomeHero />
-      <BrandDiscoveryForm />
       <WhatWeDoSection />
       <WhyStallSection />
       <HomeProcessSection />
       <ServicesGridSection />
-      <BrandCtaSection />
       <ResultsSection />
     </>
   );

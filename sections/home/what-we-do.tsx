@@ -1,9 +1,9 @@
-import { BriefcaseBusiness, Compass, Layers3 } from "lucide-react";
+import { ChartNoAxesCombined, PanelsTopLeft, TrendingUp } from "lucide-react";
 import { SectionHeading } from "@/components/section-heading";
 import { serviceCards } from "@/lib/site-data";
 
 export function WhatWeDoSection() {
-  const icons = [Compass, BriefcaseBusiness, Layers3];
+  const icons = [TrendingUp, PanelsTopLeft, ChartNoAxesCombined];
 
   return (
     <section
@@ -12,8 +12,8 @@ export function WhatWeDoSection() {
     >
       <SectionHeading
         eyebrow="The Performance Framework"
-        title="Train the business as one connected system."
-        description="Strategy sets the target. Leadership creates the cadence. Brand, sales, marketing, and operations turn that direction into repeatable execution."
+        title="Operate from one connected picture of the business."
+        description="D2D connects revenue priorities, operating data, technology, and leadership decisions so improvement can be understood, owned, and repeated."
       />
       <div className="mt-10 grid gap-6 md:grid-cols-3">
         {serviceCards.map((card, index) => {

@@ -7,8 +7,8 @@ export function HomeProcessSection() {
       <div className="performance-playbook rounded-[2.25rem] border border-[var(--color-border)] px-6 py-10 md:px-8 lg:px-10">
         <SectionHeading
           eyebrow="The Playbook"
-          title="A repeatable progression from potential to performance."
-          description="Every engagement begins with a clear baseline, then moves through a practical operating sequence designed to create focus, ownership, and continuous improvement."
+          title="From disconnected data to a working improvement system."
+          description="Every engagement begins with the decisions the business needs to make, then connects the information, tools, and operating rhythm required to improve them."
         />
         <div className="mt-10 grid gap-5 xl:grid-cols-5">
           {processSteps.map((step, index) => (
