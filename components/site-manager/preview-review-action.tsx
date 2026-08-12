@@ -1,4 +1,4 @@
-import { ArrowRight, MessageSquareText } from "lucide-react";
+import { MessageSquareText } from "lucide-react";
 
 export function PreviewReviewAction({
   previewOpen,
@@ -11,20 +11,9 @@ export function PreviewReviewAction({
 }) {
   return (
     <div
-      className={`portal-preview-review-action ${previewOpen ? "portal-preview-review-action-visible" : ""}`}
+      className="portal-preview-review-action"
+      data-preview-open={previewOpen}
     >
-      {previewOpen ? (
-        <div className="portal-preview-review-pointer" aria-hidden="true">
-          <span>
-            {disabled
-              ? "Save your draft, then review"
-              : "Click here to review this page"}
-          </span>
-          <span className="portal-preview-review-arrow">
-            <ArrowRight size={22} strokeWidth={2.5} />
-          </span>
-        </div>
-      ) : null}
       <button
         type="button"
         onClick={onReview}

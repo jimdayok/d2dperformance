@@ -64,6 +64,7 @@ describe("website feedback workflow", () => {
       digital,
       structured,
       homepage,
+      portalShell,
       previewReviewAction,
       sessionRoute,
       server,
@@ -72,6 +73,7 @@ describe("website feedback workflow", () => {
       readFile("app/(d2dmktg)/digital/page.tsx", "utf8"),
       readFile("components/site-manager/structured-entry-editor.tsx", "utf8"),
       readFile("components/site-manager/homepage-hero-editor.tsx", "utf8"),
+      readFile("components/site-manager/portal-shell.tsx", "utf8"),
       readFile("components/site-manager/preview-review-action.tsx", "utf8"),
       readFile("app/api/website-feedback/sessions/route.ts", "utf8"),
       readFile("lib/website-feedback-server.ts", "utf8"),
@@ -80,8 +82,9 @@ describe("website feedback workflow", () => {
     expect(digital).toContain("/digital/website-feedback");
     expect(structured).toContain("PreviewReviewAction");
     expect(homepage).toContain("PreviewReviewAction");
-    expect(previewReviewAction).toContain("Click here to review this page");
-    expect(previewReviewAction).toContain("ArrowRight");
+    expect(portalShell).toContain("Click here to review this page");
+    expect(portalShell).toContain("portal-sidebar-review-pointer");
+    expect(previewReviewAction).not.toContain("Click here to review this page");
     expect(previewReviewAction).toContain("Review this preview");
     expect(structured).toContain("encodeURIComponent(payload.url)");
     expect(sessionRoute).toContain(".middleware(verificationRequest, false)");

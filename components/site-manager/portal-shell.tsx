@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, CircleHelp, Globe2, MessageSquareText } from "lucide-react";
+import { ArrowUpLeft, ArrowUpRight, CircleHelp, Globe2, MessageSquareText } from "lucide-react";
 import { signOut } from "@/app/(portal)/portal/login/actions";
 import type { SiteDefinition, UserAccess } from "@/lib/site-manager/types";
 import { hasRole } from "@/lib/site-manager/permissions";
@@ -8,6 +8,9 @@ import { PortalNav } from "@/components/site-manager/portal-nav";
 export function PortalShell({ children, definition, access, displayName, siteCount }: { children: React.ReactNode; definition: SiteDefinition | null; access: UserAccess | null; displayName: string; siteCount: number }) {
   const nav = definition?.navigation.filter((item) => !item.requiredRole || (access && hasRole(access, item.requiredRole))) ?? [];
   const feedbackToolOrigin = process.env.NEXT_PUBLIC_SITE_URL ?? "https://performance.d2dmktg.com";
+  const feedbackUrl = definition
+    ? `${feedbackToolOrigin}/digital/website-feedback?site=${encodeURIComponent(definition.key)}&url=${encodeURIComponent(definition.productionUrl)}`
+    : null;
   return (
     <div className="portal-shell min-h-screen lg:grid lg:grid-cols-[19rem_minmax(0,1fr)]">
       <aside className="portal-sidebar border-b border-white/10 px-5 py-5 text-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:border-r lg:border-b-0 lg:px-6 lg:py-7">
@@ -35,7 +38,7 @@ export function PortalShell({ children, definition, access, displayName, siteCou
         <PortalNav items={nav} />
 
         <div className="mt-6 grid grid-cols-2 gap-2 lg:mt-auto lg:grid-cols-1">
-          {definition ? <a href={`${feedbackToolOrigin}/digital/website-feedback?site=${encodeURIComponent(definition.key)}&url=${encodeURIComponent(definition.productionUrl)}`} target="_blank" rel="noreferrer" className="portal-sidebar-link"><MessageSquareText size={15} /> Website feedback</a> : null}
+          {feedbackUrl ? <a href={feedbackUrl} target="_blank" rel="noreferrer" className="portal-sidebar-link"><MessageSquareText size={15} /> Website feedback</a> : null}
           {access?.isPlatformAdmin ? <Link href="/portal/feedback" className="portal-sidebar-link"><MessageSquareText size={15} /> Feedback repository</Link> : null}
           <a href="https://d2dmktg.com" target="_blank" rel="noreferrer" className="portal-sidebar-link">
             <Globe2 size={15} /> D2D Marketing
@@ -44,6 +47,12 @@ export function PortalShell({ children, definition, access, displayName, siteCou
             <CircleHelp size={15} /> Support
           </a>
         </div>
+        {feedbackUrl ? (
+          <a href={feedbackUrl} target="_blank" rel="noreferrer" className="portal-sidebar-review-pointer">
+            <span>Click here to review this page</span>
+            <ArrowUpLeft className="portal-sidebar-review-arrow" size={22} strokeWidth={2.5} aria-hidden="true" />
+          </a>
+        ) : null}
         <div className="mt-5 border-t border-white/12 pt-4 text-xs text-white/58">
           <Link href="/portal/account" className="block truncate font-semibold text-white">{displayName}</Link>
           <p className="mt-1 capitalize">{access?.isPlatformAdmin ? "Platform administrator" : access?.role?.replace("_", " ") ?? "Account"}</p>

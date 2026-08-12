@@ -1507,6 +1507,40 @@ textarea {
   color: var(--portal-cognac-light);
 }
 
+.portal-sidebar-review-pointer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  border-radius: 999px;
+  padding: 0.7rem 0.8rem 0.7rem 1rem;
+  background: #fff0a8;
+  color: #5f3b00;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+  font-size: 0.72rem;
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  transition: background 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.portal-sidebar-review-pointer:hover {
+  background: #ffe889;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+}
+
+.portal-sidebar-review-pointer:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 3px;
+}
+
+.portal-sidebar-review-arrow {
+  flex: 0 0 auto;
+  animation: portal-sidebar-review-arrow 1.05s ease-in-out infinite;
+}
+
 .portal-workspace {
   position: relative;
   background:
@@ -1625,29 +1659,6 @@ textarea {
   gap: 0.65rem;
 }
 
-.portal-preview-review-pointer {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  border-radius: 999px;
-  padding: 0.48rem 0.7rem 0.48rem 0.85rem;
-  background: #fff0a8;
-  color: #5f3b00;
-  box-shadow: 0 8px 24px rgba(95, 59, 0, 0.18);
-  font-size: 0.68rem;
-  font-weight: 750;
-  line-height: 1.15;
-  letter-spacing: 0.02em;
-}
-
-.portal-preview-review-arrow {
-  display: inline-flex;
-}
-
-.portal-preview-review-action-visible .portal-preview-review-arrow {
-  animation: portal-review-arrow 1.05s ease-in-out infinite;
-}
-
 .portal-preview-review-button {
   display: inline-flex;
   align-items: center;
@@ -1681,9 +1692,9 @@ textarea {
   box-shadow: none;
 }
 
-@keyframes portal-review-arrow {
-  0%, 100% { transform: translateX(0); }
-  50% { transform: translateX(0.32rem); }
+@keyframes portal-sidebar-review-arrow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-0.32rem); }
 }
 
 .portal-login {
@@ -1755,7 +1766,7 @@ textarea {
     animation: none;
   }
 
-  .portal-preview-review-action-visible .portal-preview-review-arrow {
+  .portal-sidebar-review-arrow {
     animation: none;
   }
 }
@@ -1766,9 +1777,6 @@ textarea {
     justify-content: space-between;
   }
 
-  .portal-preview-review-pointer {
-    max-width: 10rem;
-  }
 }
 
 @media (max-width: 640px) {
