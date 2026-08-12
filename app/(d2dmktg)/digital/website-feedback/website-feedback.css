@@ -74,6 +74,9 @@
 .saved-page-strip > p { margin: 0 0 .5rem; color: #697372; font-size: .61rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
 .saved-page-strip > div { display: flex; gap: .4rem; overflow-x: auto; padding-bottom: .2rem; }
 .saved-page-strip button { display: inline-flex; flex: 0 0 auto; align-items: center; gap: .34rem; border: 1px solid var(--feedback-line); background: white; padding: .5rem .62rem; color: #314241; font-size: .65rem; cursor: pointer; }
+.saved-page-strip button small { margin-left: .18rem; color: #0c7379; font-size: .52rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.saved-page-strip button.is-draft { border-color: #c58f50; background: #fff8ec; }
+.saved-page-strip button.is-draft small { color: #9a5f34; }
 .saved-page-strip button:disabled { opacity: .45; cursor: not-allowed; }
 .feedback-questions { flex: 1; overflow-y: auto; padding: 1.25rem 1rem 7rem; }
 .question-heading { display: flex; justify-content: space-between; align-items: start; gap: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--feedback-line); }
