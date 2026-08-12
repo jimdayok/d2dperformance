@@ -8,6 +8,7 @@ import {
   Layers3,
   Menu,
   Megaphone,
+  MessageSquareText,
   MonitorSmartphone,
   PanelsTopLeft,
   Workflow,
@@ -368,6 +369,35 @@ export default function Home() {
                 <Gauge aria-hidden="true" size={18} />
                 <span>Optimize</span>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="feedback-feature" id="feedback">
+          <div className="feedback-feature-copy">
+            <p className="eyebrow">Client collaboration / New tool</p>
+            <h2>Review the website while you&apos;re looking at it.</h2>
+            <p>
+              Open a website or private preview beside a guided marketing review,
+              save feedback page by page, and send one organized change record to
+              D2D Digital.
+            </p>
+            <a className="button button-primary" href="/digital/website-feedback">
+              Open the website feedback tool <Arrow />
+            </a>
+          </div>
+          <div className="feedback-feature-visual" aria-label="Website feedback tool preview">
+            <div className="feedback-mini-sidebar">
+              <MessageSquareText aria-hidden="true" size={22} />
+              <span>Page review / 03</span>
+              <i />
+              <i />
+              <i />
+              <strong>Save this page</strong>
+            </div>
+            <div className="feedback-mini-browser">
+              <div><span /><span /><span /><small>Desktop preview · 1440 px</small></div>
+              <section><b>D2D</b><p>Client website preview</p></section>
             </div>
           </div>
         </section>
