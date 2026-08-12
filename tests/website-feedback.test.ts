@@ -24,12 +24,13 @@ describe("website feedback workflow", () => {
   });
 
   it("keeps the CTA and editor handoff contracts", async () => {
-    const [digital, structured, homepage, sessionRoute, server] = await Promise.all([
+    const [digital, structured, homepage, sessionRoute, server, workspace] = await Promise.all([
       readFile("app/(d2dmktg)/digital/page.tsx", "utf8"),
       readFile("components/site-manager/structured-entry-editor.tsx", "utf8"),
       readFile("components/site-manager/homepage-hero-editor.tsx", "utf8"),
       readFile("app/api/website-feedback/sessions/route.ts", "utf8"),
       readFile("lib/website-feedback-server.ts", "utf8"),
+      readFile("components/website-feedback/feedback-workspace.tsx", "utf8"),
     ]);
     expect(digital).toContain("/digital/website-feedback");
     expect(structured).toContain("Review this preview");
@@ -38,5 +39,9 @@ describe("website feedback workflow", () => {
     expect(sessionRoute).toContain(".middleware(verificationRequest, false)");
     expect(sessionRoute).toContain("verificationResponse.json()");
     expect(server).toContain("if (delivery.error)");
+    expect(server).toContain("resend.batch.send");
+    expect(server).toContain("Your website feedback copy");
+    expect(workspace).toContain("Draft · save separately");
+    expect(workspace).toContain("event.source !== frameRef.current?.contentWindow");
   });
 });

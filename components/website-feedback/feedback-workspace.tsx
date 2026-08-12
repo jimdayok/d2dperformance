@@ -7,17 +7,25 @@ import { normalizeReviewUrl, overallQuestions, pageQuestions } from "@/lib/websi
 
 type SavedPage = { id: string; url: string; page_title: string; answers: Record<string, string>; page_score: number; commentary: string; updated_at: string };
 type SessionIdentity = { id: string; token: string };
+type PageDraft = { url: string; pageTitle: string; answers: Record<string, string>; pageScore: number; commentary: string };
 
 const blankAnswers = () => Object.fromEntries(pageQuestions.map((question) => [question.id, ""]));
 const blankOverall = () => Object.fromEntries(overallQuestions.map((question) => [question.id, ""]));
 
 function sessionStorageKey(id: string) { return `d2d-website-feedback:${id}`; }
+function pageLabel(url: string, title?: string) {
+  if (title) return title;
+  try { return new URL(url).pathname === "/" ? "Homepage" : new URL(url).pathname.split("/").filter(Boolean).at(-1)?.replaceAll("-", " ") || "Page"; }
+  catch { return "Page"; }
+}
 
 export function FeedbackWorkspace({ initialUrl, initialSessionId, sourceSiteSlug }: { initialUrl: string; initialSessionId: string; sourceSiteSlug: string }) {
   const [identity, setIdentity] = useState<SessionIdentity | null>(null);
   const [restoring, setRestoring] = useState(Boolean(initialSessionId));
   const [sessionError, setSessionError] = useState("");
+  const [submitterEmail, setSubmitterEmail] = useState("");
   const [savedPages, setSavedPages] = useState<SavedPage[]>([]);
+  const [pageDrafts, setPageDrafts] = useState<Record<string, PageDraft>>({});
   const [currentUrl, setCurrentUrl] = useState(initialUrl);
   const [loadedUrl, setLoadedUrl] = useState(initialUrl);
   const [pageTitle, setPageTitle] = useState("");
@@ -37,12 +45,48 @@ export function FeedbackWorkspace({ initialUrl, initialSessionId, sourceSiteSlug
   const snapshot = useMemo(() => JSON.stringify({ loadedUrl, pageTitle, answers, pageScore, commentary }), [loadedUrl, pageTitle, answers, pageScore, commentary]);
   const dirty = Boolean(identity && savedSnapshot && snapshot !== savedSnapshot);
 
+  const currentDraft = useCallback((): PageDraft => ({ url: loadedUrl, pageTitle, answers, pageScore, commentary }), [answers, commentary, loadedUrl, pageScore, pageTitle]);
+
+  const blankSnapshot = useCallback((url: string) => JSON.stringify({ loadedUrl: url, pageTitle: "", answers: blankAnswers(), pageScore: 3, commentary: "" }), []);
+
   const loadSavedPage = useCallback((page: SavedPage) => {
     setCurrentUrl(page.url); setLoadedUrl(page.url); setPageTitle(page.page_title ?? "");
     setAnswers({ ...blankAnswers(), ...(page.answers ?? {}) }); setPageScore(page.page_score ?? 3); setCommentary(page.commentary ?? "");
     setSavedSnapshot(JSON.stringify({ loadedUrl: page.url, pageTitle: page.page_title ?? "", answers: { ...blankAnswers(), ...(page.answers ?? {}) }, pageScore: page.page_score ?? 3, commentary: page.commentary ?? "" }));
     setMessage("");
   }, []);
+
+  const loadDraftPage = useCallback((draft: PageDraft, savedPage?: SavedPage) => {
+    setCurrentUrl(draft.url); setLoadedUrl(draft.url); setPageTitle(draft.pageTitle);
+    setAnswers({ ...blankAnswers(), ...draft.answers }); setPageScore(draft.pageScore); setCommentary(draft.commentary);
+    setSavedSnapshot(savedPage
+      ? JSON.stringify({ loadedUrl: savedPage.url, pageTitle: savedPage.page_title ?? "", answers: { ...blankAnswers(), ...(savedPage.answers ?? {}) }, pageScore: savedPage.page_score ?? 3, commentary: savedPage.commentary ?? "" })
+      : blankSnapshot(draft.url));
+    setMessage("Unsaved notes restored for this page. Save this page when you are ready.");
+  }, [blankSnapshot]);
+
+  const switchPage = useCallback((value: string, reportedTitle = "") => {
+    try {
+      const nextUrl = normalizeReviewUrl(value);
+      if (nextUrl === loadedUrl) {
+        setCurrentUrl(nextUrl);
+        if (reportedTitle && !pageTitle) setPageTitle(reportedTitle);
+        return;
+      }
+      if (dirty) {
+        const draft = currentDraft();
+        setPageDrafts((current) => ({ ...current, [draft.url]: draft }));
+      }
+      const savedPage = savedPages.find((page) => page.url === nextUrl);
+      const draft = pageDrafts[nextUrl];
+      if (draft) { loadDraftPage(draft, savedPage); return; }
+      if (savedPage) { loadSavedPage(savedPage); return; }
+      const nextAnswers = blankAnswers();
+      setCurrentUrl(nextUrl); setLoadedUrl(nextUrl); setPageTitle(reportedTitle); setAnswers(nextAnswers); setPageScore(3); setCommentary("");
+      setSavedSnapshot(JSON.stringify({ loadedUrl: nextUrl, pageTitle: "", answers: nextAnswers, pageScore: 3, commentary: "" }));
+      setMessage(dirty ? "New page detected. Your previous page notes remain available as an unsaved draft." : "New page detected. Add feedback and save it as a separate page note.");
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Enter a valid website address."); }
+  }, [currentDraft, dirty, loadDraftPage, loadSavedPage, loadedUrl, pageDrafts, pageTitle, savedPages]);
 
   useEffect(() => {
     if (!initialSessionId) return;
@@ -54,7 +98,7 @@ export function FeedbackWorkspace({ initialUrl, initialSessionId, sourceSiteSlug
         const response = await fetch(`/api/website-feedback/sessions/${initialSessionId}`, { headers: { "x-feedback-token": token } });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error ?? "The saved review could not be restored.");
-        const pages = (data.pages ?? []) as SavedPage[]; setSavedPages(pages); setIdentity({ id: initialSessionId, token });
+        const pages = (data.pages ?? []) as SavedPage[]; setSavedPages(pages); setIdentity({ id: initialSessionId, token }); setSubmitterEmail(String(data.session.client_email ?? "")); setSubmitted(data.session.status === "submitted");
         if (pages.length) loadSavedPage(pages.at(-1)!); else { setLoadedUrl(String(data.session.initial_url)); setCurrentUrl(String(data.session.initial_url)); setSavedSnapshot(JSON.stringify({ loadedUrl: String(data.session.initial_url), pageTitle: "", answers: blankAnswers(), pageScore: 3, commentary: "" })); }
       } catch (error) { setSessionError(error instanceof Error ? error.message : "The review could not be restored."); }
       finally { setRestoring(false); }
@@ -65,23 +109,23 @@ export function FeedbackWorkspace({ initialUrl, initialSessionId, sourceSiteSlug
   useEffect(() => {
     const receiveLocation = (event: MessageEvent) => {
       const payload = event.data as { type?: string; url?: string; title?: string } | null;
-      if (!payload || payload.type !== "d2d-feedback-location" || !payload.url || dirty) return;
-      try { const nextUrl = normalizeReviewUrl(payload.url); setCurrentUrl(nextUrl); setLoadedUrl(nextUrl); setPageTitle(payload.title ?? ""); }
-      catch { /* Ignore invalid messages from embedded pages. */ }
+      if (event.source !== frameRef.current?.contentWindow || !payload || payload.type !== "d2d-feedback-location" || !payload.url || submitted) return;
+      switchPage(payload.url, payload.title ?? "");
     };
     window.addEventListener("message", receiveLocation);
     return () => window.removeEventListener("message", receiveLocation);
-  }, [dirty]);
+  }, [submitted, switchPage]);
 
   async function startReview(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault(); setWorking(true); setSessionError("");
     const form = new FormData(event.currentTarget); const altcha = String(form.get("altcha") ?? "");
     try {
       const normalizedUrl = normalizeReviewUrl(String(form.get("initialUrl") ?? ""));
-      const response = await fetch("/api/website-feedback/sessions", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ clientName: form.get("clientName"), clientEmail: form.get("clientEmail"), company: form.get("company"), initialUrl: normalizedUrl, altcha, sourceSiteSlug: sourceSiteSlug || null }) });
+      const clientEmail = String(form.get("clientEmail") ?? "");
+      const response = await fetch("/api/website-feedback/sessions", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ clientName: form.get("clientName"), clientEmail, company: form.get("company"), initialUrl: normalizedUrl, altcha, sourceSiteSlug: sourceSiteSlug || null }) });
       const data = await response.json(); if (!response.ok) throw new Error(data.error ?? "The review could not be started.");
       const nextIdentity = { id: String(data.session.id), token: String(data.session.accessToken) };
-      window.localStorage.setItem(sessionStorageKey(nextIdentity.id), nextIdentity.token); setIdentity(nextIdentity); setCurrentUrl(normalizedUrl); setLoadedUrl(normalizedUrl);
+      window.localStorage.setItem(sessionStorageKey(nextIdentity.id), nextIdentity.token); setIdentity(nextIdentity); setSubmitterEmail(clientEmail); setCurrentUrl(normalizedUrl); setLoadedUrl(normalizedUrl);
       const nextSnapshot = JSON.stringify({ loadedUrl: normalizedUrl, pageTitle: "", answers: blankAnswers(), pageScore: 3, commentary: "" }); setSavedSnapshot(nextSnapshot);
       const url = new URL(window.location.href); url.searchParams.set("session", nextIdentity.id); url.searchParams.set("url", normalizedUrl); window.history.replaceState({}, "", url);
     } catch (error) { setSessionError(error instanceof Error ? error.message : "The review could not be started."); }
@@ -89,13 +133,7 @@ export function FeedbackWorkspace({ initialUrl, initialSessionId, sourceSiteSlug
   }
 
   function loadPage() {
-    if (dirty) { setMessage("Save this page before loading another page."); return; }
-    try {
-      const nextUrl = normalizeReviewUrl(currentUrl); const existing = savedPages.find((page) => page.url === nextUrl);
-      if (existing) { loadSavedPage(existing); return; }
-      setCurrentUrl(nextUrl); setLoadedUrl(nextUrl); setPageTitle(""); setAnswers(blankAnswers()); setPageScore(3); setCommentary("");
-      setSavedSnapshot(JSON.stringify({ loadedUrl: nextUrl, pageTitle: "", answers: blankAnswers(), pageScore: 3, commentary: "" })); setMessage("New page loaded. Add feedback, then save it before moving on.");
-    } catch (error) { setMessage(error instanceof Error ? error.message : "Enter a valid website address."); }
+    switchPage(currentUrl);
   }
 
   async function savePage() {
@@ -103,19 +141,19 @@ export function FeedbackWorkspace({ initialUrl, initialSessionId, sourceSiteSlug
     try {
       const response = await fetch(`/api/website-feedback/sessions/${identity.id}/pages`, { method: "PUT", headers: { "content-type": "application/json", "x-feedback-token": identity.token }, body: JSON.stringify({ url: loadedUrl, pageTitle, answers, pageScore, commentary }) });
       const data = await response.json(); if (!response.ok) throw new Error(data.error ?? "The page could not be saved.");
-      const page = data.page as SavedPage; setSavedPages((current) => [...current.filter((item) => item.url !== page.url), page]);
+      const page = data.page as SavedPage; setSavedPages((current) => [...current.filter((item) => item.url !== page.url), page]); setPageDrafts((current) => { const next = { ...current }; delete next[page.url]; return next; });
       setSavedSnapshot(snapshot); setMessage("Page feedback saved. You can now load another page.");
     } catch (error) { setMessage(error instanceof Error ? error.message : "The page could not be saved."); }
     finally { setWorking(false); }
   }
 
   async function submitReview() {
-    if (!identity || dirty) { setMessage("Save the current page before submitting the full review."); return; }
+    if (!identity || dirty || Object.keys(pageDrafts).length) { setMessage("Save every page marked Draft before submitting the full review."); setShowFinal(false); return; }
     setWorking(true); setMessage("Sending your review to D2D Digital…");
     try {
       const response = await fetch(`/api/website-feedback/sessions/${identity.id}/submit`, { method: "POST", headers: { "content-type": "application/json", "x-feedback-token": identity.token }, body: JSON.stringify({ satisfactionScore: satisfaction, approvalStatus, overallAnswers }) });
       const data = await response.json(); if (!response.ok) throw new Error(data.error ?? "The review could not be submitted.");
-      setSubmitted(true); setShowFinal(false); setMessage("Review submitted. D2D Digital received the complete page-by-page record.");
+      setSubmitted(true); setShowFinal(false); setMessage(`Review submitted. The complete page-by-page report was emailed to D2D Digital${submitterEmail ? ` and ${submitterEmail}` : " and the submitting party"}.`);
     } catch (error) { setMessage(error instanceof Error ? error.message : "The review could not be submitted. Your saved notes are still available."); }
     finally { setWorking(false); }
   }
@@ -123,23 +161,25 @@ export function FeedbackWorkspace({ initialUrl, initialSessionId, sourceSiteSlug
   if (restoring) return <div className="feedback-loading"><LoaderCircle className="animate-spin" /><p>Restoring your private review…</p></div>;
   if (!identity) return <StartReviewForm initialUrl={initialUrl} sourceSiteSlug={sourceSiteSlug} onSubmit={startReview} working={working} error={sessionError} />;
 
+  const unsavedCount = Object.keys(pageDrafts).length + (dirty && !pageDrafts[loadedUrl] ? 1 : 0);
+
   return (
     <div className="feedback-app">
       <header className="feedback-header">
         <a href="/digital" className="feedback-brand"><span>D2D</span><strong>DIGITAL_</strong></a>
         <div className="feedback-header-copy"><p>Website review workspace</p><span><ShieldCheck size={14} /> Private, saved page by page</span></div>
-        <button className="feedback-submit-top" type="button" onClick={() => setShowFinal(true)} disabled={!savedPages.length || submitted}>Complete review <ChevronRight size={16} /></button>
+        <button className="feedback-submit-top" type="button" onClick={() => setShowFinal(true)} disabled={!savedPages.length || Boolean(unsavedCount) || submitted}>{unsavedCount ? `${unsavedCount} page ${unsavedCount === 1 ? "draft" : "drafts"}` : "Complete review"} <ChevronRight size={16} /></button>
       </header>
       <div className="feedback-layout">
         <aside className="feedback-panel">
           <div className="feedback-url-control">
             <label htmlFor="review-url">Page being reviewed</label>
-            <div><input id="review-url" value={currentUrl} onChange={(event) => setCurrentUrl(event.target.value)} disabled={dirty || submitted} /><button type="button" onClick={loadPage} disabled={dirty || submitted}>Load</button></div>
-            <p>{dirty ? "Save your notes before changing pages." : "Enter another page address, or use a saved page below."}</p>
+            <div><input id="review-url" value={currentUrl} onChange={(event) => setCurrentUrl(event.target.value)} disabled={submitted} /><button type="button" onClick={loadPage} disabled={submitted}>Load</button></div>
+            <p>Navigate in the preview or enter a page address. Each URL keeps its own notes.</p>
           </div>
-          {savedPages.length ? <div className="saved-page-strip"><p>Saved pages</p><div>{savedPages.map((page) => <button type="button" key={page.id} onClick={() => !dirty && loadSavedPage(page)} disabled={dirty}><Check size={13} />{page.page_title || new URL(page.url).pathname || "Homepage"}</button>)}<button type="button" onClick={() => { if (!dirty) { setCurrentUrl(loadedUrl); setMessage("Enter the next page address above."); } }} disabled={dirty}><Plus size={13} /> Add page</button></div></div> : null}
+          {savedPages.length || Object.keys(pageDrafts).length ? <div className="saved-page-strip"><p>Pages in this review</p><div>{savedPages.filter((page) => !pageDrafts[page.url]).map((page) => <button type="button" key={page.id} onClick={() => switchPage(page.url)}><Check size={13} />{pageLabel(page.url, page.page_title)} <small>Saved</small></button>)}{Object.values(pageDrafts).map((draft) => <button type="button" key={draft.url} className="is-draft" onClick={() => switchPage(draft.url)}><Plus size={13} />{pageLabel(draft.url, draft.pageTitle)} <small>Draft</small></button>)}</div></div> : null}
           <div className="feedback-questions">
-            <div className="question-heading"><div><p>Page review</p><h1>{pageTitle || "Review this page"}</h1></div><span>{savedPages.find((page) => page.url === loadedUrl) ? "Saved page" : "Unsaved page"}</span></div>
+            <div className="question-heading"><div><p>Page review</p><h1>{pageTitle || pageLabel(loadedUrl)}</h1></div><span>{dirty || pageDrafts[loadedUrl] ? "Draft · save separately" : savedPages.find((page) => page.url === loadedUrl) ? "Saved page" : "New page"}</span></div>
             <label className="feedback-field"><span>Page name <small>Optional</small></span><input value={pageTitle} onChange={(event) => setPageTitle(event.target.value)} placeholder="Home, About, Services…" disabled={submitted} /></label>
             <fieldset className="rating-field"><legend>How well does this page work?</legend><div>{[1,2,3,4,5].map((score) => <button type="button" key={score} onClick={() => setPageScore(score)} className={pageScore === score ? "is-selected" : ""} aria-pressed={pageScore === score} disabled={submitted}>{score}</button>)}</div><p><span>Needs work</span><span>Excellent</span></p></fieldset>
             {pageQuestions.map((question, index) => <label className="feedback-field" key={question.id}><span><b>{String(index + 1).padStart(2, "0")}</b>{question.label}</span><small>{question.prompt}</small><textarea rows={4} value={answers[question.id] ?? ""} onChange={(event) => setAnswers((current) => ({ ...current, [question.id]: event.target.value }))} disabled={submitted} /></label>)}
@@ -149,7 +189,7 @@ export function FeedbackWorkspace({ initialUrl, initialSessionId, sourceSiteSlug
         </aside>
         <section className="feedback-preview" aria-label="Desktop website preview">
           <div className="preview-toolbar"><div><Monitor size={16} /><span>Desktop preview · 1440 px</span></div><p>{loadedUrl}</p><a href={loadedUrl} target="_blank" rel="noreferrer">Open separately <ExternalLink size={14} /></a></div>
-          <div className="preview-notice"><span>If a website blocks embedded viewing or appears blank, open it separately and keep this notes panel beside it.</span></div>
+          <div className="preview-notice"><span>When you follow a link, the notes panel changes to that page and preserves any unfinished draft. Save each page separately before completing the review.</span></div>
           <div className="desktop-stage"><iframe ref={frameRef} key={loadedUrl} src={loadedUrl} title={`Desktop preview of ${pageTitle || loadedUrl}`} sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts" /></div>
         </section>
       </div>
