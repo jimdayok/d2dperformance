@@ -64,6 +64,7 @@ describe("website feedback workflow", () => {
       digital,
       structured,
       homepage,
+      livePreviewPane,
       portalShell,
       previewReviewAction,
       sessionRoute,
@@ -73,6 +74,7 @@ describe("website feedback workflow", () => {
       readFile("app/(d2dmktg)/digital/page.tsx", "utf8"),
       readFile("components/site-manager/structured-entry-editor.tsx", "utf8"),
       readFile("components/site-manager/homepage-hero-editor.tsx", "utf8"),
+      readFile("components/site-manager/live-preview-pane.tsx", "utf8"),
       readFile("components/site-manager/portal-shell.tsx", "utf8"),
       readFile("components/site-manager/preview-review-action.tsx", "utf8"),
       readFile("app/api/website-feedback/sessions/route.ts", "utf8"),
@@ -82,6 +84,10 @@ describe("website feedback workflow", () => {
     expect(digital).toContain("/digital/website-feedback");
     expect(structured).toContain("PreviewReviewAction");
     expect(homepage).toContain("PreviewReviewAction");
+    expect(livePreviewPane).toContain('aria-label="Preview viewport"');
+    expect(livePreviewPane).toContain('setViewport("desktop")');
+    expect(livePreviewPane).toContain('setViewport("mobile")');
+    expect(livePreviewPane).toContain("max-w-[390px]");
     expect(portalShell).toContain("Click here to review this page");
     expect(portalShell).toContain("portal-sidebar-review-pointer");
     expect(previewReviewAction).not.toContain("Click here to review this page");
