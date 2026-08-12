@@ -1,4 +1,5 @@
 import type { ZodType } from "zod";
+import type { EditorGroup } from "@/lib/site-manager/editor-config";
 
 export const siteRoles = ["site_admin", "publisher", "editor", "viewer"] as const;
 export type SiteRole = (typeof siteRoles)[number];
@@ -62,6 +63,8 @@ export type SiteDefinition = {
   previewAudience: string;
   navigation: SiteNavigationItem[];
   models: Record<string, ContentModelDefinition<unknown>>;
+  editorGroups: Record<string, EditorGroup[]>;
+  modelKeyForEntry: (contentType: string, contentKey: string) => string | null;
   allowedPreviewPaths: readonly string[];
   allowedRevalidationTags: readonly string[];
 };

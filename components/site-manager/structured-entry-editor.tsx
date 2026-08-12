@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { LivePreviewPane } from "@/components/site-manager/live-preview-pane";
+import type { EditorField, EditorGroup } from "@/lib/site-manager/editor-config";
 import { resolveEditorStatus } from "@/lib/site-manager/editor-status";
-import type { EditorField, EditorGroup } from "@/lib/site-manager/sites/alford-custom-homes/editor-config";
 
 const feedbackToolOrigin = process.env.NEXT_PUBLIC_SITE_URL ?? "https://performance.d2dmktg.com";
 
@@ -92,18 +93,7 @@ function RemoveButton({ onClick }: { onClick: () => void }) {
   return <button type="button" onClick={onClick} className="mt-2 shrink-0 rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-700">Remove</button>;
 }
 
-function previewPath(modelKey: string, data: JsonObject) {
-  if (modelKey === "about-page") return "/about";
-  if (modelKey === "contact-page") return "/contact";
-  if (modelKey === "service") return "/services";
-  if (modelKey === "process-step") return "/our-process";
-  if (modelKey === "testimonial" || modelKey === "global-settings") return "/";
-  if (modelKey === "service-area") return `/service-areas#${String(data.slug ?? "")}`;
-  if (modelKey === "journal-post") return `/journal/${String(data.slug ?? "")}`;
-  return "/";
-}
-
-export function StructuredEntryEditor({ entry, siteSlug, modelKey, groups, canPublish }: { entry: Entry; siteSlug: string; modelKey: string; groups: EditorGroup[]; canPublish: boolean }) {
+export function StructuredEntryEditor({ entry, siteSlug, siteName, modelKey, groups, previewPath, canPublish }: { entry: Entry; siteSlug: string; siteName: string; modelKey: string; groups: EditorGroup[]; previewPath: string; canPublish: boolean }) {
   const [data, setData] = useState(entry.draft_data);
   const [savedData, setSavedData] = useState(entry.draft_data);
   const [revision, setRevision] = useState(entry.draft_revision);
@@ -111,6 +101,7 @@ export function StructuredEntryEditor({ entry, siteSlug, modelKey, groups, canPu
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [previewOpen, setPreviewOpen] = useState(true);
   const isDirty = useMemo(() => JSON.stringify(data) !== JSON.stringify(savedData), [data, savedData]);
   const update = (path: string, value: unknown) => setData((current) => setValueAt(current, path, value));
 
@@ -125,28 +116,21 @@ export function StructuredEntryEditor({ entry, siteSlug, modelKey, groups, canPu
 
   async function workflow(action: "submit" | "publish") {
     setPending(true); setMessage(""); setErrorMessage("");
-    const body = action === "publish" ? { siteSlug, modelKey, expectedRevision: revision, path: previewPath(modelKey, data) } : { siteSlug, expectedRevision: revision };
+    const body = action === "publish" ? { siteSlug, modelKey, expectedRevision: revision, path: previewPath } : { siteSlug, expectedRevision: revision };
     const response = await fetch(`/api/cms/entries/${entry.id}/${action}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
     const payload = await response.json().catch(() => ({})); setPending(false);
     if (!response.ok) { setErrorMessage(typeof payload.error === "string" ? payload.error : `${action === "submit" ? "Submission" : "Publishing"} failed.`); return; }
     setStatus(action === "submit" ? "in_review" : "published"); setMessage(action === "submit" ? "Submitted for D2D review." : payload.message ?? "Published.");
   }
 
-  async function openPreview() {
-    setErrorMessage("");
-    const response = await fetch("/api/cms/preview-token", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ siteSlug, path: previewPath(modelKey, data) }) });
-    const payload = await response.json().catch(() => ({}));
-    if (response.ok && payload.url) window.open(payload.url, "_blank", "noopener,noreferrer"); else setErrorMessage(payload.error ?? "Preview could not be opened.");
-  }
-
   async function openFeedback() {
     setErrorMessage("");
-    const response = await fetch("/api/cms/preview-token", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ siteSlug, path: previewPath(modelKey, data) }) });
+    const response = await fetch("/api/cms/preview-token", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ siteSlug, path: previewPath }) });
     const payload = await response.json().catch(() => ({}));
     if (response.ok && payload.url) window.open(`${feedbackToolOrigin}/digital/website-feedback?site=${encodeURIComponent(siteSlug)}&url=${encodeURIComponent(payload.url)}`, "_blank", "noopener,noreferrer"); else setErrorMessage(payload.error ?? "The feedback workspace could not be opened.");
   }
 
   const editorStatus = resolveEditorStatus({ error: errorMessage, isDirty, message });
 
-  return <form onSubmit={save} className="space-y-8"><header className="rounded-2xl border border-black/10 bg-white p-6"><div className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs uppercase tracking-wider text-black/45">Workflow status</p><p className="mt-1 font-semibold capitalize">{status.replaceAll("_", " ")}</p></div><div className="text-right text-xs text-black/50"><p>Draft revision {revision}</p><p>Last published {entry.published_at ? new Date(entry.published_at).toLocaleString() : "Never"}</p></div></div></header>{groups.map((group) => <section key={group.title} className="rounded-2xl border border-black/10 bg-white p-6"><h2 className="font-display text-2xl font-semibold">{group.title}</h2>{group.description ? <p className="mt-1 text-sm text-black/55">{group.description}</p> : null}<div className="mt-6 grid gap-5 md:grid-cols-2">{group.fields.map((field) => <div key={field.path} className={field.kind?.includes("list") || field.kind === "content_blocks" || field.kind === "textarea" ? "md:col-span-2" : ""}><Field field={field} data={data} update={update} /></div>)}</div></section>)}<div className="sticky bottom-4 z-10 flex flex-wrap items-center gap-3 rounded-2xl border border-black/10 bg-white/95 p-4 shadow-xl backdrop-blur"><button type="submit" disabled={pending || !isDirty} className="rounded-lg bg-[#18201d] px-4 py-2 text-sm font-semibold !text-white disabled:opacity-40">{pending ? "Working…" : "Save Draft"}</button><button type="button" onClick={() => workflow("submit")} disabled={pending || isDirty || status === "in_review"} className="rounded-lg border border-black/15 px-4 py-2 text-sm font-semibold disabled:opacity-40">Submit for Review</button>{canPublish ? <button type="button" onClick={() => workflow("publish")} disabled={pending || isDirty || status !== "in_review"} className="rounded-lg bg-[#9a5f34] px-4 py-2 text-sm font-semibold !text-white disabled:opacity-40">Publish</button> : null}<button type="button" onClick={openPreview} className="rounded-lg border border-black/15 px-4 py-2 text-sm font-semibold">Open Preview</button><button type="button" onClick={openFeedback} disabled={isDirty} className="rounded-lg border border-[#9a5f34]/35 bg-[#9a5f34]/8 px-4 py-2 text-sm font-semibold text-[#764522] disabled:opacity-40">Review this preview</button><p role={editorStatus.isError ? "alert" : undefined} aria-live="polite" className={`ml-auto text-sm ${editorStatus.isError ? "font-medium text-red-700" : "text-black/60"}`}>{editorStatus.text}</p></div></form>;
+  return <div className={previewOpen ? "grid items-start gap-6 xl:grid-cols-[minmax(0,.92fr)_minmax(28rem,1.08fr)]" : ""}><form onSubmit={save} className="min-w-0 space-y-8"><header className="rounded-2xl border border-black/10 bg-white p-6"><div className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs uppercase tracking-wider text-black/45">Workflow status</p><p className="mt-1 font-semibold capitalize">{status.replaceAll("_", " ")}</p></div><div className="text-right text-xs text-black/50"><p>Draft revision {revision}</p><p>Last published {entry.published_at ? new Date(entry.published_at).toLocaleString() : "Never"}</p></div></div></header>{groups.map((group) => <section key={group.title} className="rounded-2xl border border-black/10 bg-white p-6"><h2 className="font-display text-2xl font-semibold">{group.title}</h2>{group.description ? <p className="mt-1 text-sm text-black/55">{group.description}</p> : null}<div className="mt-6 grid gap-5 md:grid-cols-2">{group.fields.map((field) => <div key={field.path} className={field.kind?.includes("list") || field.kind === "content_blocks" || field.kind === "textarea" ? "md:col-span-2" : ""}><Field field={field} data={data} update={update} /></div>)}</div></section>)}<div className="sticky bottom-4 z-10 flex flex-wrap items-center gap-3 rounded-2xl border border-black/10 bg-white/95 p-4 shadow-xl backdrop-blur"><button type="submit" disabled={pending || !isDirty} className="rounded-lg bg-[#18201d] px-4 py-2 text-sm font-semibold !text-white disabled:opacity-40">{pending ? "Working…" : "Save Draft"}</button><button type="button" onClick={() => workflow("submit")} disabled={pending || isDirty || status === "in_review"} className="rounded-lg border border-black/15 px-4 py-2 text-sm font-semibold disabled:opacity-40">Submit for Review</button>{canPublish ? <button type="button" onClick={() => workflow("publish")} disabled={pending || isDirty || status !== "in_review"} className="rounded-lg bg-[#9a5f34] px-4 py-2 text-sm font-semibold !text-white disabled:opacity-40">Publish</button> : null}<button type="button" onClick={() => setPreviewOpen((value) => !value)} className="rounded-lg border border-black/15 px-4 py-2 text-sm font-semibold">{previewOpen ? "Hide Preview" : "Show Preview"}</button><button type="button" onClick={openFeedback} disabled={isDirty} className="rounded-lg border border-[#9a5f34]/35 bg-[#9a5f34]/8 px-4 py-2 text-sm font-semibold text-[#764522] disabled:opacity-40">Review this preview</button><p role={editorStatus.isError ? "alert" : undefined} aria-live="polite" className={`ml-auto text-sm ${editorStatus.isError ? "font-medium text-red-700" : "text-black/60"}`}>{editorStatus.text}</p></div></form><LivePreviewPane open={previewOpen} onOpenChange={setPreviewOpen} siteSlug={siteSlug} path={previewPath} refreshKey={revision} siteName={siteName} /></div>;
 }

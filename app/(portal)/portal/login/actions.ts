@@ -33,7 +33,7 @@ export async function login(_: LoginState, formData: FormData): Promise<LoginSta
 export async function requestPasswordReset(_: LoginState, formData: FormData): Promise<LoginState> {
   const email = z.string().email().safeParse(formData.get("email"));
   if (!email.success) return { error: "Enter your email address first." };
-  const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL ?? "http://localhost:3000/portal";
+  const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL ?? "https://webadmin.d2dmktg.com";
   const supabase = await createSupabaseServerClient();
   await supabase.auth.resetPasswordForEmail(email.data, { redirectTo: `${portalUrl}/auth/callback?next=/portal/set-password` });
   return { message: "If an account exists, password reset instructions have been sent." };
