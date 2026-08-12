@@ -24,14 +24,17 @@ describe("website feedback workflow", () => {
   });
 
   it("keeps the CTA and editor handoff contracts", async () => {
-    const [digital, structured, homepage] = await Promise.all([
+    const [digital, structured, homepage, sessionRoute] = await Promise.all([
       readFile("app/(d2dmktg)/digital/page.tsx", "utf8"),
       readFile("components/site-manager/structured-entry-editor.tsx", "utf8"),
       readFile("components/site-manager/homepage-hero-editor.tsx", "utf8"),
+      readFile("app/api/website-feedback/sessions/route.ts", "utf8"),
     ]);
     expect(digital).toContain("/digital/website-feedback");
     expect(structured).toContain("Review this preview");
     expect(homepage).toContain("Review this preview");
     expect(structured).toContain("encodeURIComponent(payload.url)");
+    expect(sessionRoute).toContain(".middleware(verificationRequest, false)");
+    expect(sessionRoute).toContain("verificationResponse.json()");
   });
 });
