@@ -4,25 +4,25 @@ import { SectionHeading } from "@/components/section-heading";
 export function ResultsSection() {
   const proofAreas = [
     {
-      title: "Revenue Focus",
+      title: "Revenue Quality",
       description:
         "Track whether priorities, offers, and commercial effort are concentrating attention on the right opportunities.",
       icon: TrendingUp,
     },
     {
-      title: "Customer Retention",
+      title: "Decision Speed",
       description:
-        "Watch the consistency of the customer experience and the strength of the relationships the business keeps.",
+        "Reduce the time spent reconciling reports and increase the time leaders spend choosing and owning the next action.",
       icon: UsersRound,
     },
     {
-      title: "Sales Performance",
+      title: "Forecast Confidence",
       description:
-        "Measure how positioning, process, confidence, and ownership show up throughout the pipeline.",
+        "Build forecasts from shared definitions, visible assumptions, and the operating drivers that teams can actually influence.",
       icon: LineChart,
     },
     {
-      title: "Operational Efficiency",
+      title: "Operational Leverage",
       description:
         "Look for reduced friction, stronger accountability, and systems that make responsible growth easier to absorb.",
       icon: ShieldCheck,
@@ -33,8 +33,8 @@ export function ResultsSection() {
     <section className="performance-scorecard mx-auto max-w-7xl px-6 py-18 lg:px-8">
       <SectionHeading
         eyebrow="The Scorecard"
-        title="Define what better means before measuring it."
-        description="The right measures depend on the business and the engagement. These are operating areas D2D can help leadership teams define, track, and improve—without pretending one score fits every company."
+        title="Define what better means, then make it visible."
+        description="The right measures depend on the business. D2D helps leadership teams define the scorecard, understand the drivers, and use the system to improve—without pretending one metric fits every company."
       />
       <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         {proofAreas.map((result) => {

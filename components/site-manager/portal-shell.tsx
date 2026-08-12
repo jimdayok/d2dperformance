@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, CircleHelp, Globe2 } from "lucide-react";
+import { ArrowUpRight, CircleHelp, Globe2, MessageSquareText } from "lucide-react";
 import { signOut } from "@/app/(portal)/portal/login/actions";
 import type { SiteDefinition, UserAccess } from "@/lib/site-manager/types";
 import { hasRole } from "@/lib/site-manager/permissions";
@@ -7,6 +7,7 @@ import { PortalNav } from "@/components/site-manager/portal-nav";
 
 export function PortalShell({ children, definition, access, displayName, siteCount }: { children: React.ReactNode; definition: SiteDefinition | null; access: UserAccess | null; displayName: string; siteCount: number }) {
   const nav = definition?.navigation.filter((item) => !item.requiredRole || (access && hasRole(access, item.requiredRole))) ?? [];
+  const feedbackToolOrigin = process.env.NEXT_PUBLIC_SITE_URL ?? "https://performance.d2dmktg.com";
   return (
     <div className="portal-shell min-h-screen lg:grid lg:grid-cols-[19rem_minmax(0,1fr)]">
       <aside className="portal-sidebar border-b border-white/10 px-5 py-5 text-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:border-r lg:border-b-0 lg:px-6 lg:py-7">
@@ -34,6 +35,8 @@ export function PortalShell({ children, definition, access, displayName, siteCou
         <PortalNav items={nav} />
 
         <div className="mt-6 grid grid-cols-2 gap-2 lg:mt-auto lg:grid-cols-1">
+          {definition ? <a href={`${feedbackToolOrigin}/digital/website-feedback?site=${encodeURIComponent(definition.key)}&url=${encodeURIComponent(definition.productionUrl)}`} target="_blank" rel="noreferrer" className="portal-sidebar-link"><MessageSquareText size={15} /> Website feedback</a> : null}
+          {access?.isPlatformAdmin ? <Link href="/portal/feedback" className="portal-sidebar-link"><MessageSquareText size={15} /> Feedback repository</Link> : null}
           <a href="https://d2dmktg.com" target="_blank" rel="noreferrer" className="portal-sidebar-link">
             <Globe2 size={15} /> D2D Marketing
           </a>

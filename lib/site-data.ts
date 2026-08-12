@@ -5,10 +5,10 @@ export const siteUrl =
     ? configuredSiteUrl.replace(/\/+$/, "")
     : "https://performance.d2dmktg.com";
 
-export const companyName = "D2D Marketing";
-export const parentBrandName = "DAY2DAY Marketing";
+export const companyName = "D2D Performance";
+export const parentBrandName = "DAY2DAY";
 export const legalBusinessName = "DAY2DAY LLC";
-export const tagline = "Strategy Built for the DAY2DAY.";
+export const tagline = "Objective systems for measurable business improvement.";
 export const primaryEmail = "andrea@d2dmktg.com";
 export const primaryPhone = "269-788-7067";
 export const primaryPhoneHref = "+12697887067";
@@ -87,70 +87,69 @@ export const navigation = [
 
 export const serviceCards = [
   {
-    title: "Business Strategy",
+    title: "Revenue Improvement",
     description:
-      "Clarify where the company is going, what matters most, and which decisions create durable momentum.",
+      "Find the pricing, pipeline, margin, retention, and operating levers that can create healthier revenue.",
   },
   {
-    title: "Executive Coaching",
+    title: "Business Information Systems",
     description:
-      "Strengthen leadership rhythm, accountability, and decision-making across founders and executive teams.",
+      "Connect the information leaders need into practical scorecards, dashboards, and decision-ready workflows.",
   },
   {
-    title: "Brand Development",
+    title: "Operating Advisory",
     description:
-      "Build a clear market position, sharper message, and brand system that reflects the quality of the business.",
+      "Use objective analysis and appropriate technology to improve how the company plans, operates, and adapts.",
   },
 ];
 
 export const stallReasons = [
-  "Leadership lacks alignment around priorities and expectations.",
-  "Marketing lacks direction because the strategy underneath it is weak.",
-  "Sales performance fluctuates because the process is not consistent.",
-  "Operations become reactive as complexity outpaces systems.",
-  "The brand is not differentiated enough to command confidence.",
-  "Growth turns chaotic when execution outruns clarity.",
+  "Critical information is scattered across disconnected systems and spreadsheets.",
+  "Teams debate whose numbers are right instead of deciding what to do next.",
+  "Dashboards report activity without clarifying ownership, cause, or action.",
+  "Revenue and margin decisions rely too heavily on instinct or incomplete data.",
+  "The technology stack records work but does not support the way the business operates.",
 ];
 
 export const processSteps = [
   {
-    title: "Discover",
-    description: "Assess the company, leadership dynamic, market position, and current constraints.",
+    title: "Diagnose",
+    description: "Map the business model, revenue engine, current systems, and the decisions leaders need to make.",
   },
   {
     title: "Define",
-    description: "Set the strategic direction, decision criteria, and performance priorities.",
+    description: "Set clear definitions for the measures, ownership, and outcomes that matter most.",
   },
   {
-    title: "Build",
-    description: "Create the systems, brand foundations, and leadership tools required to scale.",
+    title: "Connect",
+    description: "Bring the right data and workflows together in a usable business information system.",
   },
   {
-    title: "Execute",
-    description: "Translate the plan into rhythms, ownership, and measurable operating discipline.",
+    title: "Analyze",
+    description: "Turn reporting into objective insight, options, and decision support for leadership.",
   },
   {
-    title: "Optimize",
-    description: "Refine what is working, remove friction, and keep the company moving with intention.",
+    title: "Improve",
+    description: "Use the operating cadence to test changes, remove friction, and compound measurable gains.",
   },
 ];
 
 export const serviceList = [
-  "Executive Coaching",
-  "Revenue Growth",
-  "Leadership Development",
-  "Brand Development",
-  "Operational Systems",
-  "Sales Strategy",
-  "Marketing Strategy",
-  "Customer Experience",
+  "Revenue Improvement Strategy",
+  "KPI & Scorecard Design",
+  "Executive Dashboards",
+  "Business Information Systems",
+  "Workflow & Process Analysis",
+  "Sales & Margin Analysis",
+  "Forecasting & Decision Support",
+  "Technology Operating Advisory",
 ];
 
 export const results = [
-  { label: "Revenue Growth", value: "18-32%" },
-  { label: "Customer Retention", value: "+14 pts" },
-  { label: "Sales Performance", value: "+21%" },
-  { label: "Operational Efficiency", value: "1.7x" },
+  { label: "Revenue Quality", value: "Defined" },
+  { label: "Decision Speed", value: "Tracked" },
+  { label: "Forecast Confidence", value: "Measured" },
+  { label: "Operational Leverage", value: "Improved" },
 ];
 
 export const testimonials = [
