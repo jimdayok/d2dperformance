@@ -1619,6 +1619,73 @@ textarea {
   color: var(--portal-cognac);
 }
 
+.portal-preview-review-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.portal-preview-review-pointer {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 999px;
+  padding: 0.48rem 0.7rem 0.48rem 0.85rem;
+  background: #fff0a8;
+  color: #5f3b00;
+  box-shadow: 0 8px 24px rgba(95, 59, 0, 0.18);
+  font-size: 0.68rem;
+  font-weight: 750;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+}
+
+.portal-preview-review-arrow {
+  display: inline-flex;
+}
+
+.portal-preview-review-action-visible .portal-preview-review-arrow {
+  animation: portal-review-arrow 1.05s ease-in-out infinite;
+}
+
+.portal-preview-review-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.55rem;
+  border: 2px solid #0c7379;
+  border-radius: 0.65rem;
+  padding: 0.55rem 0.9rem;
+  background: #0c7379;
+  color: white;
+  box-shadow: 0 0 0 4px rgba(126, 232, 238, 0.3), 0 10px 28px rgba(12, 115, 121, 0.24);
+  font-size: 0.875rem;
+  font-weight: 750;
+  transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.portal-preview-review-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #075f64;
+  box-shadow: 0 0 0 5px rgba(126, 232, 238, 0.36), 0 14px 32px rgba(12, 115, 121, 0.3);
+}
+
+.portal-preview-review-button:focus-visible {
+  outline: 3px solid #18201d;
+  outline-offset: 3px;
+}
+
+.portal-preview-review-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  box-shadow: none;
+}
+
+@keyframes portal-review-arrow {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(0.32rem); }
+}
+
 .portal-login {
   position: relative;
   background:
@@ -1686,6 +1753,21 @@ textarea {
 
   .activity-bar::before {
     animation: none;
+  }
+
+  .portal-preview-review-action-visible .portal-preview-review-arrow {
+    animation: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .portal-preview-review-action {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .portal-preview-review-pointer {
+    max-width: 10rem;
   }
 }
 
