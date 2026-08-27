@@ -78,10 +78,10 @@ export function SiteFooter() {
         <span>
           © {new Date().getFullYear()} DAY2DAY Marketing. All rights reserved.
           Page designed by{" "}
-          <a href="https://performance.d2dmktg.com/digital">D2D Digital</a>.
+          <a href="https://digital.d2dmktg.com">D2D Digital</a>.
         </span>
         <div>
-          <Link href="/digital">D2D Digital</Link>
+          <a href="https://digital.d2dmktg.com">D2D Digital</a>
           <Link href="/">D2D Performance</Link>
           <a href="https://d2dmktg.com/terms-of-use">Terms of use</a>
           <a href="https://d2dmktg.com/privacy-policy">Privacy policy</a>

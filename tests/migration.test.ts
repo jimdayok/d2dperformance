@@ -45,6 +45,9 @@ describe("D2D Marketing production migration", () => {
         `${siteUrl}/terms-of-use`,
       ]),
     );
+    expect(entries.map((entry) => entry.url)).not.toContain(
+      `${siteUrl}/digital`,
+    );
   });
 
   it("points robots at the canonical sitemap and excludes private routes", () => {
@@ -114,6 +117,23 @@ describe("D2D Marketing production migration", () => {
     expect(response.status).toBe(308);
     expect(response.headers.get("location")).toBe(
       "https://performance.d2dmktg.com/services/example?campaign=migration",
+    );
+  });
+
+  it.each([
+    "performance.d2dmktg.com",
+    "d2dperformance.com",
+    "www.d2dperformance.com",
+  ])("redirects the old Digital page on %s to the Digital subdomain", async (host) => {
+    const request = new NextRequest(
+      `https://${host}/digital?campaign=migration`,
+      { headers: { host } },
+    );
+    const response = await proxy(request);
+
+    expect(response.status).toBe(308);
+    expect(response.headers.get("location")).toBe(
+      "https://digital.d2dmktg.com/?campaign=migration",
     );
   });
 
