@@ -29,7 +29,12 @@ type Batch = { id: string; title: string; period_start: string; period_end: stri
 const initialState: MarketingActionState = {};
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(value));
+  const dateOnly = value.slice(0, 10);
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateOnly);
+  const date = match
+    ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+    : new Date(value);
+  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(date);
 }
 
 function statusLabel(value: string) {
