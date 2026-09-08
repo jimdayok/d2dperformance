@@ -4,7 +4,7 @@
 import { useActionState } from "react";
 import { CalendarDays, CheckCircle2, ClipboardCheck, Megaphone, Sparkles } from "lucide-react";
 import {
-  createApprovedDraftsAction,
+  createManualBatchAction,
   createMarketingPlanAction,
   createPromotionAction,
   generateBatchAction,
@@ -13,7 +13,7 @@ import {
   reviseMarketingPlanAction,
   reviseSocialDayMediaAction,
   reviseSocialItemAction,
-  scheduleApprovedBatchAction,
+  retryApprovedDeliveryAction,
   submitBatchAction,
   submitPlanAction,
   type MarketingActionState,
@@ -171,6 +171,28 @@ function BatchGenerator({ organizationId, plans }: { organizationId: string; pla
   </form>;
 }
 
+function ManualPostComposer({ organizationId, plans }: { organizationId: string; plans: Plan[] }) {
+  const [state, action, pending] = useActionState(createManualBatchAction, initialState);
+  const approved = plans.filter((plan) => plan.status === "approved" && plan.approved_revision === plan.current_revision);
+  if (approved.length === 0) return null;
+  return <details className="portal-panel mt-6 p-5" open>
+    <summary className="cursor-pointer font-semibold text-[#302a25]">Create one post for customer approval</summary>
+    <p className="mt-3 text-sm leading-6 text-[#6d6258]">Add only the platforms that should publish. The customer will see the exact captions, image, and publish time before approving.</p>
+    <form action={action} className="mt-5 grid gap-4 sm:grid-cols-2">
+      <input type="hidden" name="organizationId" value={organizationId} />
+      <label className="text-xs font-semibold text-[#4d443d] sm:col-span-2">Approved plan<select required name="marketingPlanId" className="portal-field mt-2 w-full px-3 py-2.5 text-sm">{approved.map((plan) => <option key={plan.id} value={plan.id}>{plan.title}</option>)}</select></label>
+      <label className="text-xs font-semibold text-[#4d443d] sm:col-span-2">Approval batch title<input required name="title" className="portal-field mt-2 w-full px-3 py-2.5 text-sm" placeholder="Client approval proof — September 2026" /></label>
+      <label className="text-xs font-semibold text-[#4d443d]">Publish time<input required name="scheduledFor" type="datetime-local" className="portal-field mt-2 w-full px-3 py-2.5 text-sm" /></label>
+      <label className="text-xs font-semibold text-[#4d443d]">Central time zone<select name="utcOffset" defaultValue="-05:00" className="portal-field mt-2 w-full px-3 py-2.5 text-sm"><option value="-05:00">CDT (UTC−5)</option><option value="-06:00">CST (UTC−6)</option></select></label>
+      <label className="text-xs font-semibold text-[#4d443d] sm:col-span-2">Facebook caption <span className="font-normal text-[#877b70]">— leave blank to skip Facebook</span><textarea name="facebookCaption" rows={6} className="portal-field mt-2 w-full px-3 py-2.5 text-sm" /></label>
+      <label className="text-xs font-semibold text-[#4d443d] sm:col-span-2">Instagram caption <span className="font-normal text-[#877b70]">— leave blank to skip Instagram</span><textarea name="instagramCaption" rows={6} className="portal-field mt-2 w-full px-3 py-2.5 text-sm" /></label>
+      <label className="text-xs font-semibold text-[#4d443d] sm:col-span-2">LinkedIn caption <span className="font-normal text-[#877b70]">— leave blank until the D2D Marketing Page is connected</span><textarea name="linkedinCaption" rows={6} className="portal-field mt-2 w-full px-3 py-2.5 text-sm" /></label>
+      <label className="text-xs font-semibold text-[#4d443d] sm:col-span-2">Approved image URLs and alt text <span className="font-normal text-[#877b70]">— one per line: URL | description</span><textarea name="media" rows={3} className="portal-field mt-2 w-full px-3 py-2.5 text-sm" placeholder="https://approved-host.example/post.png | Description of the image" /></label>
+      <div className="sm:col-span-2"><button disabled={pending} className="portal-primary-button px-4 py-2.5 text-sm font-semibold">{pending ? "Saving…" : "Create reviewable post"}</button><Feedback state={state} /></div>
+    </form>
+  </details>;
+}
+
 export function MarketingWorkspace({ access, plans, promotions, batches, items, schedulingEnabled }: { access: Access; plans: Plan[]; promotions: Promotion[]; batches: Batch[]; items: SocialItem[]; schedulingEnabled: boolean }) {
   const canCreate = ["platform_admin", "manager", "creator"].includes(access.role);
   const canReview = ["platform_admin", "manager", "reviewer"].includes(access.role);
@@ -193,18 +215,20 @@ export function MarketingWorkspace({ access, plans, promotions, batches, items, 
       {canReview ? <PromotionForm organizationId={access.organizationId} /> : null}
     </section>
 
-    <section id="content"><SectionHeading icon={CheckCircle2} eyebrow="Approval gate" title="Social content">Platform-specific captions and imagery remain drafts until the customer approves the exact current batch.</SectionHeading>
-      <div className="mt-6 grid gap-6">{batches.map((batch) => { const batchItems = items.filter((item) => item.batch_id === batch.id); return <article key={batch.id} className="portal-panel overflow-hidden"><div className="border-b border-[#241c17]/10 p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-display text-2xl font-semibold">{batch.title}</h3><p className="mt-1 text-sm text-[#6d6258]">{formatDate(batch.period_start)}–{formatDate(batch.period_end)} · {batchItems.length} platform posts</p></div><span className="rounded-full bg-[#9a5f34]/10 px-3 py-1 text-xs font-semibold capitalize text-[#7b4725]">{statusLabel(batch.status)}</span></div>{batch.sync_error ? <p role="alert" className="mt-3 text-sm text-red-700">{batch.sync_error}</p> : null}</div>
+    <section id="content"><SectionHeading icon={CheckCircle2} eyebrow="Approval gate" title="Social content">Platform-specific captions and imagery remain drafts until the customer approves the exact current batch. Approval automatically creates and schedules the posts in D2D Social.</SectionHeading>
+      <div className="mt-6 grid gap-6">{batches.map((batch) => { const batchItems = items.filter((item) => item.batch_id === batch.id); return <article key={batch.id} className="portal-panel overflow-hidden"><div className="border-b border-[#241c17]/10 p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-display text-2xl font-semibold">{batch.title}</h3><p className="mt-1 text-sm text-[#6d6258]">{formatDate(batch.period_start)}–{formatDate(batch.period_end)} · {batchItems.length} platform posts</p></div><span className="rounded-full bg-[#9a5f34]/10 px-3 py-1 text-xs font-semibold capitalize text-[#7b4725]">{statusLabel(batch.status)}</span></div>{batch.sync_error && isPlatformAdmin ? <p role="alert" className="mt-3 text-sm text-red-700">{batch.sync_error}</p> : null}{batch.status === "failed" && !isPlatformAdmin ? <p className="mt-3 text-sm text-[#6d6258]">Your approval is saved. D2D is resolving the delivery connection; you do not need to approve again.</p> : null}</div>
         {canCreate && ["internal_review", "changes_requested"].includes(batch.status) ? <div className="grid gap-3 border-b border-[#241c17]/10 bg-[#f8f2e9] p-5">{[...new Set(batchItems.map((item) => item.content_day))].map((contentDay) => <DayMediaEditor key={contentDay} batchId={batch.id} contentDay={contentDay} media={batchItems.find((item) => item.content_day === contentDay)?.media ?? []} />)}</div> : null}
         <div className="divide-y divide-[#241c17]/10">{batchItems.map((item) => <div key={item.id} className="grid gap-3 p-5 sm:grid-cols-[8rem_1fr]"><div><p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9a5f34]">Day {item.content_day}</p><p className="mt-1 text-sm font-semibold capitalize">{item.platform}</p><p className="mt-1 text-xs text-[#7a6f65]">{new Date(item.scheduled_for).toLocaleString()}</p></div><div>{item.media.length > 0 ? <div className="mb-4 flex flex-wrap gap-3">{item.media.map((media) => <img key={media.url} src={media.url} alt={media.altText ?? `${item.platform} post image`} loading="lazy" className="h-32 w-32 rounded-xl border border-black/10 bg-white object-cover" />)}</div> : null}<p className="whitespace-pre-wrap text-sm leading-6 text-[#403933]">{item.caption}</p><p className="mt-3 text-xs text-[#7a6f65]">{item.media.length > 0 ? `${item.media.length} approved image${item.media.length === 1 ? "" : "s"}` : `Creative needed: ${item.creative_brief}`}</p>{item.shoutrrr_post_id ? <p className="mt-1 text-xs font-semibold text-emerald-700">D2D Social draft created</p> : null}{canCreate && ["internal_review", "changes_requested"].includes(batch.status) ? <SocialItemEditor item={item} /> : null}</div></div>)}</div>
         <div className="flex flex-wrap gap-3 border-t border-[#241c17]/10 bg-[#f8f2e9] p-5">
           {canCreate && ["internal_review", "changes_requested"].includes(batch.status) ? <form action={submitBatchAction}><input type="hidden" name="batchId" value={batch.id} /><button className="portal-secondary-button px-3 py-2 text-sm font-semibold">Send to customer for approval</button></form> : null}
           {canReview && batch.status === "client_review" ? <form action={reviewBatchAction} className="flex flex-wrap gap-2"><input type="hidden" name="batchId" value={batch.id} /><input name="note" className="portal-field px-3 py-2 text-sm" placeholder="Optional review note" /><button name="decision" value="changes_requested" className="portal-secondary-button px-3 py-2 text-sm font-semibold">Request changes</button><button name="decision" value="approved" className="portal-primary-button px-3 py-2 text-sm font-semibold">Approve exact batch</button></form> : null}
-          {isPlatformAdmin && batch.status === "approved" ? <form action={createApprovedDraftsAction}><input type="hidden" name="batchId" value={batch.id} /><button className="portal-secondary-button px-3 py-2 text-sm font-semibold">Create D2D Social drafts and upload images</button></form> : null}
-          {isPlatformAdmin && batch.status === "approved" && batchItems.every((item) => item.shoutrrr_post_id) ? <form action={scheduleApprovedBatchAction}><input type="hidden" name="batchId" value={batch.id} /><button disabled={!schedulingEnabled} title={schedulingEnabled ? undefined : "Production scheduling is disabled"} className="portal-primary-button px-3 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50">Schedule approved batch</button></form> : null}
+          {batch.status === "scheduling" ? <p className="text-sm font-semibold text-[#7b4725]">Approved — sending to D2D Social…</p> : null}
+          {batch.status === "scheduled" ? <p className="text-sm font-semibold text-emerald-700">Customer approved · D2D Social scheduled automatically</p> : null}
+          {isPlatformAdmin && ["approved", "failed"].includes(batch.status) ? <form action={retryApprovedDeliveryAction}><input type="hidden" name="batchId" value={batch.id} /><button disabled={!schedulingEnabled} title={schedulingEnabled ? undefined : "Production scheduling is disabled"} className="portal-primary-button px-3 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50">Retry approved delivery</button></form> : null}
         </div>
       </article>; })}</div>
       {batches.length === 0 ? <p className="portal-panel mt-6 p-5 text-sm text-[#6d6258]">No social content batches have been created.</p> : null}
+      {canCreate ? <ManualPostComposer organizationId={access.organizationId} plans={plans} /> : null}
       {canCreate ? <BatchGenerator organizationId={access.organizationId} plans={plans} /> : null}
     </section>
   </div>;

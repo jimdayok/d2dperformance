@@ -82,6 +82,27 @@ export const generateSocialBatchSchema = z.object({
   path: ["periodEnd"],
 });
 
+export const manualSocialBatchSchema = z.object({
+  organizationId: z.string().uuid(),
+  marketingPlanId: z.string().uuid(),
+  title: z.string().trim().min(1).max(180),
+  scheduledFor: z.string().datetime(),
+  captions: z.object({
+    facebook: z.string().trim().max(10000).optional(),
+    instagram: z.string().trim().max(10000).optional(),
+    linkedin: z.string().trim().max(10000).optional(),
+  }).refine((captions) => Object.values(captions).some(Boolean), {
+    message: "Add a caption for at least one platform.",
+  }),
+  media: z.array(z.object({
+    url: z.string().url().refine((value) => value.startsWith("https://"), "Image URLs must use HTTPS."),
+    altText: z.string().trim().min(1).max(500),
+  })).max(10),
+}).refine((value) => Date.parse(value.scheduledFor) > Date.now(), {
+  message: "The publish time must be in the future.",
+  path: ["scheduledFor"],
+});
+
 export const generatedSocialBatchSchema = z.object({
   title: z.string().trim().min(1).max(180),
   rationale: z.string().trim().min(1).max(3000),
@@ -102,3 +123,4 @@ export const generatedSocialBatchSchema = z.object({
 export type PromotionInput = z.infer<typeof promotionSchema>;
 export type MarketingPlanDraftInput = z.infer<typeof marketingPlanDraftSchema>;
 export type GenerateSocialBatchInput = z.infer<typeof generateSocialBatchSchema>;
+export type ManualSocialBatchInput = z.infer<typeof manualSocialBatchSchema>;

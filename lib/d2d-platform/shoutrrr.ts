@@ -26,6 +26,13 @@ function config() {
   return { apiUrl: `${baseUrl}/api/v1`, apiKey };
 }
 
+function approvedAccountId(platform: ConnectedAccount["platform"]) {
+  const key = `D2D_SOCIAL_${platform.toUpperCase()}_ACCOUNT_ID`;
+  const value = process.env[key]?.trim();
+  if (!value) throw new Error(`No approved ${platform} destination is configured.`);
+  return value;
+}
+
 function validateMediaUrl(value: string) {
   const url = new URL(value);
   if (url.protocol !== "https:") throw new Error("Social media assets must use HTTPS.");
@@ -78,8 +85,9 @@ async function uploadMedia(input: MediaInput): Promise<string> {
 
 export async function createPlatformDraft(input: DraftInput): Promise<string> {
   const accounts = await listConnectedAccounts();
-  const account = accounts.find((row) => row.platform === input.platform && row.status === "active");
-  if (!account) throw new Error(`No connected ${input.platform} account is available.`);
+  const accountId = approvedAccountId(input.platform);
+  const account = accounts.find((row) => row.id === accountId && row.platform === input.platform && row.status === "active");
+  if (!account) throw new Error(`The approved ${input.platform} destination is not connected and active.`);
   const created = await request<{ post: ShoutrrrPost }>("/posts", {
     method: "POST",
     body: JSON.stringify({

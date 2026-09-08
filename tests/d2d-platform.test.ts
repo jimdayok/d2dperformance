@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   generatedSocialBatchSchema,
+  manualSocialBatchSchema,
   marketingPlanContentSchema,
   reviseSocialItemSchema,
 } from "@/lib/d2d-platform/schemas";
@@ -46,6 +47,30 @@ describe("D2D customer marketing schemas", () => {
       media: [{ url: "http://example.test/image.png" }],
       scheduledFor: "2026-09-09T15:00:00.000Z",
       creativeBrief: "Approved image",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("allows a manual approval batch to target only connected company platforms", () => {
+    const result = manualSocialBatchSchema.parse({
+      organizationId: "65000000-0000-4000-8000-000000000001",
+      marketingPlanId: "65000000-0000-4000-8000-000000000002",
+      title: "Approval proof",
+      scheduledFor: "2099-09-09T15:00:00.000Z",
+      captions: { facebook: "Exact approved Facebook copy", instagram: "Exact approved Instagram copy" },
+      media: [{ url: "https://assets.example.test/approved.png", altText: "Approved image" }],
+    });
+    expect(result.captions.linkedin).toBeUndefined();
+  });
+
+  it("rejects an empty manual approval batch", () => {
+    const result = manualSocialBatchSchema.safeParse({
+      organizationId: "65000000-0000-4000-8000-000000000001",
+      marketingPlanId: "65000000-0000-4000-8000-000000000002",
+      title: "Approval proof",
+      scheduledFor: "2099-09-09T15:00:00.000Z",
+      captions: {},
+      media: [],
     });
     expect(result.success).toBe(false);
   });

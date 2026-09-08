@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/site-manager/access";
 import { requireProductAccess } from "@/lib/d2d-platform/access";
 import {
   generateSocialBatchSchema,
+  manualSocialBatchSchema,
   marketingPlanContentSchema,
   marketingPlanDraftSchema,
   promotionSchema,
@@ -14,6 +15,7 @@ import {
 } from "@/lib/d2d-platform/schemas";
 import { generateSocialBatch } from "@/lib/d2d-platform/openai";
 import { createPlatformDraft, schedulePost } from "@/lib/d2d-platform/shoutrrr";
+import { deliverApprovedBatch } from "@/lib/d2d-platform/deliver-approved-batch";
 import type { MarketingPlanContent } from "@/lib/d2d-platform/types";
 import { z } from "zod";
 
@@ -246,6 +248,47 @@ export async function generateBatchAction(
   }
 }
 
+export async function createManualBatchAction(
+  _: MarketingActionState,
+  formData: FormData,
+): Promise<MarketingActionState> {
+  try {
+    const localDateTime = String(formData.get("scheduledFor") ?? "");
+    const utcOffset = z.enum(["-05:00", "-06:00"]).parse(formData.get("utcOffset"));
+    const media = lines(formData.get("media")).map((row) => {
+      const [url, ...altParts] = row.split("|");
+      return { url: url.trim(), altText: altParts.join("|").trim() };
+    });
+    const parsed = manualSocialBatchSchema.parse({
+      organizationId: formData.get("organizationId"),
+      marketingPlanId: formData.get("marketingPlanId"),
+      title: formData.get("title"),
+      scheduledFor: new Date(`${localDateTime}:00${utcOffset}`).toISOString(),
+      captions: {
+        facebook: String(formData.get("facebookCaption") ?? "").trim() || undefined,
+        instagram: String(formData.get("instagramCaption") ?? "").trim() || undefined,
+        linkedin: String(formData.get("linkedinCaption") ?? "").trim() || undefined,
+      },
+      media,
+    });
+    await requireProductAccess(parsed.organizationId, "social", ["manager", "creator"]);
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase.rpc("create_manual_social_batch", {
+      check_organization: parsed.organizationId,
+      check_marketing_plan: parsed.marketingPlanId,
+      check_title: parsed.title,
+      check_scheduled_for: parsed.scheduledFor,
+      check_captions: parsed.captions,
+      check_media: parsed.media,
+    });
+    if (error) throw new Error(error.message);
+    revalidatePath("/portal/marketing");
+    return { message: "The post is ready for D2D review. Send it to the customer when the exact copy and image are final." };
+  } catch (error) {
+    return initialFailure(error);
+  }
+}
+
 export async function submitBatchAction(formData: FormData) {
   await requireSignedIn();
   const batchId = idSchema.parse(formData.get("batchId"));
@@ -256,7 +299,7 @@ export async function submitBatchAction(formData: FormData) {
 }
 
 export async function reviewBatchAction(formData: FormData) {
-  await requireSignedIn();
+  const user = await requireSignedIn();
   const parsed = reviewSchema.parse({
     subjectId: formData.get("batchId"),
     decision: formData.get("decision"),
@@ -269,6 +312,27 @@ export async function reviewBatchAction(formData: FormData) {
     check_note: parsed.note,
   });
   if (error) throw new Error(error.message);
+  if (parsed.decision === "approved") {
+    try {
+      await deliverApprovedBatch(parsed.subjectId, user.id);
+    } catch {
+      // The approval record is authoritative. Delivery failures are persisted on
+      // the batch for D2D to resolve without asking the customer to approve twice.
+    }
+  }
+  revalidatePath("/portal/marketing");
+}
+
+export async function retryApprovedDeliveryAction(formData: FormData) {
+  const user = await requireSignedIn();
+  const batchId = idSchema.parse(formData.get("batchId"));
+  const supabase = await createSupabaseServerClient();
+  const { data: batch } = await supabase.from("social_content_batches")
+    .select("organization_id").eq("id", batchId).single();
+  if (!batch) throw new Error("Approved batch was not found.");
+  const access = await requireProductAccess(batch.organization_id, "social", ["manager"]);
+  if (access.role !== "platform_admin") throw new Error("A D2D platform administrator must retry delivery.");
+  await deliverApprovedBatch(batchId, user.id);
   revalidatePath("/portal/marketing");
 }
 
