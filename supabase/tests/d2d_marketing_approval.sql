@@ -39,6 +39,13 @@ begin
   if (select count(*) from public.product_entitlements) <> 1 then
     raise exception 'social-only customer could not see its entitlement';
   end if;
+  if not exists (
+    select 1
+    from public.organizations
+    where id = '62000000-0000-0000-0000-000000000001'
+  ) then
+    raise exception 'social-only customer could not see its organization';
+  end if;
   begin
     perform public.admin_set_product_entitlement(
       '62000000-0000-0000-0000-000000000001', 'social', 'suspended', 'https://social.example.test', null
