@@ -1,8 +1,8 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- customer-approved image hosts are dynamic and validated server-side */
 
-import { useActionState } from "react";
-import { CalendarDays, CheckCircle2, ClipboardCheck, Megaphone, Sparkles } from "lucide-react";
+import { useActionState, useRef } from "react";
+import { CalendarDays, CheckCircle2, ClipboardCheck, Expand, Megaphone, Sparkles, X } from "lucide-react";
 import {
   createManualBatchAction,
   createMarketingPlanAction,
@@ -70,6 +70,39 @@ function displayCentralDateTime(value: string) {
     minute: "2-digit",
     timeZoneName: "short",
   }).format(new Date(value));
+}
+
+function ReviewImage({ media, platform }: { media: SocialItem["media"][number]; platform: string }) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const alt = media.altText ?? `${platform} post image`;
+
+  return <>
+    <button
+      type="button"
+      onClick={() => dialogRef.current?.showModal()}
+      className="group relative inline-block max-w-full overflow-hidden rounded-xl border border-black/10 bg-white text-left shadow-sm transition hover:border-[#9a5f34]/50 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9a5f34]"
+      aria-label={`View full ${platform} post image`}
+    >
+      <img src={media.url} alt={alt} loading="lazy" className="block h-auto max-h-72 w-auto max-w-full object-contain" />
+      <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 bg-[#171310]/85 px-3 py-2 text-xs font-semibold text-white opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-visible:opacity-100">
+        <Expand size={14} aria-hidden="true" /> View full image
+      </span>
+    </button>
+    <dialog
+      ref={dialogRef}
+      aria-label={`Full ${platform} post image`}
+      onClick={(event) => { if (event.target === event.currentTarget) dialogRef.current?.close(); }}
+      className="m-auto max-h-[92vh] w-[min(92vw,80rem)] rounded-2xl border border-white/15 bg-[#171310] p-0 text-white shadow-2xl backdrop:bg-black/75"
+    >
+      <div className="relative grid max-h-[92vh] place-items-center overflow-auto p-4 sm:p-8">
+        <button type="button" onClick={() => dialogRef.current?.close()} className="absolute right-3 top-3 z-10 inline-flex items-center gap-2 rounded-full bg-black/75 px-3 py-2 text-xs font-semibold text-white shadow-lg hover:bg-black" aria-label="Close full image">
+          <X size={16} aria-hidden="true" /> Close
+        </button>
+        <img src={media.url} alt={alt} className="max-h-[78vh] max-w-full rounded-lg object-contain" />
+        <a href={media.url} target="_blank" rel="noreferrer" className="mt-4 text-sm font-semibold text-white underline underline-offset-4">Open original image in a new tab</a>
+      </div>
+    </dialog>
+  </>;
 }
 
 function SocialItemEditor({ item }: { item: SocialItem }) {
@@ -235,7 +268,7 @@ export function MarketingWorkspace({ access, plans, promotions, batches, items, 
     <section id="content"><SectionHeading icon={CheckCircle2} eyebrow="Approval gate" title="Social content">Platform-specific captions and imagery remain drafts until the customer approves the exact current batch. Approval automatically creates and schedules the posts in D2D Social.</SectionHeading>
       <div className="mt-6 grid gap-6">{batches.map((batch) => { const batchItems = items.filter((item) => item.batch_id === batch.id); return <article key={batch.id} className="portal-panel overflow-hidden"><div className="border-b border-[#241c17]/10 p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-display text-2xl font-semibold">{batch.title}</h3><p className="mt-1 text-sm text-[#6d6258]">{formatDate(batch.period_start)}–{formatDate(batch.period_end)} · {batchItems.length} platform posts</p></div><span className="rounded-full bg-[#9a5f34]/10 px-3 py-1 text-xs font-semibold capitalize text-[#7b4725]">{statusLabel(batch.status)}</span></div>{batch.sync_error && isPlatformAdmin ? <p role="alert" className="mt-3 text-sm text-red-700">{batch.sync_error}</p> : null}{batch.status === "failed" && !isPlatformAdmin ? <p className="mt-3 text-sm text-[#6d6258]">Your approval is saved. D2D is resolving the delivery connection; you do not need to approve again.</p> : null}</div>
         {canCreate && ["internal_review", "changes_requested"].includes(batch.status) ? <div className="grid gap-3 border-b border-[#241c17]/10 bg-[#f8f2e9] p-5">{[...new Set(batchItems.map((item) => item.content_day))].map((contentDay) => <DayMediaEditor key={contentDay} batchId={batch.id} contentDay={contentDay} media={batchItems.find((item) => item.content_day === contentDay)?.media ?? []} />)}</div> : null}
-        <div className="divide-y divide-[#241c17]/10">{batchItems.map((item) => <div key={item.id} className="grid gap-3 p-5 sm:grid-cols-[8rem_1fr]"><div><p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9a5f34]">Day {item.content_day}</p><p className="mt-1 text-sm font-semibold capitalize">{item.platform}</p><p className="mt-1 text-xs text-[#7a6f65]">{displayCentralDateTime(item.scheduled_for)}</p></div><div>{item.media.length > 0 ? <div className="mb-4 flex flex-wrap gap-3">{item.media.map((media) => <img key={media.url} src={media.url} alt={media.altText ?? `${item.platform} post image`} loading="lazy" className="h-32 w-32 rounded-xl border border-black/10 bg-white object-cover" />)}</div> : null}<p className="whitespace-pre-wrap text-sm leading-6 text-[#403933]">{item.caption}</p><p className="mt-3 text-xs text-[#7a6f65]">{item.media.length > 0 ? `${item.media.length} approved image${item.media.length === 1 ? "" : "s"}` : `Creative needed: ${item.creative_brief}`}</p>{item.shoutrrr_post_id ? <p className="mt-1 text-xs font-semibold text-emerald-700">D2D Social draft created</p> : null}{canCreate && ["internal_review", "changes_requested"].includes(batch.status) ? <SocialItemEditor item={item} /> : null}</div></div>)}</div>
+        <div className="divide-y divide-[#241c17]/10">{batchItems.map((item) => <div key={item.id} className="grid gap-3 p-5 sm:grid-cols-[8rem_1fr]"><div><p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9a5f34]">Day {item.content_day}</p><p className="mt-1 text-sm font-semibold capitalize">{item.platform}</p><p className="mt-1 text-xs text-[#7a6f65]">{displayCentralDateTime(item.scheduled_for)}</p></div><div>{item.media.length > 0 ? <div className="mb-4 flex flex-wrap gap-3">{item.media.map((media) => <ReviewImage key={media.url} media={media} platform={item.platform} />)}</div> : null}<p className="whitespace-pre-wrap text-sm leading-6 text-[#403933]">{item.caption}</p><p className="mt-3 text-xs text-[#7a6f65]">{item.media.length > 0 ? `${item.media.length} approved image${item.media.length === 1 ? "" : "s"}` : `Creative needed: ${item.creative_brief}`}</p>{item.shoutrrr_post_id ? <p className="mt-1 text-xs font-semibold text-emerald-700">D2D Social draft created</p> : null}{canCreate && ["internal_review", "changes_requested"].includes(batch.status) ? <SocialItemEditor item={item} /> : null}</div></div>)}</div>
         <div className="flex flex-wrap gap-3 border-t border-[#241c17]/10 bg-[#f8f2e9] p-5">
           {canCreate && ["internal_review", "changes_requested"].includes(batch.status) ? <form action={submitBatchAction}><input type="hidden" name="batchId" value={batch.id} /><button className="portal-secondary-button px-3 py-2 text-sm font-semibold">Send to customer for approval</button></form> : null}
           {canReview && batch.status === "client_review" ? <form action={reviewBatchAction} className="flex flex-wrap gap-2"><input type="hidden" name="batchId" value={batch.id} /><input name="note" className="portal-field px-3 py-2 text-sm" placeholder="Optional review note" /><button name="decision" value="changes_requested" className="portal-secondary-button px-3 py-2 text-sm font-semibold">Request changes</button><button name="decision" value="approved" className="portal-primary-button px-3 py-2 text-sm font-semibold">Approve exact batch</button></form> : null}
