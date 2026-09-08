@@ -10,6 +10,6 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (error) return NextResponse.redirect(new URL("/portal/login?auth_error=callback", url.origin));
   }
-  const safeNext = next?.startsWith("/") && !next.startsWith("//") ? next : "/portal/set-password";
+  const safeNext = next?.startsWith("/") && !next.startsWith("//") ? next : "/portal/dashboard";
   return NextResponse.redirect(new URL(safeNext, url.origin));
 }

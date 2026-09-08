@@ -2,12 +2,14 @@
 -- The script switches to `authenticated`, so RLS is exercised rather than
 -- accidentally bypassed by the migration owner. Everything is rolled back.
 begin;
+select plan(1);
 
 insert into auth.users(instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
 values
   ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated', 'rls-a@example.test', '', now(), '{}', '{}', now(), now()),
   ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-000000000002', 'authenticated', 'authenticated', 'rls-b@example.test', '', now(), '{}', '{}', now(), now());
-insert into public.profiles(id, email) values ('10000000-0000-0000-0000-000000000001', 'rls-a@example.test'), ('10000000-0000-0000-0000-000000000002', 'rls-b@example.test');
+insert into public.profiles(id, email) values ('10000000-0000-0000-0000-000000000001', 'rls-a@example.test'), ('10000000-0000-0000-0000-000000000002', 'rls-b@example.test')
+on conflict (id) do nothing;
 insert into public.organizations(id, name, slug) values ('20000000-0000-0000-0000-000000000001', 'RLS A', 'rls-a'), ('20000000-0000-0000-0000-000000000002', 'RLS B', 'rls-b');
 insert into public.organization_members(organization_id, user_id, role) values ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 'editor'), ('20000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000002', 'editor');
 insert into public.sites(id, organization_id, name, slug, production_url, preview_url)
@@ -34,5 +36,8 @@ begin
     if found then raise exception 'tenant isolation failed: cross-tenant update succeeded'; end if;
   end;
 end $$;
+
+select pass('site manager tenant RLS isolates organizations');
+select * from finish();
 
 rollback;

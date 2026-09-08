@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: { default: "D2D Site Manager", template: "%s | D2D Site Manager" },
-  description: "Secure website content operations for D2D Marketing clients.",
+  title: { default: "D2D Account", template: "%s | D2D Account" },
+  description: "One secure account for D2D Social, Brand Vault, and Web Management.",
   robots: { index: false, follow: false, nocache: true },
 };
 
