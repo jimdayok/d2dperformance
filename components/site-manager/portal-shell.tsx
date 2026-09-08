@@ -1,12 +1,16 @@
 import Link from "next/link";
-import { ArrowUpLeft, ArrowUpRight, CircleHelp, Globe2, MessageSquareText } from "lucide-react";
+import { ArrowUpLeft, ArrowUpRight, CircleHelp, Globe2, LayoutGrid, MessageSquareText, Settings2, Share2 } from "lucide-react";
 import { signOut } from "@/app/(portal)/portal/login/actions";
 import type { SiteDefinition, UserAccess } from "@/lib/site-manager/types";
 import { hasRole } from "@/lib/site-manager/permissions";
 import { PortalNav } from "@/components/site-manager/portal-nav";
+import { getPlatformAdminStatus, getProductAccess } from "@/lib/d2d-platform/access";
 
-export function PortalShell({ children, definition, access, displayName, siteCount }: { children: React.ReactNode; definition: SiteDefinition | null; access: UserAccess | null; displayName: string; siteCount: number }) {
+export async function PortalShell({ children, definition, access, displayName, siteCount }: { children: React.ReactNode; definition: SiteDefinition | null; access: UserAccess | null; displayName: string; siteCount: number }) {
   const nav = definition?.navigation.filter((item) => !item.requiredRole || (access && hasRole(access, item.requiredRole))) ?? [];
+  const [products, platformAdmin] = await Promise.all([getProductAccess(), getPlatformAdminStatus()]);
+  const canUseSocial = products.some((product) => product.product === "social");
+  const isPlatformAdmin = Boolean(access?.isPlatformAdmin || platformAdmin);
   const feedbackToolOrigin = process.env.NEXT_PUBLIC_SITE_URL ?? "https://performance.d2dmktg.com";
   const feedbackUrl = definition
     ? `${feedbackToolOrigin}/digital/website-feedback?site=${encodeURIComponent(definition.key)}&url=${encodeURIComponent(definition.productionUrl)}`
@@ -18,11 +22,17 @@ export function PortalShell({ children, definition, access, displayName, siteCou
           <span className="grid size-11 place-items-center border border-[#d6a77f]/55 bg-[#d6a77f] text-sm font-semibold tracking-[-0.08em] text-[#17201d] transition-transform group-hover:-rotate-2">D2D</span>
           <span>
             <span className="block text-[9px] font-semibold uppercase tracking-[0.32em] text-[#d6a77f]">Marketing</span>
-            <span className="mt-1 block font-display text-[1.65rem] leading-none">Site Manager</span>
+            <span className="mt-1 block font-display text-[1.65rem] leading-none">D2D Account</span>
           </span>
         </Link>
 
-        <div className="mt-8 border-t border-white/12 pt-6">
+        <nav aria-label="D2D Account" className="mt-8 grid gap-1 border-t border-white/12 pt-6">
+          <Link href="/portal/dashboard" className="portal-sidebar-link"><LayoutGrid size={15} /> My services</Link>
+          {canUseSocial ? <Link href="/portal/marketing" className="portal-sidebar-link"><Share2 size={15} /> Social &amp; marketing</Link> : null}
+          {isPlatformAdmin ? <Link href="/portal/admin/products" className="portal-sidebar-link"><Settings2 size={15} /> Customer access</Link> : null}
+        </nav>
+
+        <div className="mt-6 border-t border-white/12 pt-6">
           <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/38">Content operations</p>
           {definition ? (
             <div className="mt-3 border-l-2 border-[#d6a77f] bg-white/[0.055] px-4 py-3">
@@ -31,7 +41,7 @@ export function PortalShell({ children, definition, access, displayName, siteCou
               {siteCount > 1 ? <Link href="/portal/dashboard" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-[#d6a77f]">Switch website <ArrowUpRight size={12} /></Link> : null}
             </div>
           ) : (
-            <p className="mt-3 max-w-48 text-sm leading-6 text-white/58">Choose a website to review content and publishing activity.</p>
+            <p className="mt-3 max-w-48 text-sm leading-6 text-white/58">Choose a service or website to manage your D2D work.</p>
           )}
         </div>
 
@@ -39,7 +49,7 @@ export function PortalShell({ children, definition, access, displayName, siteCou
 
         <div className="mt-6 grid grid-cols-2 gap-2 lg:mt-auto lg:grid-cols-1">
           {feedbackUrl ? <a href={feedbackUrl} target="_blank" rel="noreferrer" className="portal-sidebar-link"><MessageSquareText size={15} /> Website feedback</a> : null}
-          {access?.isPlatformAdmin ? <Link href="/portal/feedback" className="portal-sidebar-link"><MessageSquareText size={15} /> Feedback repository</Link> : null}
+          {isPlatformAdmin ? <Link href="/portal/feedback" className="portal-sidebar-link"><MessageSquareText size={15} /> Feedback repository</Link> : null}
           <a href="https://d2dmktg.com" target="_blank" rel="noreferrer" className="portal-sidebar-link">
             <Globe2 size={15} /> D2D Marketing
           </a>
@@ -55,7 +65,7 @@ export function PortalShell({ children, definition, access, displayName, siteCou
         ) : null}
         <div className="mt-5 border-t border-white/12 pt-4 text-xs text-white/58">
           <Link href="/portal/account" className="block truncate font-semibold text-white">{displayName}</Link>
-          <p className="mt-1 capitalize">{access?.isPlatformAdmin ? "Platform administrator" : access?.role?.replace("_", " ") ?? "Account"}</p>
+          <p className="mt-1 capitalize">{isPlatformAdmin ? "Platform administrator" : access?.role?.replace("_", " ") ?? "Account"}</p>
           <form action={signOut}><button className="mt-3 font-semibold text-[#d6a77f] underline decoration-[#d6a77f]/45 underline-offset-4">Sign out</button></form>
         </div>
       </aside>
@@ -63,7 +73,7 @@ export function PortalShell({ children, definition, access, displayName, siteCou
         <header className="portal-topbar flex min-h-[4.5rem] items-center justify-between gap-4 px-5 lg:px-9">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#9a5f34]">D2D control center</p>
-            <p className="mt-1 text-sm font-semibold text-[#27231f]">{definition?.name ?? "Website portfolio"}</p>
+            <p className="mt-1 text-sm font-semibold text-[#27231f]">{definition?.name ?? "Your services"}</p>
           </div>
           <div className="flex items-center gap-3">
             <span className="hidden items-center gap-2 text-xs font-medium text-[#6d6258] sm:flex"><span className="size-1.5 rounded-full bg-emerald-600" /> Systems operational</span>

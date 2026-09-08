@@ -2,6 +2,7 @@
 -- Verify anon cannot read CMS base tables and can retrieve published content
 -- only through the explicitly granted public RPC. Everything is rolled back.
 begin;
+select plan(1);
 
 insert into public.organizations(id, name, slug)
 values ('40000000-0000-0000-0000-000000000001', 'Public RPC Test', 'public-rpc-test');
@@ -74,5 +75,8 @@ begin
   end;
 end
 $$;
+
+select pass('anonymous access remains limited to published content RPC');
+select * from finish();
 
 rollback;
