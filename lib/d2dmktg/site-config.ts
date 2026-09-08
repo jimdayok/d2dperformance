@@ -13,7 +13,7 @@ export const siteConfig = {
     clientLogin: "https://webadmin.d2dmktg.com",
     websiteEditing: "https://webadmin.d2dmktg.com",
     brandVault: "https://brandvault.d2dmktg.com",
-    d2dDigital: "/digital",
+    d2dDigital: "https://digital.d2dmktg.com",
     d2dPerformance: "/#top",
     facebook: "https://www.facebook.com/day2daymktg2016",
     instagram: "https://www.instagram.com/day2daymarketing/",

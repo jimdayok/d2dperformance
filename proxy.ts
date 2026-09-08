@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const canonicalWebsiteHost = "performance.d2dmktg.com";
 const canonicalPortalHost = "webadmin.d2dmktg.com";
+const digitalWebsiteUrl = "https://digital.d2dmktg.com";
 const portalRedirectHosts = new Set(["portal.d2dperformance.com"]);
 const performanceRedirectHosts = new Set([
   "d2dperformance.com",
@@ -26,6 +27,12 @@ export async function proxy(request: NextRequest) {
   }
 
   if (performanceRedirectHosts.has(hostname)) {
+    if (url.pathname === "/digital") {
+      const digitalUrl = new URL(digitalWebsiteUrl);
+      digitalUrl.search = url.search;
+      return NextResponse.redirect(digitalUrl, 308);
+    }
+
     url.protocol = "https:";
     url.hostname = canonicalWebsiteHost;
     url.port = "";
@@ -37,6 +44,12 @@ export async function proxy(request: NextRequest) {
     url.hostname = "d2dmktg.com";
     url.port = "";
     return NextResponse.redirect(url, 308);
+  }
+
+  if (hostname === canonicalWebsiteHost && url.pathname === "/digital") {
+    const digitalUrl = new URL(digitalWebsiteUrl);
+    digitalUrl.search = url.search;
+    return NextResponse.redirect(digitalUrl, 308);
   }
 
   if (isPortalHost && url.pathname === "/" && url.searchParams.has("code")) {

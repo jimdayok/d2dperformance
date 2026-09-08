@@ -4,7 +4,6 @@ import { navigation, siteUrl } from "@/lib/site-data";
 export default function sitemap(): MetadataRoute.Sitemap {
   const routes = [
     ...navigation.map((item) => item.href),
-    "/digital",
     "/privacy-policy",
     "/sign-up-for-our-newsletter",
     "/terms-of-use",
