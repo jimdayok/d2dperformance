@@ -29,7 +29,7 @@ export async function PortalShell({ children, definition, access, displayName, s
         <nav aria-label="D2D Account" className="mt-8 grid gap-1 border-t border-white/12 pt-6">
           <Link href="/portal/dashboard" className="portal-sidebar-link"><LayoutGrid size={15} /> My services</Link>
           {canUseSocial ? <Link href="/portal/marketing" className="portal-sidebar-link"><Share2 size={15} /> Social &amp; marketing</Link> : null}
-          {isPlatformAdmin ? <Link href="/portal/admin/products" className="portal-sidebar-link"><Settings2 size={15} /> Customer access</Link> : null}
+          {isPlatformAdmin ? <Link href="/portal/admin/products" className="portal-sidebar-link"><Settings2 size={15} /> Administration</Link> : null}
         </nav>
 
         <div className="mt-6 border-t border-white/12 pt-6">

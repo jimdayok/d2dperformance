@@ -61,6 +61,18 @@ describe("D2D customer marketing schemas", () => {
     expect(migration).toContain("grant execute on function public.admin_create_customer_organization");
   });
 
+  it("assigns a customer user and selected services in one audited transaction", () => {
+    const migration = readFileSync(
+      "supabase/migrations/202609090003_admin_assign_customer_user.sql",
+      "utf8",
+    );
+    expect(migration).toContain("admin_assign_customer_user");
+    expect(migration).toContain("public.is_platform_admin(auth.uid())");
+    expect(migration).toContain("jsonb_each(check_product_roles)");
+    expect(migration).toContain("'organization_member.assigned'");
+    expect(migration).toContain("grant execute on function public.admin_assign_customer_user");
+  });
+
   it("makes the central Website Management button an actual route authorization gate", () => {
     const access = readFileSync("lib/site-manager/access.ts", "utf8");
     const migration = readFileSync(
