@@ -12,6 +12,14 @@ insert into public.profiles(id, email) values ('10000000-0000-0000-0000-00000000
 on conflict (id) do nothing;
 insert into public.organizations(id, name, slug) values ('20000000-0000-0000-0000-000000000001', 'RLS A', 'rls-a'), ('20000000-0000-0000-0000-000000000002', 'RLS B', 'rls-b');
 insert into public.organization_members(organization_id, user_id, role) values ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 'editor'), ('20000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000002', 'editor');
+insert into public.product_entitlements(organization_id, product, launch_url)
+values
+  ('20000000-0000-0000-0000-000000000001', 'web_management', 'https://webadmin.d2dmktg.com/portal/dashboard'),
+  ('20000000-0000-0000-0000-000000000002', 'web_management', 'https://webadmin.d2dmktg.com/portal/dashboard');
+insert into public.organization_product_members(organization_id, user_id, product, role)
+values
+  ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 'web_management', 'creator'),
+  ('20000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000002', 'web_management', 'creator');
 insert into public.sites(id, organization_id, name, slug, production_url, preview_url)
 values ('30000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', 'Site A', 'rls-site-a', 'https://a.example.test', 'https://a.example.test'),
        ('30000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000002', 'Site B', 'rls-site-b', 'https://b.example.test', 'https://b.example.test');

@@ -2,13 +2,15 @@
 
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { Building2, Check, LockKeyhole, Power, UserRoundCheck, UsersRound } from "lucide-react";
+import { Building2, Check, LockKeyhole, Plus, Power, UserRoundCheck, UsersRound } from "lucide-react";
 import {
+  createCustomerOrganizationAction,
   removeProductMemberAction,
   setEntitlementAction,
   setProductMemberAction,
   type ProductAdminState,
 } from "@/app/(portal)/portal/(authenticated)/admin/products/actions";
+import { customerSlugFromName } from "@/lib/d2d-platform/organizations";
 import { d2dProducts, type D2DProductDefinition } from "@/lib/d2d-platform/products";
 import type { ProductRole } from "@/lib/d2d-platform/types";
 
@@ -49,6 +51,67 @@ function SubmitButton({ active, activeLabel, inactiveLabel, disabled = false, to
     >
       {pending ? "Saving…" : active ? activeLabel : inactiveLabel}
     </button>
+  );
+}
+
+function CreateCustomerButton({ disabled }: { disabled: boolean }) {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending || disabled}
+      className="inline-flex min-w-36 items-center justify-center gap-2 rounded-md border border-[#315d4b] bg-[#315d4b] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#284d3e] disabled:cursor-not-allowed disabled:opacity-45"
+    >
+      <Plus size={16} />
+      {pending ? "Adding…" : "Add customer"}
+    </button>
+  );
+}
+
+function CreateCustomerForm({ onCreated }: { onCreated: (organizationId: string) => void }) {
+  const [name, setName] = useState("");
+  const [state, action] = useActionState(async (previousState: ProductAdminState, formData: FormData) => {
+    const result = await createCustomerOrganizationAction(previousState, formData);
+    if (result.organizationId) {
+      onCreated(result.organizationId);
+      setName("");
+    }
+    return result;
+  }, initialState);
+  const slug = customerSlugFromName(name);
+
+  return (
+    <section className="portal-panel border p-5 sm:p-6" aria-labelledby="add-customer-heading">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,34rem)] lg:items-end">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#9a5f34]">Customer setup</p>
+          <h2 id="add-customer-heading" className="mt-2 font-display text-3xl font-semibold">Add a customer</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#6d6258]">
+            Enter the business name. The customer starts with every service off, so nothing is shared until you choose what to turn on.
+          </p>
+        </div>
+        <form action={action} className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+          <label className="text-xs font-semibold uppercase tracking-[0.13em] text-[#5d5148]">
+            Customer name
+            <input
+              name="name"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              required
+              maxLength={160}
+              autoComplete="organization"
+              placeholder="Mike’s Off the Square"
+              className="portal-field mt-2 w-full px-3 py-3 text-sm normal-case tracking-normal"
+            />
+          </label>
+          <div className="self-end"><CreateCustomerButton disabled={!name.trim() || !slug} /></div>
+          <p className="text-xs leading-5 text-[#74685e] sm:col-span-2">
+            {slug ? `Account name: ${slug}` : "The account name will be created automatically."}
+          </p>
+          <div className="sm:col-span-2"><Feedback state={state} /></div>
+        </form>
+      </div>
+    </section>
   );
 }
 
@@ -225,6 +288,8 @@ export function ProductAccessAdmin({ organizations, profiles, organizationMember
         <h1 className="mt-3 font-display text-4xl font-semibold sm:text-5xl">Customer access</h1>
         <p className="mt-3 max-w-3xl text-sm leading-6 text-[#6d6258]">Choose a customer organization, turn its D2D services on or off, and control what each person can open after signing in.</p>
       </header>
+
+      <CreateCustomerForm onCreated={setSelectedOrganizationId} />
 
       {organizations.length ? (
         <>

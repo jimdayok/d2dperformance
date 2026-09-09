@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { d2dProducts } from "@/lib/d2d-platform/products";
+import { customerSlugFromName } from "@/lib/d2d-platform/organizations";
 import {
   generatedSocialBatchSchema,
   marketingPlanContentSchema,
@@ -40,6 +41,24 @@ describe("D2D customer marketing schemas", () => {
     expect(migration).toContain("product_member.removed");
     expect(migration).toContain("person must belong to the organization");
     expect(migration).toContain("grant execute on function public.admin_remove_product_member");
+  });
+
+  it("creates readable customer account names from business names", () => {
+    expect(customerSlugFromName("Mike’s Off the Square")).toBe("mikes-off-the-square");
+    expect(customerSlugFromName(" Café & Co. ")).toBe("cafe-and-co");
+    expect(customerSlugFromName("---")).toBe("");
+  });
+
+  it("adds customers through an audited administrator-only database function", () => {
+    const migration = readFileSync(
+      "supabase/migrations/202609090002_admin_create_customer_organization.sql",
+      "utf8",
+    );
+    expect(migration).toContain("admin_create_customer_organization");
+    expect(migration).toContain("public.is_platform_admin(auth.uid())");
+    expect(migration).toContain("'organization.created'");
+    expect(migration).toContain("'initial_services', 'off'");
+    expect(migration).toContain("grant execute on function public.admin_create_customer_organization");
   });
 
   it("makes the central Website Management button an actual route authorization gate", () => {

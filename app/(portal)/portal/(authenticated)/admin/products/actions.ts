@@ -3,10 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getD2DProduct } from "@/lib/d2d-platform/products";
+import { customerSlugFromName } from "@/lib/d2d-platform/organizations";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/site-manager/access";
 
-export type ProductAdminState = { error?: string; message?: string };
+export type ProductAdminState = {
+  error?: string;
+  message?: string;
+  organizationId?: string;
+};
 
 const productSchema = z.enum(["social", "brand_vault", "web_management"]);
 
@@ -21,6 +26,35 @@ async function requirePlatformAdmin() {
 
 function failure(error: unknown): ProductAdminState {
   return { error: error instanceof Error ? error.message : "The change could not be saved." };
+}
+
+export async function createCustomerOrganizationAction(
+  _: ProductAdminState,
+  formData: FormData,
+): Promise<ProductAdminState> {
+  try {
+    const { name } = z.object({
+      name: z.string().trim().min(1, "Enter a customer name.").max(160),
+    }).parse({ name: formData.get("name") });
+    const slug = customerSlugFromName(name);
+    if (!slug) return { error: "Enter a customer name with at least one letter or number." };
+
+    const supabase = await requirePlatformAdmin();
+    const { data, error } = await supabase.rpc("admin_create_customer_organization", {
+      check_name: name,
+      check_slug: slug,
+    });
+    if (error) throw new Error(error.message);
+    if (!data?.id) throw new Error("The customer was created, but could not be opened.");
+
+    revalidatePath("/portal/admin/products");
+    return {
+      message: `${name} was added. All services are off until you turn them on.`,
+      organizationId: data.id,
+    };
+  } catch (error) {
+    return failure(error);
+  }
 }
 
 export async function setEntitlementAction(
