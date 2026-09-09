@@ -1,4 +1,6 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { d2dProducts } from "@/lib/d2d-platform/products";
 import {
   generatedSocialBatchSchema,
   marketingPlanContentSchema,
@@ -19,6 +21,43 @@ const plan = {
 };
 
 describe("D2D customer marketing schemas", () => {
+  it("defines one secure launch destination and customer default for every service", () => {
+    expect(d2dProducts.map((product) => product.value)).toEqual([
+      "social",
+      "brand_vault",
+      "web_management",
+    ]);
+    expect(d2dProducts.every((product) => product.defaultLaunchUrl.startsWith("https://"))).toBe(true);
+  });
+
+  it("adds audited administrator-only customer access removal", () => {
+    const migration = readFileSync(
+      "supabase/migrations/202609090001_customer_product_access_controls.sql",
+      "utf8",
+    );
+    expect(migration).toContain("admin_remove_product_member");
+    expect(migration).toContain("public.is_platform_admin(auth.uid())");
+    expect(migration).toContain("product_member.removed");
+    expect(migration).toContain("person must belong to the organization");
+    expect(migration).toContain("grant execute on function public.admin_remove_product_member");
+  });
+
+  it("makes the central Website Management button an actual route authorization gate", () => {
+    const access = readFileSync("lib/site-manager/access.ts", "utf8");
+    const migration = readFileSync(
+      "supabase/migrations/202609090001_customer_product_access_controls.sql",
+      "utf8",
+    );
+    expect(access).toContain('.eq("product", "web_management")');
+    expect(access).toContain('entitlement.organization_id');
+    expect(access).toContain('entitledOrganizationIds.has(organizationId)');
+    expect(migration).toContain("Preserve every existing Website Management customer's current access");
+    expect(migration).toContain("on conflict (organization_id, user_id, product) do nothing");
+    expect(migration).toContain("direct requests cannot bypass the portal buttons");
+    expect(migration).toContain("create or replace function public.has_site_role");
+    expect(migration).toContain("create or replace function public.can_publish_site");
+  });
+
   it("accepts a complete reviewable marketing plan", () => {
     expect(marketingPlanContentSchema.parse(plan)).toEqual(plan);
   });

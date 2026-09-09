@@ -5,9 +5,10 @@ import { login, requestPasswordReset, type LoginState } from "@/app/(portal)/por
 
 const initialState: LoginState = {};
 
-export function LoginForm({ next, ssoEnabled = false }: { next?: string; ssoEnabled?: boolean }) {
+export function LoginForm({ next, ssoEnabled = false, legacyEnabled = false }: { next?: string; ssoEnabled?: boolean; legacyEnabled?: boolean }) {
   const [state, loginAction, pending] = useActionState(login, initialState);
   const [resetState, resetAction, resetting] = useActionState(requestPasswordReset, initialState);
+  const showLegacySignIn = !ssoEnabled || legacyEnabled;
   return (
     <div className="space-y-7">
       {ssoEnabled ? (
@@ -16,16 +17,16 @@ export function LoginForm({ next, ssoEnabled = false }: { next?: string; ssoEnab
             href={`/portal/login/d2d?next=${encodeURIComponent(next ?? "/portal/dashboard")}`}
             className="portal-primary-button block w-full px-5 py-3.5 text-center font-semibold"
           >
-            Continue with D2D Account
+            Sign in to D2D Account
           </a>
-          <div className="my-6 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8b7e72]">
+          {showLegacySignIn ? <div className="my-6 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8b7e72]">
             <span className="h-px flex-1 bg-[#2b211b]/10" />
-            Legacy sign-in
+            Temporary email sign-in
             <span className="h-px flex-1 bg-[#2b211b]/10" />
-          </div>
+          </div> : <p className="mt-4 text-center text-xs leading-5 text-[#796e64]">Use the same D2D Account for every service assigned to you.</p>}
         </div>
       ) : null}
-      <form action={loginAction} className="space-y-5">
+      {showLegacySignIn ? <><form action={loginAction} className="space-y-5">
         {next ? <input type="hidden" name="next" value={next} /> : null}
         <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-[#4d443d]" htmlFor="email">Email address
           <input id="email" name="email" type="email" autoComplete="email" required className="portal-field mt-2 w-full px-4 py-3.5 text-sm normal-case tracking-normal" />
@@ -43,7 +44,7 @@ export function LoginForm({ next, ssoEnabled = false }: { next?: string; ssoEnab
           <button disabled={resetting} className="portal-secondary-button px-4 py-3 text-sm font-semibold">{resetting ? "Sending…" : "Send reset"}</button>
         </div>
         <p aria-live="polite" className="mt-2 text-sm text-[#6d6258]">{resetState.error ?? resetState.message}</p>
-      </form>
+      </form></> : null}
     </div>
   );
 }

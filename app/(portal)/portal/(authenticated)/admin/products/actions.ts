@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { getD2DProduct } from "@/lib/d2d-platform/products";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/site-manager/access";
 
@@ -30,28 +31,32 @@ export async function setEntitlementAction(
     const input = z.object({
       organizationId: z.string().uuid(),
       product: productSchema,
-      status: z.enum(["active", "suspended", "archived"]),
-      launchUrl: z.string().url().refine((value) => value.startsWith("https://"), "Launch URL must use HTTPS."),
-      externalWorkspaceId: z.string().trim().max(240),
+      enabled: z.enum(["true", "false"]).transform((value) => value === "true"),
     }).parse({
       organizationId: formData.get("organizationId"),
       product: formData.get("product"),
-      status: formData.get("status"),
-      launchUrl: formData.get("launchUrl"),
-      externalWorkspaceId: formData.get("externalWorkspaceId") ?? "",
+      enabled: formData.get("enabled"),
     });
     const supabase = await requirePlatformAdmin();
+    const { data: existing, error: lookupError } = await supabase
+      .from("product_entitlements")
+      .select("launch_url,external_workspace_id")
+      .eq("organization_id", input.organizationId)
+      .eq("product", input.product)
+      .maybeSingle();
+    if (lookupError) throw new Error(lookupError.message);
+    const product = getD2DProduct(input.product);
     const { error } = await supabase.rpc("admin_set_product_entitlement", {
       check_organization: input.organizationId,
       check_product: input.product,
-      check_status: input.status,
-      check_launch_url: input.launchUrl,
-      check_external_workspace_id: input.externalWorkspaceId || null,
+      check_status: input.enabled ? "active" : "suspended",
+      check_launch_url: existing?.launch_url ?? product.defaultLaunchUrl,
+      check_external_workspace_id: existing?.external_workspace_id ?? null,
     });
     if (error) throw new Error(error.message);
     revalidatePath("/portal/admin/products");
     revalidatePath("/portal/dashboard");
-    return { message: "Customer product access was saved." };
+    return { message: `${product.label} is ${input.enabled ? "on" : "off"} for this organization.` };
   } catch (error) {
     return failure(error);
   }
@@ -82,7 +87,37 @@ export async function setProductMemberAction(
     });
     if (error) throw new Error(error.message);
     revalidatePath("/portal/admin/products");
-    return { message: "The customer role was saved." };
+    revalidatePath("/portal/dashboard");
+    return { message: "This person’s access was saved." };
+  } catch (error) {
+    return failure(error);
+  }
+}
+
+export async function removeProductMemberAction(
+  _: ProductAdminState,
+  formData: FormData,
+): Promise<ProductAdminState> {
+  try {
+    const input = z.object({
+      organizationId: z.string().uuid(),
+      userId: z.string().uuid(),
+      product: productSchema,
+    }).parse({
+      organizationId: formData.get("organizationId"),
+      userId: formData.get("userId"),
+      product: formData.get("product"),
+    });
+    const supabase = await requirePlatformAdmin();
+    const { error } = await supabase.rpc("admin_remove_product_member", {
+      check_organization: input.organizationId,
+      check_user: input.userId,
+      check_product: input.product,
+    });
+    if (error) throw new Error(error.message);
+    revalidatePath("/portal/admin/products");
+    revalidatePath("/portal/dashboard");
+    return { message: "This person’s access was removed." };
   } catch (error) {
     return failure(error);
   }

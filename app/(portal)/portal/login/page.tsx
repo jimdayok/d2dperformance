@@ -42,8 +42,8 @@ export default async function LoginPage({
             <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#9a5f34]">Authorized access</p>
             <h2 className="mt-4 font-display text-4xl font-semibold text-[#171513] sm:text-5xl">Welcome back.</h2>
             <p className="mt-4 mb-9 max-w-md text-sm leading-6 text-[#6d6258]">Sign in once to reach the D2D services assigned to your organization.</p>
-            {authError ? <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">D2D Account sign-in could not be completed. Please try again or use the legacy sign-in while setup is being finalized.</p> : null}
-            {hasSupabaseConfig() ? <LoginForm next={destination} ssoEnabled={process.env.D2D_SSO_ENABLED === "true"} /> : <p role="alert" className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Supabase is not configured. Add the documented public URL and anonymous key to enable sign-in.</p>}
+            {authError ? <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">D2D Account sign-in could not be completed. Please try again. If the problem continues, contact D2D support below.</p> : null}
+            {hasSupabaseConfig() ? <LoginForm next={destination} ssoEnabled={process.env.D2D_SSO_ENABLED === "true"} legacyEnabled={process.env.D2D_LEGACY_LOGIN_ENABLED === "true"} /> : <p role="alert" className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Supabase is not configured. Add the documented public URL and anonymous key to enable sign-in.</p>}
           </div>
           <p className="text-xs text-[#877b70]">Need help? <a href="mailto:andrea@d2dmktg.com" className="font-semibold text-[#5d3d29] underline underline-offset-4">Contact D2D support</a></p>
         </div>

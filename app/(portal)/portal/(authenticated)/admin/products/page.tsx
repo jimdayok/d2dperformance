@@ -10,13 +10,20 @@ export default async function ProductAccessPage() {
   const supabase = await createSupabaseServerClient();
   const { data: profile } = await supabase.from("profiles").select("is_platform_admin").eq("id", user.id).single();
   if (!profile?.is_platform_admin) redirect("/portal/dashboard");
-  const [{ data: organizations }, { data: profiles }, { data: entitlements }, { data: memberships }] = await Promise.all([
+  const [
+    { data: organizations },
+    { data: profiles },
+    { data: organizationMembers },
+    { data: entitlements },
+    { data: memberships },
+  ] = await Promise.all([
     supabase.from("organizations").select("id,name").eq("status", "active").order("name"),
     supabase.from("profiles").select("id,display_name,email").order("email"),
-    supabase.from("product_entitlements").select("id,organization_id,product,status,launch_url").order("created_at"),
+    supabase.from("organization_members").select("organization_id,user_id"),
+    supabase.from("product_entitlements").select("id,organization_id,product,status").order("created_at"),
     supabase.from("organization_product_members").select("id,organization_id,user_id,product,role").order("created_at"),
   ]);
   return <PortalShell definition={null} access={sites[0]?.access ?? null} displayName={user.user_metadata?.display_name ?? user.email ?? "Account"} siteCount={sites.length}>
-    <ProductAccessAdmin organizations={organizations ?? []} profiles={profiles ?? []} entitlements={entitlements ?? []} memberships={memberships ?? []} />
+    <ProductAccessAdmin organizations={organizations ?? []} profiles={profiles ?? []} organizationMembers={organizationMembers ?? []} entitlements={entitlements ?? []} memberships={memberships ?? []} />
   </PortalShell>;
 }
