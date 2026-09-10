@@ -3,6 +3,7 @@ import { ArrowRight, ExternalLink, FolderHeart, Globe2, Share2 } from "lucide-re
 import { PortalShell } from "@/components/site-manager/portal-shell";
 import { getAccessibleSites, getCurrentUser } from "@/lib/site-manager/access";
 import { getProductAccess } from "@/lib/d2d-platform/access";
+import { getProductLaunchHref } from "@/lib/d2d-platform/product-navigation";
 
 const productDetails = {
   social: { name: "D2D Social", description: "Review marketing plans, share sales and specials, approve social content, and monitor scheduled work.", icon: Share2 },
@@ -27,15 +28,18 @@ export default async function DashboardPage() {
           {products.map((product) => {
             const details = productDetails[product.product];
             const Icon = details.icon;
-            const internalHref = product.product === "social" ? "/portal/marketing" : product.launchUrl;
+            const internalHref = getProductLaunchHref(product, sites);
             const external = internalHref.startsWith("http");
+            const actionLabel = product.product === "web_management" && !external
+              ? "Open website editor"
+              : "Open service";
             return <article key={`${product.organizationId}:${product.product}`} className="portal-site-card p-6">
               <div className="flex items-start justify-between gap-4"><span className="grid size-11 place-items-center border border-[#9a5f34]/20 bg-[#9a5f34]/8 text-[#9a5f34]"><Icon size={19} strokeWidth={1.7} /></span><span className="text-xs font-medium text-[#776b61]"><span className="mr-2 inline-block size-1.5 rounded-full bg-emerald-600" />Active</span></div>
               <p className="mt-7 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#9a5f34]">{product.organizationName}</p>
               <h2 className="mt-2 font-display text-3xl font-semibold">{details.name}</h2>
               <p className="mt-3 min-h-20 text-sm leading-6 text-[#6d6258]">{details.description}</p>
               <div className="mt-5 border-t border-[#241c17]/10 pt-5">
-                {external ? <a href={internalHref} className="portal-primary-button inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold">Open service <ExternalLink size={14} /></a> : <Link href={internalHref} className="portal-primary-button inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold">Open service <ArrowRight size={15} /></Link>}
+                {external ? <a href={internalHref} className="portal-primary-button inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold">{actionLabel} <ExternalLink size={14} /></a> : <Link href={internalHref} className="portal-primary-button inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold">{actionLabel} <ArrowRight size={15} /></Link>}
               </div>
             </article>;
           })}
