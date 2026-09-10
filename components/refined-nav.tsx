@@ -16,8 +16,9 @@ import { companyName, parentBrandName } from "@/lib/site-data";
 
 const websiteManagementUrl = "https://webadmin.d2dmktg.com";
 const brandVaultUrl = "https://brandvault.d2dmktg.com";
+const socialPagesUrl = "https://social.d2dperformance.com/login";
 const marketingUrl = "https://d2dmktg.com";
-const digitalUrl = "https://d2d-digital.vercel.app";
+const digitalUrl = "https://digital.d2dmktg.com";
 
 const serviceItems = [
   {
@@ -40,6 +41,11 @@ const serviceItems = [
     label: "Information Systems",
     description: "Connect tools, definitions, workflows, and ownership.",
   },
+  {
+    href: "/#operational-tools",
+    label: "Operational Tools",
+    description: "Open the connected D2D client platform suite.",
+  },
 ] as const;
 
 const primaryItems = [
@@ -49,13 +55,18 @@ const primaryItems = [
 
 const clientItems = [
   {
+    href: socialPagesUrl,
+    label: "D2D Social Pages",
+    description: "Plan, review, approve, and publish social content.",
+  },
+  {
     href: brandVaultUrl,
-    label: "Brand Vault",
+    label: "D2D Brand Vault",
     description: "Find approved logos, files, and brand guidelines.",
   },
   {
     href: websiteManagementUrl,
-    label: "Website Management",
+    label: "D2D Site Manager",
     description: "Review and update your D2D-managed website.",
   },
 ] as const;

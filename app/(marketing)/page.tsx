@@ -4,6 +4,7 @@ import { ResultsSection } from "@/sections/home/results";
 import { ServicesGridSection } from "@/sections/home/services-grid";
 import { WhatWeDoSection } from "@/sections/home/what-we-do";
 import { WhyStallSection } from "@/sections/home/why-stall";
+import { OperationalToolsSection } from "@/sections/home/operational-tools";
 import { companyName, siteUrl } from "@/lib/site-data";
 import { createMetadata, sanitizeJsonLd } from "@/lib/metadata";
 
@@ -31,6 +32,7 @@ export default function Home() {
       />
       <HomeHero />
       <WhatWeDoSection />
+      <OperationalToolsSection />
       <WhyStallSection />
       <HomeProcessSection />
       <ServicesGridSection />

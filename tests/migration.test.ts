@@ -8,7 +8,7 @@ import { hasTrustedPublicOrigin } from "@/lib/public-origin";
 import { companyName, siteUrl } from "@/lib/site-data";
 import { proxy } from "@/proxy";
 
-describe("D2D Marketing production migration", () => {
+describe("D2D Performance production migration", () => {
   it("keeps all three D2D ecosystem labels and current-state indicators", () => {
     const digitalPage = readFileSync(
       "app/(d2dmktg)/digital/page.tsx",
@@ -28,7 +28,7 @@ describe("D2D Marketing production migration", () => {
   });
 
   it("uses the approved brand and canonical origin", () => {
-    expect(companyName).toBe("D2D Marketing");
+    expect(companyName).toBe("D2D Performance");
     expect(siteUrl).toBe("https://performance.d2dmktg.com");
   });
 
