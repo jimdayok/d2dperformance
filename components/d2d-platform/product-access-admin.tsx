@@ -2,11 +2,12 @@
 
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { Activity, Building2, Check, FileStack, HardDrive, KeyRound, LockKeyhole, Plus, Power, UserPlus, UserRoundCheck, UsersRound } from "lucide-react";
+import { Activity, Building2, Check, FileStack, HardDrive, KeyRound, LockKeyhole, Mail, Plus, Power, UserPlus, UserRoundCheck, UsersRound } from "lucide-react";
 import {
   addCustomerUserAction,
   createCustomerOrganizationAction,
   removeProductMemberAction,
+  sendClientInstructionsAction,
   setEntitlementAction,
   setOrganizationMemberRoleAction,
   setProductMemberAction,
@@ -62,6 +63,7 @@ function activityLabel(action: string) {
     "product_entitlement.set": "Customer service changed",
     "product_member.set": "Person access changed",
     "product_member.removed": "Person access removed",
+    "client.instructions_email_sent": "Login instructions emailed",
   };
   return labels[action] ?? action.replaceAll("_", " ").replaceAll(".", " · ");
 }
@@ -333,17 +335,33 @@ function PersonSummary({
   organizationId,
   person,
   organizationRole,
+  instructionsEmailReady,
 }: {
   organizationId: string;
   person: Profile;
   organizationRole: string;
+  instructionsEmailReady: boolean;
 }) {
   const [state, action] = useActionState(setOrganizationMemberRoleAction, initialState);
+  const [emailState, emailAction] = useActionState(sendClientInstructionsAction, initialState);
   return (
     <div className="grid gap-4 border-b border-[#241c17]/10 pb-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,28rem)] lg:items-end">
-      <div className="flex items-center gap-3">
-        <span className="grid size-9 place-items-center rounded-full bg-[#315d4b] text-white"><UserRoundCheck size={17} /></span>
-        <div><p className="font-semibold">{person.display_name || person.email}</p><p className="text-xs text-[#74685e]">{person.email}</p></div>
+      <div>
+        <div className="flex items-center gap-3">
+          <span className="grid size-9 place-items-center rounded-full bg-[#315d4b] text-white"><UserRoundCheck size={17} /></span>
+          <div><p className="font-semibold">{person.display_name || person.email}</p><p className="text-xs text-[#74685e]">{person.email}</p></div>
+        </div>
+        <form action={emailAction} className="mt-4">
+          <input type="hidden" name="organizationId" value={organizationId} />
+          <input type="hidden" name="userId" value={person.id} />
+          <SendInstructionsButton disabled={!instructionsEmailReady} />
+          <p className="mt-2 text-xs leading-5 text-[#74685e]">
+            {instructionsEmailReady
+              ? "Sends the secure sign-in link, first-login steps, and this person’s active services."
+              : "Add the portal email delivery settings before sending instructions."}
+          </p>
+          <Feedback state={emailState} />
+        </form>
       </div>
       <form action={action} className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
         <input type="hidden" name="organizationId" value={organizationId} />
@@ -357,6 +375,20 @@ function PersonSummary({
         <div className="sm:col-span-2"><Feedback state={state} /></div>
       </form>
     </div>
+  );
+}
+
+function SendInstructionsButton({ disabled }: { disabled: boolean }) {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending || disabled}
+      className="portal-secondary-button inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-45"
+    >
+      <Mail size={15} />
+      {pending ? "Sending…" : "Email login instructions"}
+    </button>
   );
 }
 
@@ -443,7 +475,7 @@ function PersonProductCard({ organizationId, userId, product, entitlement, membe
   );
 }
 
-function OrganizationAccess({ organization, profiles, organizationMembers, entitlements, memberships, identityProvisioningReady }: { organization: Organization; profiles: Profile[]; organizationMembers: OrganizationMember[]; entitlements: Entitlement[]; memberships: Membership[]; identityProvisioningReady: boolean }) {
+function OrganizationAccess({ organization, profiles, organizationMembers, entitlements, memberships, identityProvisioningReady, instructionsEmailReady }: { organization: Organization; profiles: Profile[]; organizationMembers: OrganizationMember[]; entitlements: Entitlement[]; memberships: Membership[]; identityProvisioningReady: boolean; instructionsEmailReady: boolean }) {
   const people = organizationMembers
     .filter((member) => member.organization_id === organization.id)
     .map((member) => profiles.find((profile) => profile.id === member.user_id))
@@ -504,6 +536,7 @@ function OrganizationAccess({ organization, profiles, organizationMembers, entit
                   organizationId={organization.id}
                   person={selectedPerson}
                   organizationRole={selectedOrganizationMember?.role ?? "viewer"}
+                  instructionsEmailReady={instructionsEmailReady}
                 />
                 <div className="mt-4 grid gap-3 xl:grid-cols-3">
                   {d2dProducts.map((product) => (
@@ -539,6 +572,7 @@ export function ProductAccessAdmin({
   memberships,
   dashboard,
   identityProvisioningReady,
+  instructionsEmailReady,
 }: {
   organizations: Organization[];
   profiles: Profile[];
@@ -547,6 +581,7 @@ export function ProductAccessAdmin({
   memberships: Membership[];
   dashboard: AdminDashboardData;
   identityProvisioningReady: boolean;
+  instructionsEmailReady: boolean;
 }) {
   const [selectedOrganizationId, setSelectedOrganizationId] = useState(organizations[0]?.id ?? "");
   const selectedOrganization = organizations.find((organization) => organization.id === selectedOrganizationId);
@@ -585,6 +620,7 @@ export function ProductAccessAdmin({
               entitlements={entitlements}
               memberships={memberships}
               identityProvisioningReady={identityProvisioningReady}
+              instructionsEmailReady={instructionsEmailReady}
             />
           ) : null}
         </>

@@ -43,6 +43,8 @@ Public-site and form variables:
 - `NEXT_PUBLIC_META_PIXEL_IDS`
 - `CONTACT_FORM_TO_EMAIL`
 - `CONTACT_FORM_FROM_EMAIL`
+- `PORTAL_INSTRUCTIONS_FROM_EMAIL`
+- `PORTAL_SUPPORT_EMAIL`
 - `BRAND_DISCOVERY_FROM_EMAIL`
 - `BRAND_DISCOVERY_TO_EMAIL`
 - `BRAND_DISCOVERY_NOTIFICATION_EMAIL`
@@ -69,7 +71,7 @@ Instagram variables:
 - `INSTAGRAM_SHOWCASE_HANDLES`
 - `INSTAGRAM_GRAPH_API_VERSION`
 
-The contact form uses Resend and routes notifications through `CONTACT_FORM_TO_EMAIL`. The Brand Discovery flows store configured data in Supabase and use Resend for internal and customer email. If required variables are unavailable, endpoints return a visible failure rather than claiming delivery.
+The contact form uses Resend and routes notifications through `CONTACT_FORM_TO_EMAIL`. The Brand Discovery flows store configured data in Supabase and use Resend for internal and customer email. Platform administrators can send assigned clients a login-and-usage message from Administration headquarters; it prefers `PORTAL_INSTRUCTIONS_FROM_EMAIL` and uses `PORTAL_SUPPORT_EMAIL` for replies. If required variables are unavailable, endpoints return a visible failure rather than claiming delivery.
 
 ## Domain and redirect strategy
 

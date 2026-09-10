@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getD2DProduct } from "@/lib/d2d-platform/products";
 import { customerSlugFromName } from "@/lib/d2d-platform/organizations";
 import { provisionD2DIdentity } from "@/lib/d2d-platform/keycloak-admin";
+import { sendClientInstructionsEmail } from "@/lib/d2d-platform/client-instructions-email";
 import {
   ensureBrandVaultOrganization,
   removeBrandVaultMember,
@@ -27,12 +28,16 @@ const organizationRoleSchema = z.enum(["site_admin", "publisher", "editor", "vie
 const productRoleSchema = z.enum(["manager", "creator", "reviewer", "viewer"]);
 
 async function requirePlatformAdmin() {
+  return (await requirePlatformAdminContext()).supabase;
+}
+
+async function requirePlatformAdminContext() {
   const user = await getCurrentUser();
   if (!user) throw new Error("Sign in again to continue.");
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.from("profiles").select("is_platform_admin").eq("id", user.id).single();
   if (!data?.is_platform_admin) throw new Error("Platform administrator access is required.");
-  return supabase;
+  return { supabase, user };
 }
 
 function failure(error: unknown): ProductAdminState {
@@ -176,6 +181,80 @@ export async function addCustomerUserAction(
       ? " Brand Vault access is recorded here and will synchronize when its secure connection is enabled."
       : "";
     return { message: `${input.displayName} was added and access was assigned.${accountMessage}${vaultMessage}`, userId };
+  } catch (error) {
+    return failure(error);
+  }
+}
+
+export async function sendClientInstructionsAction(
+  _: ProductAdminState,
+  formData: FormData,
+): Promise<ProductAdminState> {
+  try {
+    const input = z.object({
+      organizationId: z.string().uuid(),
+      userId: z.string().uuid(),
+    }).parse({
+      organizationId: formData.get("organizationId"),
+      userId: formData.get("userId"),
+    });
+    const { supabase, user } = await requirePlatformAdminContext();
+    const [organizationResult, profileResult, organizationMemberResult, membershipsResult, entitlementsResult] = await Promise.all([
+      supabase.from("organizations").select("id,name").eq("id", input.organizationId).eq("status", "active").single(),
+      supabase.from("profiles").select("id,display_name,email").eq("id", input.userId).single(),
+      supabase.from("organization_members").select("role").eq("organization_id", input.organizationId).eq("user_id", input.userId).maybeSingle(),
+      supabase.from("organization_product_members").select("product,role").eq("organization_id", input.organizationId).eq("user_id", input.userId),
+      supabase.from("product_entitlements").select("product,status").eq("organization_id", input.organizationId).eq("status", "active"),
+    ]);
+    const lookupError = organizationResult.error
+      ?? profileResult.error
+      ?? organizationMemberResult.error
+      ?? membershipsResult.error
+      ?? entitlementsResult.error;
+    if (lookupError) throw new Error(lookupError.message);
+    const organization = organizationResult.data;
+    const profile = profileResult.data;
+    if (!organization || !profile) throw new Error("The selected customer or person could not be found.");
+    if (!organizationMemberResult.data) throw new Error("This person is not assigned to that customer.");
+    if (!profile.email) throw new Error("This person does not have an email address.");
+
+    const activeProducts = new Set((entitlementsResult.data ?? []).map((entitlement) => entitlement.product));
+    const services = (membershipsResult.data ?? []).flatMap((membership) => {
+      const product = productSchema.safeParse(membership.product);
+      const role = productRoleSchema.safeParse(membership.role);
+      if (!product.success || !role.success || !activeProducts.has(product.data)) return [];
+      const definition = getD2DProduct(product.data);
+      return [{
+        product: product.data,
+        label: definition.label,
+        description: definition.description,
+        role: role.data,
+      }];
+    });
+    if (!services.length) throw new Error("Assign at least one active service before sending login instructions.");
+
+    const delivery = await sendClientInstructionsEmail({
+      displayName: profile.display_name || profile.email,
+      email: profile.email,
+      organizationName: organization.name,
+      services,
+    });
+    const admin = createSupabaseAdminClient();
+    const { error: auditError } = await admin.from("platform_audit_events").insert({
+      organization_id: input.organizationId,
+      actor_id: user.id,
+      action: "client.instructions_email_sent",
+      subject_type: "profile",
+      subject_id: input.userId,
+      detail: {
+        recipient_email: profile.email,
+        services: services.map((service) => service.product),
+        delivery_id: delivery.id,
+      },
+    });
+    if (auditError) console.error("Client instructions email audit entry failed", auditError);
+    revalidatePath("/portal/admin/products");
+    return { message: `Login instructions were sent to ${profile.email}.` };
   } catch (error) {
     return failure(error);
   }

@@ -73,6 +73,24 @@ describe("D2D customer marketing schemas", () => {
     expect(migration).toContain("grant execute on function public.admin_assign_customer_user");
   });
 
+  it("sends scoped login instructions only after rechecking administrator and customer access", () => {
+    const actions = readFileSync(
+      "app/(portal)/portal/(authenticated)/admin/products/actions.ts",
+      "utf8",
+    );
+    const admin = readFileSync(
+      "components/d2d-platform/product-access-admin.tsx",
+      "utf8",
+    );
+    expect(actions).toContain("sendClientInstructionsAction");
+    expect(actions).toContain("requirePlatformAdminContext");
+    expect(actions).toContain('from("organization_members")');
+    expect(actions).toContain("This person is not assigned to that customer.");
+    expect(actions).toContain("Assign at least one active service");
+    expect(actions).toContain('action: "client.instructions_email_sent"');
+    expect(admin).toContain("Email login instructions");
+  });
+
   it("makes the central Website Management button an actual route authorization gate", () => {
     const access = readFileSync("lib/site-manager/access.ts", "utf8");
     const migration = readFileSync(

@@ -5,6 +5,7 @@ import { getAccessibleSites, getCurrentUser } from "@/lib/site-manager/access";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getAdminDashboardData } from "@/lib/d2d-platform/admin-reporting";
 import { isD2DIdentityProvisioningConfigured } from "@/lib/d2d-platform/keycloak-admin";
+import { isClientInstructionsEmailConfigured } from "@/lib/d2d-platform/client-instructions-email";
 
 export default async function ProductAccessPage() {
   const [user, sites] = await Promise.all([getCurrentUser(), getAccessibleSites()]);
@@ -36,6 +37,7 @@ export default async function ProductAccessPage() {
       memberships={memberships ?? []}
       dashboard={dashboard}
       identityProvisioningReady={isD2DIdentityProvisioningConfigured()}
+      instructionsEmailReady={isClientInstructionsEmailConfigured()}
     />
   </PortalShell>;
 }
