@@ -13,6 +13,11 @@ export const pageQuestions = [
   { id: "specific_changes", label: "What specific changes should we make on this page?", prompt: "List exact edits and mark anything that is essential before the next review." },
 ] as const;
 
+export const pageRatings = [
+  { id: "copy_clarity", label: "How clear is the copy?", low: "Hard to follow", high: "Very clear" },
+  { id: "visual_confidence", label: "How well do the visuals fit?", low: "Needs changes", high: "Feels right" },
+] as const;
+
 export const overallQuestions = [
   { id: "overall_strengths", label: "What is working best across the site?" },
   { id: "overall_concerns", label: "What still feels unresolved or needs the most attention?" },
@@ -24,6 +29,18 @@ export const overallQuestions = [
 ] as const;
 
 const answerSchema = z.record(z.string().max(80), z.string().max(5_000));
+const ratingSchema = z.record(z.string().max(80), z.number().int().min(1).max(5));
+
+export const markupNoteSchema = z.object({
+  id: z.string().trim().min(1).max(100),
+  kind: z.enum(["circle", "note"]),
+  category: z.enum(["modify_text", "change_picture", "general"]),
+  x: z.number().min(0).max(1),
+  y: z.number().min(0).max(1),
+  width: z.number().min(0).max(1),
+  height: z.number().min(0).max(1),
+  text: z.string().trim().max(2_000),
+});
 
 export const startFeedbackSchema = z.object({
   clientName: z.string().trim().min(2).max(120),
@@ -38,6 +55,8 @@ export const pageFeedbackSchema = z.object({
   url: z.string().trim().max(2_048),
   pageTitle: z.string().trim().max(240).optional().default(""),
   answers: answerSchema,
+  ratings: ratingSchema.optional().default({}),
+  annotations: z.array(markupNoteSchema).max(100).optional().default([]),
   pageScore: z.number().int().min(1).max(5),
   commentary: z.string().trim().max(10_000).optional().default(""),
 });
@@ -50,6 +69,7 @@ export const submitFeedbackSchema = z.object({
 
 export type PageFeedbackInput = z.infer<typeof pageFeedbackSchema>;
 export type SubmitFeedbackInput = z.infer<typeof submitFeedbackSchema>;
+export type MarkupNote = z.infer<typeof markupNoteSchema>;
 
 export function normalizeReviewUrl(value: string) {
   const candidate = value.trim();
