@@ -1,10 +1,10 @@
 "use client";
 
-import { Circle, MessageSquareText, MousePointer2, RotateCcw, Trash2 } from "lucide-react";
+import { ArrowUpRight, Circle, MessageSquareText, MousePointer2, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import type { MarkupNote } from "@/lib/website-feedback-schema";
 
-type Tool = "browse" | "select" | "circle" | "note";
+type Tool = "browse" | "select" | "draw" | "arrow" | "circle" | "note";
 type Point = { x: number; y: number };
 
 const categoryLabels: Record<MarkupNote["category"], string> = {
@@ -36,6 +36,7 @@ export function MarkupCanvas({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [start, setStart] = useState<Point | null>(null);
   const [draft, setDraft] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
+  const [draftPoints, setDraftPoints] = useState<Point[]>([]);
   const layerRef = useRef<HTMLDivElement>(null);
   const selected = annotations.find((annotation) => annotation.id === selectedId) ?? null;
 
@@ -58,22 +59,32 @@ export function MarkupCanvas({
     if (disabled || event.target !== event.currentTarget) return;
     if (tool === "note") {
       const point = pointFromEvent(event);
-      addAnnotation({ id: crypto.randomUUID(), kind: "note", category: "general", x: point.x, y: point.y, width: 0, height: 0, text: "" });
+      addAnnotation({ id: crypto.randomUUID(), kind: "note", category: "general", x: point.x, y: point.y, width: 0, height: 0, points: [], text: "" });
       return;
     }
-    if (tool !== "circle") {
+    if (!(["circle", "draw", "arrow"] as Tool[]).includes(tool)) {
       setSelectedId(null);
       return;
     }
     event.currentTarget.setPointerCapture(event.pointerId);
     const point = pointFromEvent(event);
     setStart(point);
+    if (tool === "draw" || tool === "arrow") setDraftPoints([point]);
     setDraft({ x: point.x, y: point.y, width: 0, height: 0 });
   }
 
   function pointerMove(event: React.PointerEvent<HTMLDivElement>) {
-    if (!start || tool !== "circle") return;
+    if (!start || !(["circle", "draw", "arrow"] as Tool[]).includes(tool)) return;
     const point = pointFromEvent(event);
+    if (tool === "draw") {
+      setDraftPoints((current) => {
+        const previous = current.at(-1);
+        if (previous && Math.hypot(previous.x - point.x, previous.y - point.y) < 0.0025) return current;
+        return [...current, point];
+      });
+    } else if (tool === "arrow") {
+      setDraftPoints((current) => current.length ? [current[0], point] : [start, point]);
+    }
     setDraft({
       x: Math.min(start.x, point.x),
       y: Math.min(start.y, point.y),
@@ -83,15 +94,36 @@ export function MarkupCanvas({
   }
 
   function pointerUp(event: React.PointerEvent<HTMLDivElement>) {
-    if (!start || tool !== "circle") return;
+    if (!start || !(["circle", "draw", "arrow"] as Tool[]).includes(tool)) return;
     const point = pointFromEvent(event);
     const width = Math.abs(point.x - start.x);
     const height = Math.abs(point.y - start.y);
-    const annotation: MarkupNote = width < 0.015 && height < 0.015
-      ? { id: crypto.randomUUID(), kind: "circle", category: "general", x: clamp(point.x - 0.04), y: clamp(point.y - 0.04), width: 0.08, height: 0.08, text: "" }
-      : { id: crypto.randomUUID(), kind: "circle", category: "general", x: Math.min(start.x, point.x), y: Math.min(start.y, point.y), width, height, text: "" };
+    let annotation: MarkupNote;
+    if (tool === "circle") {
+      annotation = width < 0.015 && height < 0.015
+        ? { id: crypto.randomUUID(), kind: "circle", category: "general", x: clamp(point.x - 0.04), y: clamp(point.y - 0.04), width: 0.08, height: 0.08, points: [], text: "" }
+        : { id: crypto.randomUUID(), kind: "circle", category: "general", x: Math.min(start.x, point.x), y: Math.min(start.y, point.y), width, height, points: [], text: "" };
+    } else {
+      const points = tool === "arrow" ? [start, point] : [...draftPoints, point];
+      const xs = points.map((item) => item.x);
+      const ys = points.map((item) => item.y);
+      const minX = Math.min(...xs);
+      const minY = Math.min(...ys);
+      annotation = {
+        id: crypto.randomUUID(),
+        kind: tool === "draw" ? "draw" : "arrow",
+        category: "general",
+        x: minX,
+        y: minY,
+        width: Math.max(Math.max(...xs) - minX, 0.006),
+        height: Math.max(Math.max(...ys) - minY, 0.006),
+        points,
+        text: "",
+      };
+    }
     setStart(null);
     setDraft(null);
+    setDraftPoints([]);
     addAnnotation(annotation);
   }
 
@@ -118,12 +150,14 @@ export function MarkupCanvas({
       <div className="markup-toolbar" aria-label="Website markup tools">
         <div className="markup-toolset">
           <button type="button" className={tool === "browse" ? "is-selected" : ""} onClick={() => { setTool("browse"); setSelectedId(null); }} disabled={disabled}><MousePointer2 size={15} /> Browse site</button>
+          <button type="button" className={tool === "draw" ? "is-selected" : ""} onClick={() => setTool("draw")} disabled={disabled}><Pencil size={15} /> Draw freehand</button>
+          <button type="button" className={tool === "arrow" ? "is-selected" : ""} onClick={() => setTool("arrow")} disabled={disabled}><ArrowUpRight size={15} /> Draw arrow</button>
           <button type="button" className={tool === "circle" ? "is-selected" : ""} onClick={() => setTool("circle")} disabled={disabled}><Circle size={15} /> Circle an area</button>
           <button type="button" className={tool === "note" ? "is-selected" : ""} onClick={() => setTool("note")} disabled={disabled}><MessageSquareText size={15} /> Place a note</button>
           {annotations.length ? <button type="button" onClick={() => setTool("select")} className={tool === "select" ? "is-selected" : ""} disabled={disabled}>Edit marks</button> : null}
         </div>
         <div className="markup-help">
-          <span>{tool === "browse" ? "Follow links and scroll normally." : tool === "circle" ? "Drag around anything you want changed." : tool === "note" ? "Click exactly where your note belongs." : "Select a numbered mark to edit its note."}</span>
+          <span>{tool === "browse" ? "Follow links and scroll normally." : tool === "draw" ? "Draw directly over anything that needs attention." : tool === "arrow" ? "Drag from the note toward the exact item." : tool === "circle" ? "Drag around anything you want changed." : tool === "note" ? "Click exactly where your note belongs." : "Select a numbered mark to edit its note."}</span>
           <button type="button" onClick={undo} disabled={disabled || !annotations.length} aria-label="Undo last markup"><RotateCcw size={14} /> Undo</button>
         </div>
       </div>
@@ -135,10 +169,11 @@ export function MarkupCanvas({
           onPointerDown={pointerDown}
           onPointerMove={pointerMove}
           onPointerUp={pointerUp}
-          onPointerCancel={() => { setStart(null); setDraft(null); }}
+          onPointerCancel={() => { setStart(null); setDraft(null); setDraftPoints([]); }}
           aria-label="Website annotation layer"
         >
           <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <defs><marker id="markup-arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L7,3 z" /></marker></defs>
             {annotations.filter((annotation) => annotation.kind === "circle").map((annotation) => (
               <ellipse
                 key={annotation.id}
@@ -149,7 +184,15 @@ export function MarkupCanvas({
                 ry={Math.max(annotation.height / 2, 0.012) * 100}
               />
             ))}
-            {draft ? <ellipse className="is-draft" cx={(draft.x + draft.width / 2) * 100} cy={(draft.y + draft.height / 2) * 100} rx={Math.max(draft.width / 2, 0.005) * 100} ry={Math.max(draft.height / 2, 0.005) * 100} /> : null}
+            {annotations.filter((annotation) => annotation.kind === "draw" && annotation.points.length > 1).map((annotation) => (
+              <polyline key={annotation.id} className={annotation.id === selectedId ? "is-selected" : ""} points={annotation.points.map((point) => `${point.x * 100},${point.y * 100}`).join(" ")} />
+            ))}
+            {annotations.filter((annotation) => annotation.kind === "arrow" && annotation.points.length > 1).map((annotation) => (
+              <line key={annotation.id} className={annotation.id === selectedId ? "is-selected" : ""} x1={annotation.points[0].x * 100} y1={annotation.points[0].y * 100} x2={annotation.points.at(-1)!.x * 100} y2={annotation.points.at(-1)!.y * 100} markerEnd="url(#markup-arrowhead)" />
+            ))}
+            {tool === "circle" && draft ? <ellipse className="is-draft" cx={(draft.x + draft.width / 2) * 100} cy={(draft.y + draft.height / 2) * 100} rx={Math.max(draft.width / 2, 0.005) * 100} ry={Math.max(draft.height / 2, 0.005) * 100} /> : null}
+            {tool === "draw" && draftPoints.length > 1 ? <polyline className="is-draft" points={draftPoints.map((point) => `${point.x * 100},${point.y * 100}`).join(" ")} /> : null}
+            {tool === "arrow" && draftPoints.length > 1 ? <line className="is-draft" x1={draftPoints[0].x * 100} y1={draftPoints[0].y * 100} x2={draftPoints.at(-1)!.x * 100} y2={draftPoints.at(-1)!.y * 100} markerEnd="url(#markup-arrowhead)" /> : null}
           </svg>
           {annotations.map((annotation, index) => (
             <button

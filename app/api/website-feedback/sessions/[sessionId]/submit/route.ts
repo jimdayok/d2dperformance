@@ -2,6 +2,9 @@ import { hasTrustedPublicOrigin, untrustedOriginResponse } from "@/lib/public-or
 import { submitFeedbackSchema } from "@/lib/website-feedback-schema";
 import { submitFeedbackSession } from "@/lib/website-feedback-server";
 
+export const runtime = "nodejs";
+export const maxDuration = 300;
+
 export async function POST(request: Request, { params }: { params: Promise<{ sessionId: string }> }) {
   try {
     if (!hasTrustedPublicOrigin(request)) return untrustedOriginResponse();

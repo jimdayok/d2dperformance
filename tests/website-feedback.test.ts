@@ -81,6 +81,17 @@ describe("website feedback workflow", () => {
       height: 0.12,
       text: "Use the team photo.",
     }).success).toBe(false);
+    expect(markupNoteSchema.safeParse({
+      id: "mark-3",
+      kind: "draw",
+      category: "general",
+      x: 0.12,
+      y: 0.18,
+      width: 0.42,
+      height: 0.2,
+      points: [{ x: 0.12, y: 0.18 }, { x: 0.3, y: 0.3 }, { x: 0.54, y: 0.22 }],
+      text: "The spacing in this section feels uneven.",
+    }).success).toBe(true);
   });
 
   it("keeps the CTA and editor handoff contracts", async () => {
@@ -123,8 +134,10 @@ describe("website feedback workflow", () => {
     expect(structured).toContain("encodeURIComponent(payload.url)");
     expect(sessionRoute).toContain(".middleware(verificationRequest, false)");
     expect(sessionRoute).toContain("verificationResponse.json()");
-    expect(server).toContain("if (delivery.error)");
-    expect(server).toContain("resend.batch.send");
+    expect(server).toContain("if (rejected)");
+    expect(server).toContain("generateWebsiteFeedbackPdf");
+    expect(server).toContain("attachments:");
+    expect(server).toContain("idempotencyKey");
     expect(server).toContain("Your website feedback copy");
     expect(workspace).toContain("Draft · save separately");
     expect(workspace).toContain(
@@ -132,6 +145,8 @@ describe("website feedback workflow", () => {
     );
     expect(workspace).not.toContain("submit it to Jim");
     expect(markupCanvas).toContain("Circle an area");
+    expect(markupCanvas).toContain("Draw freehand");
+    expect(markupCanvas).toContain("Draw arrow");
     expect(markupCanvas).toContain("Modify text");
     expect(markupCanvas).toContain("Change picture");
     expect(markupMigration).toContain("annotations jsonb");

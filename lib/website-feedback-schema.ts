@@ -33,12 +33,16 @@ const ratingSchema = z.record(z.string().max(80), z.number().int().min(1).max(5)
 
 export const markupNoteSchema = z.object({
   id: z.string().trim().min(1).max(100),
-  kind: z.enum(["circle", "note"]),
+  kind: z.enum(["circle", "note", "draw", "arrow"]),
   category: z.enum(["modify_text", "change_picture", "general"]),
   x: z.number().min(0).max(1),
   y: z.number().min(0).max(1),
   width: z.number().min(0).max(1),
   height: z.number().min(0).max(1),
+  points: z.array(z.object({
+    x: z.number().min(0).max(1),
+    y: z.number().min(0).max(1),
+  })).max(1_500).optional().default([]),
   text: z.string().trim().max(2_000),
 });
 
