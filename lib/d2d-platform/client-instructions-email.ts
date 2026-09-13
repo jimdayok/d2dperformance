@@ -32,7 +32,7 @@ export async function sendClientInstructionsEmail(input: {
   const loginUrl = new URL("/portal/login", portalUrl).toString();
   const supportEmail = process.env.PORTAL_SUPPORT_EMAIL
     ?? process.env.CONTACT_FORM_TO_EMAIL
-    ?? "andrea@d2dmktg.com";
+    ?? "info@d2dmktg.com";
   const message = buildClientInstructionsEmail({ ...input, loginUrl, supportEmail });
   const resend = new Resend(apiKey);
   const { data, error } = await resend.emails.send({

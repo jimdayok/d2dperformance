@@ -45,7 +45,7 @@ export default async function LoginPage({
             {authError ? <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">D2D Account sign-in could not be completed. Please try again. If the problem continues, contact D2D support below.</p> : null}
             {hasSupabaseConfig() ? <LoginForm next={destination} ssoEnabled={process.env.D2D_SSO_ENABLED === "true"} legacyEnabled={process.env.D2D_LEGACY_LOGIN_ENABLED === "true"} /> : <p role="alert" className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Supabase is not configured. Add the documented public URL and anonymous key to enable sign-in.</p>}
           </div>
-          <p className="text-xs text-[#877b70]">Need help? <a href="mailto:andrea@d2dmktg.com" className="font-semibold text-[#5d3d29] underline underline-offset-4">Contact D2D support</a></p>
+          <p className="text-xs text-[#877b70]">Need help? <a href="mailto:info@d2dmktg.com" className="font-semibold text-[#5d3d29] underline underline-offset-4">Contact D2D support</a></p>
         </div>
       </section>
     </main>

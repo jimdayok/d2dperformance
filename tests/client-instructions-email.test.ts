@@ -6,7 +6,7 @@ const message = buildClientInstructionsEmail({
   email: "mike@example.com",
   organizationName: "Mike's <Square>",
   loginUrl: "https://webadmin.d2dmktg.com/portal/login",
-  supportEmail: "andrea@d2dmktg.com",
+  supportEmail: "info@d2dmktg.com",
   services: [{
     product: "social",
     label: "D2D Social",

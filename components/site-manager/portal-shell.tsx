@@ -53,7 +53,7 @@ export async function PortalShell({ children, definition, access, displayName, s
           <a href="https://d2dmktg.com" target="_blank" rel="noreferrer" className="portal-sidebar-link">
             <Globe2 size={15} /> D2D Marketing
           </a>
-          <a href="mailto:andrea@d2dmktg.com" className="portal-sidebar-link">
+          <a href="mailto:info@d2dmktg.com" className="portal-sidebar-link">
             <CircleHelp size={15} /> Support
           </a>
         </div>

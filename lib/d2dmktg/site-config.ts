@@ -2,7 +2,7 @@ export const siteConfig = {
   businessName: "DAY2DAY Marketing",
   phone: "269-788-7067",
   phoneHref: "+12697887067",
-  email: "andrea@d2dmktg.com",
+  email: "info@d2dmktg.com",
   location: "Dallas–Fort Worth",
   links: {
     calendly: "https://calendly.com/d2dmktg/30min",
