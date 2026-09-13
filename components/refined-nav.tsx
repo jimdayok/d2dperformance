@@ -196,7 +196,7 @@ export function RefinedNav() {
           <Link className="is-current" href="/#top" aria-current="page">
             <ChartNoAxesCombined aria-hidden="true" />
             <strong>D2D Performance</strong>
-            <small>Lead + improve</small>
+            <small>Tools + solutions</small>
           </Link>
         </div>
       </nav>
@@ -215,15 +215,14 @@ export function RefinedNav() {
           >
             <span className="performance-brand-wordmark" aria-hidden="true">
               <Image
-                src="/assets/original/day2day-marketing-reverse.png"
+                src="/assets/original/d2d-performance.png"
                 alt=""
-                width={982}
-                height={283}
+                width={500}
+                height={125}
                 loading="eager"
                 unoptimized
               />
             </span>
-            <span className="performance-brand-descriptor">Performance</span>
           </Link>
 
           <nav

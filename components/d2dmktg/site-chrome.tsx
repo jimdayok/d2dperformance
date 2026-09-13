@@ -38,7 +38,7 @@ const d2dEcosystem = [
   },
   {
     name: "D2D Marketing Advisory",
-    role: "Lead + improve",
+    role: "Tools + solutions",
     href: siteConfig.links.d2dPerformance,
     current: false,
     icon: Gauge,
