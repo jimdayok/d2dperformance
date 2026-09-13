@@ -393,7 +393,7 @@ function ManualPostComposer({ organizationId, plans }: { organizationId: string;
   </details>;
 }
 
-export function MarketingWorkspace({ access, plans, promotions, batches, items, schedulingEnabled, nowIso }: { access: Access; plans: Plan[]; promotions: Promotion[]; batches: Batch[]; items: SocialItem[]; schedulingEnabled: boolean; nowIso: string }) {
+export function MarketingWorkspace({ access, plans, promotions, batches, items, schedulingEnabled, nowIso, previewMode }: { access: Access; plans: Plan[]; promotions: Promotion[]; batches: Batch[]; items: SocialItem[]; schedulingEnabled: boolean; nowIso: string; previewMode: boolean }) {
   const canCreate = ["platform_admin", "manager", "creator"].includes(access.role);
   const canReview = ["platform_admin", "manager", "reviewer"].includes(access.role);
   const isPlatformAdmin = access.role === "platform_admin";
@@ -403,6 +403,8 @@ export function MarketingWorkspace({ access, plans, promotions, batches, items, 
         ["today", "Today"], ["calendar", "Calendar"], ["results", "Results"], ["plan", "Plan"], ["promotions", "Business updates"], ["content", "Approve posts"],
       ].map(([href, label]) => <a key={href} href={`#${href}`} className="rounded-full border border-[#241c17]/12 bg-white px-3 py-2 text-xs font-semibold text-[#5f554c] transition hover:border-[#9a5f34]/45 hover:text-[#7b4725]">{label}</a>)}</nav>
     </header>
+
+    {previewMode ? <aside role="status" className="rounded-xl border border-[#9a5f34]/25 bg-[#f8f2e9] px-5 py-4 text-sm leading-6 text-[#5f554c]"><strong className="text-[#302a25]">Private view-only preview.</strong> Explore the customer experience and open full-size images safely. Submitting forms, recording approvals, and scheduling posts are blocked on this preview.</aside> : null}
 
     <MarketingToday plans={plans} promotions={promotions} batches={batches} items={items} nowIso={nowIso} />
 

@@ -60,6 +60,7 @@ export default async function MarketingPage({
       items={items}
       schedulingEnabled={process.env.D2D_SOCIAL_SCHEDULING_ENABLED === "true"}
       nowIso={new Date().toISOString()}
+      previewMode={process.env.VERCEL_ENV === "preview"}
     />
   </PortalShell>;
 }

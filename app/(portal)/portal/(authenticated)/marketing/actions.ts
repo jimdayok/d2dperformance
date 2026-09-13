@@ -46,6 +46,12 @@ function selectedChannels(formData: FormData) {
 
 const idSchema = z.string().uuid();
 
+function requireWritableMarketingEnvironment() {
+  if (process.env.VERCEL_ENV === "preview") {
+    throw new Error("This private preview is view-only. No marketing records or publishing schedules were changed.");
+  }
+}
+
 async function requireSignedIn() {
   const user = await getCurrentUser();
   if (!user) throw new Error("Sign in again to continue.");
@@ -72,6 +78,7 @@ export async function createPromotionAction(
   formData: FormData,
 ): Promise<MarketingActionState> {
   try {
+    requireWritableMarketingEnvironment();
     const updateType = z.enum(["sale", "event", "announcement", "blackout"]).parse(formData.get("updateType") ?? "announcement");
     const location = z.string().trim().max(300).parse(formData.get("location") ?? "");
     const offerCode = z.string().trim().max(160).parse(formData.get("offerCode") ?? "");
@@ -126,6 +133,7 @@ export async function createMarketingPlanAction(
   formData: FormData,
 ): Promise<MarketingActionState> {
   try {
+    requireWritableMarketingEnvironment();
     const content = planContentFromForm(formData);
     const parsed = marketingPlanDraftSchema.parse({
       organizationId: formData.get("organizationId"),
@@ -154,6 +162,7 @@ export async function createMarketingPlanAction(
 }
 
 export async function submitPlanAction(formData: FormData) {
+  requireWritableMarketingEnvironment();
   await requireSignedIn();
   const planId = idSchema.parse(formData.get("planId"));
   const supabase = await createSupabaseServerClient();
@@ -163,6 +172,7 @@ export async function submitPlanAction(formData: FormData) {
 }
 
 export async function reviewPlanAction(formData: FormData) {
+  requireWritableMarketingEnvironment();
   await requireSignedIn();
   const parsed = reviewSchema.parse({
     subjectId: formData.get("planId"),
@@ -184,6 +194,7 @@ export async function reviseMarketingPlanAction(
   formData: FormData,
 ): Promise<MarketingActionState> {
   try {
+    requireWritableMarketingEnvironment();
     await requireSignedIn();
     const content = planContentFromForm(formData);
     const validatedContent = marketingPlanContentSchema.parse(content);
@@ -210,6 +221,7 @@ export async function generateBatchAction(
   formData: FormData,
 ): Promise<MarketingActionState> {
   try {
+    requireWritableMarketingEnvironment();
     const parsed = generateSocialBatchSchema.parse({
       organizationId: formData.get("organizationId"),
       marketingPlanId: formData.get("marketingPlanId"),
@@ -269,6 +281,7 @@ export async function createManualBatchAction(
   formData: FormData,
 ): Promise<MarketingActionState> {
   try {
+    requireWritableMarketingEnvironment();
     const localDateTime = String(formData.get("scheduledFor") ?? "");
     const utcOffset = z.enum(["-05:00", "-06:00"]).parse(formData.get("utcOffset"));
     const media = lines(formData.get("media")).map((row) => {
@@ -306,6 +319,7 @@ export async function createManualBatchAction(
 }
 
 export async function submitBatchAction(formData: FormData) {
+  requireWritableMarketingEnvironment();
   await requireSignedIn();
   const batchId = idSchema.parse(formData.get("batchId"));
   const supabase = await createSupabaseServerClient();
@@ -315,6 +329,7 @@ export async function submitBatchAction(formData: FormData) {
 }
 
 export async function reviewBatchAction(formData: FormData) {
+  requireWritableMarketingEnvironment();
   const user = await requireSignedIn();
   const parsed = reviewSchema.parse({
     subjectId: formData.get("batchId"),
@@ -340,6 +355,7 @@ export async function reviewBatchAction(formData: FormData) {
 }
 
 export async function requestSocialItemChangesAction(formData: FormData) {
+  requireWritableMarketingEnvironment();
   await requireSignedIn();
   const batchId = idSchema.parse(formData.get("batchId"));
   const itemId = idSchema.parse(formData.get("itemId"));
@@ -364,6 +380,7 @@ export async function requestSocialItemChangesAction(formData: FormData) {
 }
 
 export async function retryApprovedDeliveryAction(formData: FormData) {
+  requireWritableMarketingEnvironment();
   const user = await requireSignedIn();
   const batchId = idSchema.parse(formData.get("batchId"));
   const supabase = await createSupabaseServerClient();
@@ -381,6 +398,7 @@ export async function reviseSocialItemAction(
   formData: FormData,
 ): Promise<MarketingActionState> {
   try {
+    requireWritableMarketingEnvironment();
     await requireSignedIn();
     const media = lines(formData.get("media")).map((row) => {
       const [url, ...altParts] = row.split("|");
@@ -417,6 +435,7 @@ export async function reviseSocialDayMediaAction(
   formData: FormData,
 ): Promise<MarketingActionState> {
   try {
+    requireWritableMarketingEnvironment();
     await requireSignedIn();
     const batchId = idSchema.parse(formData.get("batchId"));
     const contentDay = z.coerce.number().int().positive().parse(formData.get("contentDay"));
@@ -451,6 +470,7 @@ type SocialItemRow = {
 };
 
 export async function createApprovedDraftsAction(formData: FormData) {
+  requireWritableMarketingEnvironment();
   await requireSignedIn();
   const batchId = idSchema.parse(formData.get("batchId"));
   const supabase = await createSupabaseServerClient();
@@ -480,6 +500,7 @@ export async function createApprovedDraftsAction(formData: FormData) {
 }
 
 export async function scheduleApprovedBatchAction(formData: FormData) {
+  requireWritableMarketingEnvironment();
   await requireSignedIn();
   if (process.env.D2D_SOCIAL_SCHEDULING_ENABLED !== "true") {
     throw new Error("Scheduling remains disabled until the production approval gate is opened.");
