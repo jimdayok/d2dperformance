@@ -127,17 +127,6 @@ export function BrandDiscoveryForm() {
     saveDraft(storageKey, draft);
   }, [draft, hydrated, submitted]);
 
-  useEffect(() => {
-    if (!hydrated || !draft.started) {
-      return;
-    }
-
-    questionTopRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  }, [draft.currentSectionIndex, draft.started, hydrated]);
-
   const currentSectionIndex = Math.max(0, draft.currentSectionIndex);
   const contentSteps = brandDiscoverySections.length;
   const reviewStep = currentSectionIndex === contentSteps;
@@ -189,12 +178,22 @@ export function BrandDiscoveryForm() {
     }));
   }
 
+  function scrollToQuestionTop() {
+    window.requestAnimationFrame(() => {
+      questionTopRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  }
+
   function goToStep(index: number) {
     updateDraft((current) => ({
       ...current,
       currentSectionIndex: index,
       updatedAt: new Date().toISOString(),
     }));
+    scrollToQuestionTop();
   }
 
   function handleStart() {
@@ -209,6 +208,7 @@ export function BrandDiscoveryForm() {
         updatedAt: now,
       };
     });
+    scrollToQuestionTop();
   }
 
   function handleStartOver() {

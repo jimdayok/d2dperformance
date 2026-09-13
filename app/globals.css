@@ -1801,11 +1801,23 @@ textarea {
 .performance-platforms {
   position: relative;
   overflow: hidden;
+  scroll-margin-top: 4rem;
   margin: clamp(1.5rem, 3vw, 3rem) 0;
   color: #f7f1e7;
   background:
     radial-gradient(circle at 12% 0%, rgba(184, 106, 50, 0.2), transparent 32rem),
     linear-gradient(135deg, #221813 0%, #111313 48%, #0e1112 100%);
+}
+
+#brand-discovery {
+  scroll-margin-top: 4rem;
+}
+
+@media (min-width: 681px) {
+  .performance-platforms,
+  #brand-discovery {
+    scroll-margin-top: 8rem;
+  }
 }
 
 .performance-platforms::before {
@@ -1865,7 +1877,7 @@ textarea {
 .performance-platform-grid {
   margin-top: clamp(4rem, 7vw, 6.5rem);
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: clamp(1rem, 2vw, 1.7rem);
 }
 
@@ -1889,6 +1901,10 @@ textarea {
   --platform-accent: #b86a32;
 }
 
+.performance-platform-card.is-discovery {
+  --platform-accent: #d88349;
+}
+
 .performance-platform-logo {
   min-height: 150px;
   display: grid;
@@ -1902,6 +1918,30 @@ textarea {
 .performance-platform-logo img {
   width: 100%;
   height: auto;
+}
+
+.performance-platform-wordmark {
+  display: grid;
+  justify-items: center;
+  color: #fffaf2;
+  text-align: center;
+}
+
+.performance-platform-wordmark span,
+.performance-platform-wordmark small {
+  color: var(--platform-accent);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.performance-platform-wordmark strong {
+  margin: 0.45rem 0 0.55rem;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.65rem, 3vw, 2.7rem);
+  font-weight: 600;
+  letter-spacing: -0.04em;
 }
 
 .performance-platform-card h3 {
@@ -1931,25 +1971,38 @@ textarea {
   border-top: 1px solid color-mix(in oklab, var(--platform-accent) 72%, transparent);
 }
 
-.performance-platform-detail img {
+.performance-platform-mark {
   width: 76px;
   height: 76px;
   border-radius: 0.5rem;
 }
 
-.performance-platform-detail span,
-.performance-platform-detail strong {
+.performance-platform-icon {
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in oklab, var(--platform-accent) 65%, transparent);
+  background: color-mix(in oklab, var(--platform-accent) 12%, #111313);
+  color: var(--platform-accent);
+}
+
+.performance-platform-icon svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.performance-platform-detail div > span,
+.performance-platform-detail div > strong {
   display: block;
   text-transform: uppercase;
 }
 
-.performance-platform-detail span {
+.performance-platform-detail div > span {
   color: var(--platform-accent);
   font-size: 0.62rem;
   letter-spacing: 0.2em;
 }
 
-.performance-platform-detail strong {
+.performance-platform-detail div > strong {
   margin-top: 0.7rem;
   color: rgba(255, 250, 242, 0.86);
   font-size: 0.68rem;

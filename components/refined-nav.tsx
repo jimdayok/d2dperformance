@@ -46,6 +46,11 @@ const serviceItems = [
     label: "Operational Tools",
     description: "Open the connected D2D client platform suite.",
   },
+  {
+    href: "/brand-development",
+    label: "Brand Discovery",
+    description: "Start or resume the guided brand discovery.",
+  },
 ] as const;
 
 const primaryItems = [
