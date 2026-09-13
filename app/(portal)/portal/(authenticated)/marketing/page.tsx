@@ -59,6 +59,7 @@ export default async function MarketingPage({
       batches={batches ?? []}
       items={items}
       schedulingEnabled={process.env.D2D_SOCIAL_SCHEDULING_ENABLED === "true"}
+      nowIso={new Date().toISOString()}
     />
   </PortalShell>;
 }

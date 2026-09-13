@@ -72,11 +72,27 @@ export async function createPromotionAction(
   formData: FormData,
 ): Promise<MarketingActionState> {
   try {
+    const updateType = z.enum(["sale", "event", "announcement", "blackout"]).parse(formData.get("updateType") ?? "announcement");
+    const location = z.string().trim().max(300).parse(formData.get("location") ?? "");
+    const offerCode = z.string().trim().max(160).parse(formData.get("offerCode") ?? "");
+    const assetLinks = z.string().trim().max(2000).parse(formData.get("assetLinks") ?? "");
+    const blackoutNotes = z.string().trim().max(1000).parse(formData.get("blackoutNotes") ?? "");
+    const description = [
+      `Update type: ${updateType}`,
+      location ? `Location: ${location}` : "",
+      String(formData.get("description") ?? ""),
+    ].filter(Boolean).join("\n");
+    const offerTerms = [
+      String(formData.get("offerTerms") ?? ""),
+      offerCode ? `Offer code: ${offerCode}` : "",
+      assetLinks ? `Approved asset links:\n${assetLinks}` : "",
+      blackoutNotes ? `Scheduling notes: ${blackoutNotes}` : "",
+    ].filter(Boolean).join("\n\n");
     const parsed = promotionSchema.parse({
       organizationId: formData.get("organizationId"),
       name: formData.get("name"),
-      description: formData.get("description"),
-      offerTerms: formData.get("offerTerms") ?? "",
+      description,
+      offerTerms,
       startsAt: dateAtNoonUtc(formData.get("startsOn")),
       endsAt: dateAtNoonUtc(formData.get("endsOn")),
       priority: formData.get("priority") ?? "normal",
@@ -320,6 +336,30 @@ export async function reviewBatchAction(formData: FormData) {
       // the batch for D2D to resolve without asking the customer to approve twice.
     }
   }
+  revalidatePath("/portal/marketing");
+}
+
+export async function requestSocialItemChangesAction(formData: FormData) {
+  await requireSignedIn();
+  const batchId = idSchema.parse(formData.get("batchId"));
+  const itemId = idSchema.parse(formData.get("itemId"));
+  const note = z.string().trim().min(1, "Tell D2D what should change.").max(4500).parse(formData.get("note"));
+  const supabase = await createSupabaseServerClient();
+  const { data: item, error: itemError } = await supabase
+    .from("social_content_items")
+    .select("id,batch_id,content_day,platform,current_revision")
+    .eq("id", itemId)
+    .single();
+  if (itemError || !item || item.batch_id !== batchId) {
+    throw new Error("The selected social post is unavailable.");
+  }
+  const reviewNote = `Day ${item.content_day} · ${item.platform} · revision ${item.current_revision}\n${note}`;
+  const { error } = await supabase.rpc("review_social_batch", {
+    check_batch: batchId,
+    check_decision: "changes_requested",
+    check_note: reviewNote,
+  });
+  if (error) throw new Error(error.message);
   revalidatePath("/portal/marketing");
 }
 

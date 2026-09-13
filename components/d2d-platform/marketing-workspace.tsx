@@ -1,13 +1,14 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- customer-approved image hosts are dynamic and validated server-side */
 
-import { useActionState, useRef } from "react";
-import { CalendarDays, CheckCircle2, ClipboardCheck, Expand, Megaphone, Sparkles, X } from "lucide-react";
+import { useActionState, useRef, useState } from "react";
+import { ArrowRight, BarChart3, CalendarDays, CheckCircle2, ClipboardCheck, Expand, ListChecks, Megaphone, Sparkles, X } from "lucide-react";
 import {
   createManualBatchAction,
   createMarketingPlanAction,
   createPromotionAction,
   generateBatchAction,
+  requestSocialItemChangesAction,
   reviewBatchAction,
   reviewPlanAction,
   reviseMarketingPlanAction,
@@ -18,6 +19,7 @@ import {
   submitPlanAction,
   type MarketingActionState,
 } from "@/app/(portal)/portal/(authenticated)/marketing/actions";
+import { buildMarketingCalendar, buildMarketingOverview, centralDateKey } from "@/lib/d2d-platform/marketing-dashboard";
 import type { MarketingPlanContent } from "@/lib/d2d-platform/types";
 
 type Access = { organizationId: string; organizationName: string; role: string };
@@ -72,6 +74,111 @@ function displayCentralDateTime(value: string) {
   }).format(new Date(value));
 }
 
+function MetricCard({ label, value, detail }: { label: string; value: number; detail: string }) {
+  return <article className="portal-panel p-5">
+    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#9a5f34]">{label}</p>
+    <p className="mt-3 font-display text-4xl font-semibold text-[#241c17]">{value}</p>
+    <p className="mt-2 text-xs leading-5 text-[#74695f]">{detail}</p>
+  </article>;
+}
+
+function MarketingToday({ plans, promotions, batches, items, nowIso }: { plans: Plan[]; promotions: Promotion[]; batches: Batch[]; items: SocialItem[]; nowIso: string }) {
+  const overview = buildMarketingOverview({ plans, promotions, batches, items, now: new Date(nowIso) });
+  return <section id="today" className="scroll-mt-8">
+    <div className="overflow-hidden rounded-2xl border border-[#9a5f34]/25 bg-[#171f1b] text-white shadow-[0_24px_80px_rgba(23,31,27,0.14)]">
+      <div className="grid gap-6 p-6 sm:p-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#d6a77f]">Your marketing today</p>
+          <h2 className="mt-3 max-w-2xl font-display text-3xl font-semibold leading-tight sm:text-4xl">{overview.nextAction.title}</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-white/70">{overview.nextAction.detail}</p>
+        </div>
+        <a href={overview.nextAction.href} className="inline-flex w-fit items-center gap-2 rounded-lg bg-[#d6a77f] px-4 py-3 text-sm font-semibold text-[#171310] transition hover:bg-[#e5bd98]">Open the next step <ArrowRight size={16} /></a>
+      </div>
+      <div className="grid border-t border-white/10 sm:grid-cols-3">
+        <p className="border-b border-white/10 px-6 py-4 text-sm sm:border-b-0 sm:border-r"><strong className="text-[#e5bd98]">{overview.approvalsWaiting}</strong><span className="ml-2 text-white/65">approvals waiting</span></p>
+        <p className="border-b border-white/10 px-6 py-4 text-sm sm:border-b-0 sm:border-r"><strong className="text-[#e5bd98]">{overview.scheduledPosts}</strong><span className="ml-2 text-white/65">upcoming posts</span></p>
+        <p className="px-6 py-4 text-sm"><strong className="text-[#e5bd98]">{overview.activeUpdates}</strong><span className="ml-2 text-white/65">active business updates</span></p>
+      </div>
+    </div>
+    <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <MetricCard label="Needs your attention" value={overview.approvalsWaiting} detail="Marketing plans or content batches awaiting a customer decision." />
+      <MetricCard label="Scheduled ahead" value={overview.scheduledPosts} detail="Approved platform posts with a future publish time." />
+      <MetricCard label="Business updates" value={overview.activeUpdates} detail="Sales, events, announcements, and timing notes still in play." />
+      <MetricCard label="Delivery records" value={overview.deliveryRecords} detail="Approved posts already created inside D2D Social." />
+    </div>
+  </section>;
+}
+
+function dateFromKey(value: string) {
+  return new Date(`${value}T12:00:00.000Z`);
+}
+
+function MarketingCalendarPanel({ promotions, batches, items, nowIso }: { promotions: Promotion[]; batches: Batch[]; items: SocialItem[]; nowIso: string }) {
+  const events = buildMarketingCalendar({ promotions, batches, items });
+  const todayKey = centralDateKey(nowIso);
+  const today = dateFromKey(todayKey);
+  const start = new Date(today);
+  start.setUTCDate(start.getUTCDate() - start.getUTCDay());
+  const days = Array.from({ length: 42 }, (_, index) => {
+    const date = new Date(start);
+    date.setUTCDate(start.getUTCDate() + index);
+    return { date, key: date.toISOString().slice(0, 10) };
+  });
+  const monthLabel = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "UTC" }).format(today);
+  return <section id="calendar" className="scroll-mt-8">
+    <SectionHeading icon={CalendarDays} eyebrow="One visible schedule" title="Marketing calendar">See customer updates, approval work, and every platform post in one place. Nothing on this calendar bypasses the approval gate.</SectionHeading>
+    <div className="portal-panel mt-6 overflow-hidden">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#241c17]/10 p-5">
+        <h3 className="font-display text-2xl font-semibold">{monthLabel}</h3>
+        <div className="flex flex-wrap gap-3 text-xs text-[#6d6258]"><span className="inline-flex items-center gap-2"><span className="size-2 rounded-full bg-[#356b52]" />Social post</span><span className="inline-flex items-center gap-2"><span className="size-2 rounded-full bg-[#b26f3f]" />Business update</span></div>
+      </div>
+      <div className="overflow-x-auto">
+        <div className="min-w-[42rem]">
+          <div className="grid grid-cols-7 border-b border-[#241c17]/10 bg-[#f8f2e9] text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-[#776b61]">{["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => <div key={day} className="px-1 py-3">{day}</div>)}</div>
+          <div role="grid" aria-label={`${monthLabel} marketing calendar`} className="grid grid-cols-7 gap-px bg-[#241c17]/10">
+            {days.map(({ date, key }) => {
+              const dayEvents = events.filter((event) => event.dateKey === key);
+              const isToday = key === todayKey;
+              return <div role="gridcell" key={key} className={`min-h-28 bg-[#fffdf9] p-2 ${isToday ? "ring-2 ring-inset ring-[#9a5f34]" : ""}`}>
+                <p className={`text-xs font-semibold ${isToday ? "text-[#9a5f34]" : "text-[#665b52]"}`}>{date.getUTCDate()}</p>
+                <div className="mt-2 grid gap-1.5">{dayEvents.slice(0, 3).map((event) => <div key={`${event.kind}-${event.id}`} title={event.label} className={`truncate rounded px-1.5 py-1 text-[10px] font-semibold ${event.kind === "promotion" ? "bg-[#f0dfcf] text-[#7b4725]" : "bg-[#dcebe3] text-[#28543f]"}`}>{event.platform ? `${event.platform.slice(0, 2).toUpperCase()} · ` : ""}{event.label}</div>)}{dayEvents.length > 3 ? <p className="text-[10px] text-[#766b61]">+{dayEvents.length - 3} more</p> : null}</div>
+              </div>;
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>;
+}
+
+function DeliveryResults({ batches, items }: { batches: Batch[]; items: SocialItem[] }) {
+  const platforms = ["facebook", "instagram", "linkedin"];
+  const linked = items.filter((item) => Boolean(item.shoutrrr_post_id));
+  const withCreative = items.filter((item) => item.media.length > 0).length;
+  const approvedBatches = batches.filter((batch) => ["approved", "scheduling", "scheduled", "published"].includes(batch.status)).length;
+  return <section id="results" className="scroll-mt-8">
+    <SectionHeading icon={BarChart3} eyebrow="Proof of work" title="Delivery results">This first results view reports only what D2D can prove today. Audience reach, engagement, clicks, and leads will be added when each network’s insights connection is authorized.</SectionHeading>
+    <div className="mt-6 grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
+      <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+        <MetricCard label="Approved batches" value={approvedBatches} detail="Current batches that completed customer approval." />
+        <MetricCard label="D2D Social records" value={linked.length} detail="Posts with a linked delivery record in D2D Social." />
+        <MetricCard label="Posts with creative" value={withCreative} detail="Platform posts that include customer-reviewable imagery." />
+      </div>
+      <article className="portal-panel p-6">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#9a5f34]">Platform coverage</p>
+        <h3 className="mt-2 font-display text-2xl font-semibold">What is ready across each network</h3>
+        <div className="mt-6 grid gap-5">{platforms.map((platform) => {
+          const total = items.filter((item) => item.platform === platform).length;
+          const delivered = linked.filter((item) => item.platform === platform).length;
+          const percentage = total === 0 ? 0 : Math.round((delivered / total) * 100);
+          return <div key={platform}><div className="flex items-center justify-between gap-4 text-sm"><span className="font-semibold capitalize">{platform}</span><span className="text-[#756a60]">{delivered} of {total} linked</span></div><div className="mt-2 h-2 overflow-hidden rounded-full bg-[#eee4da]"><div className="h-full rounded-full bg-[#356b52]" style={{ width: `${percentage}%` }} /></div></div>;
+        })}</div>
+        <div className="mt-7 rounded-xl border border-[#9a5f34]/20 bg-[#f8f2e9] p-4 text-sm leading-6 text-[#5f554c]"><strong className="text-[#302a25]">Next measurement layer:</strong> platform reach and engagement, tracked website visits, inquiries, and a plain-English monthly recommendation. No unsupported performance numbers will be shown.</div>
+      </article>
+    </div>
+  </section>;
+}
+
 function ReviewImage({ media, platform }: { media: SocialItem["media"][number]; platform: string }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const alt = media.altText ?? `${platform} post image`;
@@ -103,6 +210,43 @@ function ReviewImage({ media, platform }: { media: SocialItem["media"][number]; 
       </div>
     </dialog>
   </>;
+}
+
+function SpecificChangeRequest({ batch, item }: { batch: Batch; item: SocialItem }) {
+  return <details className="mt-4 rounded-xl border border-[#b26f3f]/25 bg-[#fff9f3] p-4">
+    <summary className="cursor-pointer text-xs font-semibold text-[#7b4725]">Request a change to this post</summary>
+    <form action={requestSocialItemChangesAction} className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto]">
+      <input type="hidden" name="batchId" value={batch.id} />
+      <input type="hidden" name="itemId" value={item.id} />
+      <label className="sr-only" htmlFor={`change-note-${item.id}`}>What should D2D change?</label>
+      <textarea id={`change-note-${item.id}`} required name="note" rows={2} className="portal-field px-3 py-2 text-sm" placeholder="Tell D2D exactly what should change in this caption, image, or publish time." />
+      <button className="portal-secondary-button h-fit px-3 py-2 text-sm font-semibold">Send specific feedback</button>
+    </form>
+  </details>;
+}
+
+function ClientReviewChecklist({ batch, items }: { batch: Batch; items: SocialItem[] }) {
+  const [reviewed, setReviewed] = useState<string[]>([]);
+  const allReviewed = items.length > 0 && reviewed.length === items.length;
+  const toggle = (itemId: string, checked: boolean) => {
+    setReviewed((current) => checked
+      ? [...new Set([...current, itemId])]
+      : current.filter((id) => id !== itemId));
+  };
+  return <div className="w-full rounded-xl border border-[#356b52]/20 bg-white p-4 sm:p-5">
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div><p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#356b52]">Exact review checklist</p><h4 className="mt-1 font-display text-xl font-semibold">Confirm every platform post</h4><p className="mt-1 text-xs leading-5 text-[#756a60]">Check each post after reviewing its caption, image, platform, and Central publish time.</p></div>
+      <span className="rounded-full bg-[#e5f0e9] px-3 py-1 text-xs font-semibold text-[#28543f]">{reviewed.length} of {items.length} reviewed</span>
+    </div>
+    <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{items.map((item) => <label key={item.id} className="flex cursor-pointer items-start gap-3 rounded-lg border border-[#241c17]/10 bg-[#fffdf9] p-3 text-sm"><input type="checkbox" checked={reviewed.includes(item.id)} onChange={(event) => toggle(item.id, event.target.checked)} className="mt-0.5" /><span><strong className="block capitalize">Day {item.content_day} · {item.platform}</strong><span className="mt-1 block text-xs text-[#756a60]">{displayCentralDateTime(item.scheduled_for)}</span></span></label>)}</div>
+    <form action={reviewBatchAction} className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
+      <input type="hidden" name="batchId" value={batch.id} />
+      <input type="hidden" name="decision" value="approved" />
+      <label className="sr-only" htmlFor={`approval-note-${batch.id}`}>Optional approval note</label>
+      <input id={`approval-note-${batch.id}`} name="note" className="portal-field px-3 py-2 text-sm" placeholder="Optional approval note" />
+      <button disabled={!allReviewed} title={allReviewed ? undefined : "Review every post before approving the exact batch"} className="portal-primary-button inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-45"><ListChecks size={16} />Approve reviewed batch</button>
+    </form>
+  </div>;
 }
 
 function SocialItemEditor({ item }: { item: SocialItem }) {
@@ -172,14 +316,20 @@ function PromotionForm({ organizationId }: { organizationId: string }) {
   const [state, action, pending] = useActionState(createPromotionAction, initialState);
   return <form action={action} className="portal-panel mt-6 grid gap-4 p-5 sm:grid-cols-2">
     <input type="hidden" name="organizationId" value={organizationId} />
-    <label className="text-xs font-semibold text-[#4d443d] sm:col-span-2">Promotion or event name<input required name="name" className="portal-field mt-2 w-full px-3 py-2.5 text-sm" /></label>
-    <label className="text-xs font-semibold text-[#4d443d] sm:col-span-2">What customers need to know<textarea required name="description" rows={3} className="portal-field mt-2 w-full px-3 py-2.5 text-sm" /></label>
+    <div className="sm:col-span-2"><p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9a5f34]">Tell D2D what is happening</p><h3 className="mt-1 font-display text-2xl font-semibold">Add a business update</h3><p className="mt-2 text-sm leading-6 text-[#6d6258]">Give us the dates and exact details. This creates a planning item; it does not publish anything.</p></div>
+    <label className="text-xs font-semibold text-[#4d443d]">Type<select name="updateType" defaultValue="sale" className="portal-field mt-2 w-full px-3 py-2.5 text-sm"><option value="sale">Sale or special</option><option value="event">Event</option><option value="announcement">Announcement</option><option value="blackout">Do not publish</option></select></label>
+    <label className="text-xs font-semibold text-[#4d443d]">Location or service area<input name="location" className="portal-field mt-2 w-full px-3 py-2.5 text-sm" placeholder="Optional" /></label>
+    <label className="text-xs font-semibold text-[#4d443d] sm:col-span-2">Name<input required name="name" className="portal-field mt-2 w-full px-3 py-2.5 text-sm" placeholder="Fall open house, holiday hours, new service…" /></label>
+    <label className="text-xs font-semibold text-[#4d443d] sm:col-span-2">What should customers know?<textarea required name="description" rows={4} className="portal-field mt-2 w-full px-3 py-2.5 text-sm" placeholder="Include the offer, audience, price or value, and the action customers should take." /></label>
     <label className="text-xs font-semibold text-[#4d443d] sm:col-span-2">Terms, exclusions, or required wording<textarea name="offerTerms" rows={2} className="portal-field mt-2 w-full px-3 py-2.5 text-sm" /></label>
     <label className="text-xs font-semibold text-[#4d443d]">Starts<input required name="startsOn" type="date" className="portal-field mt-2 w-full px-3 py-2.5 text-sm" /></label>
     <label className="text-xs font-semibold text-[#4d443d]">Ends<input required name="endsOn" type="date" className="portal-field mt-2 w-full px-3 py-2.5 text-sm" /></label>
+    <label className="text-xs font-semibold text-[#4d443d]">Offer or registration code<input name="offerCode" className="portal-field mt-2 w-full px-3 py-2.5 text-sm" placeholder="Optional" /></label>
     <label className="text-xs font-semibold text-[#4d443d]">Priority<select name="priority" defaultValue="normal" className="portal-field mt-2 w-full px-3 py-2.5 text-sm"><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option><option value="low">Low</option></select></label>
+    <label className="text-xs font-semibold text-[#4d443d] sm:col-span-2">Approved photos or Brand Vault links <span className="font-normal text-[#877b70]">— one per line</span><textarea name="assetLinks" rows={3} className="portal-field mt-2 w-full px-3 py-2.5 text-sm" placeholder="Paste approved asset links or note which Brand Vault folder D2D should use." /></label>
+    <label className="text-xs font-semibold text-[#4d443d] sm:col-span-2">Timing or blackout notes<textarea name="blackoutNotes" rows={2} className="portal-field mt-2 w-full px-3 py-2.5 text-sm" placeholder="Examples: do not announce before Friday; stop posts after inventory sells out." /></label>
     <fieldset className="text-xs font-semibold text-[#4d443d]"><legend>Channels</legend><div className="mt-3 flex flex-wrap gap-4">{["facebook", "instagram", "linkedin"].map((channel) => <label key={channel} className="flex items-center gap-2 capitalize"><input type="checkbox" name={channel} defaultChecked />{channel}</label>)}</div></fieldset>
-    <div className="sm:col-span-2"><button disabled={pending} className="portal-primary-button px-4 py-2.5 text-sm font-semibold">{pending ? "Submitting…" : "Submit promotion"}</button><Feedback state={state} /></div>
+    <div className="sm:col-span-2"><button disabled={pending} className="portal-primary-button px-4 py-2.5 text-sm font-semibold">{pending ? "Submitting…" : "Send update to D2D"}</button><Feedback state={state} /></div>
   </form>;
 }
 
@@ -243,14 +393,24 @@ function ManualPostComposer({ organizationId, plans }: { organizationId: string;
   </details>;
 }
 
-export function MarketingWorkspace({ access, plans, promotions, batches, items, schedulingEnabled }: { access: Access; plans: Plan[]; promotions: Promotion[]; batches: Batch[]; items: SocialItem[]; schedulingEnabled: boolean }) {
+export function MarketingWorkspace({ access, plans, promotions, batches, items, schedulingEnabled, nowIso }: { access: Access; plans: Plan[]; promotions: Promotion[]; batches: Batch[]; items: SocialItem[]; schedulingEnabled: boolean; nowIso: string }) {
   const canCreate = ["platform_admin", "manager", "creator"].includes(access.role);
   const canReview = ["platform_admin", "manager", "reviewer"].includes(access.role);
   const isPlatformAdmin = access.role === "platform_admin";
   return <div className="space-y-12">
-    <header className="border-b border-[#241c17]/12 pb-7"><p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#9a5f34]">{access.organizationName}</p><h1 className="mt-3 font-display text-4xl font-semibold sm:text-5xl">Marketing workspace</h1><p className="mt-3 max-w-3xl text-sm leading-6 text-[#6d6258]">One agreed plan, one place for sales and specials, and an exact approval record before anything is scheduled.</p></header>
+    <header className="border-b border-[#241c17]/12 pb-7"><p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#9a5f34]">{access.organizationName}</p><h1 className="mt-3 font-display text-4xl font-semibold sm:text-5xl">Your marketing center</h1><p className="mt-3 max-w-3xl text-sm leading-6 text-[#6d6258]">See what needs your attention, share real business updates, review every post, and confirm what D2D delivered.</p>
+      <nav aria-label="Marketing center sections" className="mt-6 flex flex-wrap gap-2">{[
+        ["today", "Today"], ["calendar", "Calendar"], ["results", "Results"], ["plan", "Plan"], ["promotions", "Business updates"], ["content", "Approve posts"],
+      ].map(([href, label]) => <a key={href} href={`#${href}`} className="rounded-full border border-[#241c17]/12 bg-white px-3 py-2 text-xs font-semibold text-[#5f554c] transition hover:border-[#9a5f34]/45 hover:text-[#7b4725]">{label}</a>)}</nav>
+    </header>
 
-    <section id="plan"><SectionHeading icon={ClipboardCheck} eyebrow="Shared direction" title="Marketing plan">Every campaign is grounded in the customer-approved current version. Editing an approved version requires a new review.</SectionHeading>
+    <MarketingToday plans={plans} promotions={promotions} batches={batches} items={items} nowIso={nowIso} />
+
+    <MarketingCalendarPanel promotions={promotions} batches={batches} items={items} nowIso={nowIso} />
+
+    <DeliveryResults batches={batches} items={items} />
+
+    <section id="plan" className="scroll-mt-8"><SectionHeading icon={ClipboardCheck} eyebrow="Shared direction" title="Marketing plan">Every campaign is grounded in the customer-approved current version. Editing an approved version requires a new review.</SectionHeading>
       <div className="mt-6 grid gap-4">{plans.map((plan) => <article key={plan.id} className="portal-panel p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-display text-2xl font-semibold">{plan.title}</h3><p className="mt-1 text-sm text-[#6d6258]">{formatDate(plan.period_start)}–{formatDate(plan.period_end)} · Revision {plan.current_revision}</p></div><span className="rounded-full bg-[#9a5f34]/10 px-3 py-1 text-xs font-semibold capitalize text-[#7b4725]">{statusLabel(plan.status)}</span></div>
         <PlanDetails plan={plan} />
         {canCreate && ["draft", "changes_requested"].includes(plan.status) ? <><PlanRevisionForm plan={plan} /><form action={submitPlanAction} className="mt-4"><input type="hidden" name="planId" value={plan.id} /><button className="portal-secondary-button px-3 py-2 text-sm font-semibold">Submit for customer review</button></form></> : null}
@@ -260,18 +420,18 @@ export function MarketingWorkspace({ access, plans, promotions, batches, items, 
       {canCreate ? <PlanForm organizationId={access.organizationId} /> : null}
     </section>
 
-    <section id="promotions"><SectionHeading icon={Megaphone} eyebrow="Customer input" title="Sales, specials, and events">Submit real dates and approved offer language before content is drafted. Nothing here publishes automatically.</SectionHeading>
+    <section id="promotions" className="scroll-mt-8"><SectionHeading icon={Megaphone} eyebrow="Customer input" title="Business updates">Tell D2D about sales, events, announcements, timing restrictions, and approved assets before content is drafted. Nothing here publishes automatically.</SectionHeading>
       <div className="mt-6 grid gap-4 sm:grid-cols-2">{promotions.map((promotion) => <article key={promotion.id} className="portal-panel p-5"><div className="flex justify-between gap-3"><h3 className="font-display text-xl font-semibold">{promotion.name}</h3><span className="text-xs font-semibold capitalize text-[#9a5f34]">{promotion.priority}</span></div><p className="mt-3 text-sm leading-6 text-[#62584f]">{promotion.description}</p><p className="mt-4 text-xs text-[#7a6f65]">{formatDate(promotion.starts_at)}–{formatDate(promotion.ends_at)} · {promotion.channels.join(", ")}</p></article>)}</div>
       {canReview ? <PromotionForm organizationId={access.organizationId} /> : null}
     </section>
 
-    <section id="content"><SectionHeading icon={CheckCircle2} eyebrow="Approval gate" title="Social content">Platform-specific captions and imagery remain drafts until the customer approves the exact current batch. Approval automatically creates and schedules the posts in D2D Social.</SectionHeading>
+    <section id="content" className="scroll-mt-8"><SectionHeading icon={CheckCircle2} eyebrow="Approval gate" title="Approve social posts">Platform-specific captions and imagery remain drafts until the customer approves the exact current batch. Approval automatically creates and schedules the posts in D2D Social.</SectionHeading>
       <div className="mt-6 grid gap-6">{batches.map((batch) => { const batchItems = items.filter((item) => item.batch_id === batch.id); return <article key={batch.id} className="portal-panel overflow-hidden"><div className="border-b border-[#241c17]/10 p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-display text-2xl font-semibold">{batch.title}</h3><p className="mt-1 text-sm text-[#6d6258]">{formatDate(batch.period_start)}–{formatDate(batch.period_end)} · {batchItems.length} platform posts</p></div><span className="rounded-full bg-[#9a5f34]/10 px-3 py-1 text-xs font-semibold capitalize text-[#7b4725]">{statusLabel(batch.status)}</span></div>{batch.sync_error && isPlatformAdmin ? <p role="alert" className="mt-3 text-sm text-red-700">{batch.sync_error}</p> : null}{batch.status === "failed" && !isPlatformAdmin ? <p className="mt-3 text-sm text-[#6d6258]">Your approval is saved. D2D is resolving the delivery connection; you do not need to approve again.</p> : null}</div>
         {canCreate && ["internal_review", "changes_requested"].includes(batch.status) ? <div className="grid gap-3 border-b border-[#241c17]/10 bg-[#f8f2e9] p-5">{[...new Set(batchItems.map((item) => item.content_day))].map((contentDay) => <DayMediaEditor key={contentDay} batchId={batch.id} contentDay={contentDay} media={batchItems.find((item) => item.content_day === contentDay)?.media ?? []} />)}</div> : null}
-        <div className="divide-y divide-[#241c17]/10">{batchItems.map((item) => <div key={item.id} className="grid gap-3 p-5 sm:grid-cols-[8rem_1fr]"><div><p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9a5f34]">Day {item.content_day}</p><p className="mt-1 text-sm font-semibold capitalize">{item.platform}</p><p className="mt-1 text-xs text-[#7a6f65]">{displayCentralDateTime(item.scheduled_for)}</p></div><div>{item.media.length > 0 ? <div className="mb-4 flex flex-wrap gap-3">{item.media.map((media) => <ReviewImage key={media.url} media={media} platform={item.platform} />)}</div> : null}<p className="whitespace-pre-wrap text-sm leading-6 text-[#403933]">{item.caption}</p><p className="mt-3 text-xs text-[#7a6f65]">{item.media.length > 0 ? `${item.media.length} approved image${item.media.length === 1 ? "" : "s"}` : `Creative needed: ${item.creative_brief}`}</p>{item.shoutrrr_post_id ? <p className="mt-1 text-xs font-semibold text-emerald-700">D2D Social draft created</p> : null}{canCreate && ["internal_review", "changes_requested"].includes(batch.status) ? <SocialItemEditor item={item} /> : null}</div></div>)}</div>
+        <div className="divide-y divide-[#241c17]/10">{batchItems.map((item) => <div key={item.id} className="grid gap-3 p-5 sm:grid-cols-[8rem_1fr]"><div><p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9a5f34]">Day {item.content_day}</p><p className="mt-1 text-sm font-semibold capitalize">{item.platform}</p><p className="mt-1 text-xs text-[#7a6f65]">{displayCentralDateTime(item.scheduled_for)}</p></div><div>{item.media.length > 0 ? <div className="mb-4 flex flex-wrap gap-3">{item.media.map((media) => <ReviewImage key={media.url} media={media} platform={item.platform} />)}</div> : null}<p className="whitespace-pre-wrap text-sm leading-6 text-[#403933]">{item.caption}</p><p className="mt-3 text-xs text-[#7a6f65]">{item.media.length > 0 ? `${item.media.length} approved image${item.media.length === 1 ? "" : "s"}` : `Creative needed: ${item.creative_brief}`}</p>{item.shoutrrr_post_id ? <p className="mt-1 text-xs font-semibold text-emerald-700">D2D Social draft created</p> : null}{canReview && batch.status === "client_review" ? <SpecificChangeRequest batch={batch} item={item} /> : null}{canCreate && ["internal_review", "changes_requested"].includes(batch.status) ? <SocialItemEditor item={item} /> : null}</div></div>)}</div>
         <div className="flex flex-wrap gap-3 border-t border-[#241c17]/10 bg-[#f8f2e9] p-5">
           {canCreate && ["internal_review", "changes_requested"].includes(batch.status) ? <form action={submitBatchAction}><input type="hidden" name="batchId" value={batch.id} /><button className="portal-secondary-button px-3 py-2 text-sm font-semibold">Send to customer for approval</button></form> : null}
-          {canReview && batch.status === "client_review" ? <form action={reviewBatchAction} className="flex flex-wrap gap-2"><input type="hidden" name="batchId" value={batch.id} /><input name="note" className="portal-field px-3 py-2 text-sm" placeholder="Optional review note" /><button name="decision" value="changes_requested" className="portal-secondary-button px-3 py-2 text-sm font-semibold">Request changes</button><button name="decision" value="approved" className="portal-primary-button px-3 py-2 text-sm font-semibold">Approve exact batch</button></form> : null}
+          {canReview && batch.status === "client_review" ? <ClientReviewChecklist batch={batch} items={batchItems} /> : null}
           {batch.status === "scheduling" ? <p className="text-sm font-semibold text-[#7b4725]">Approved — sending to D2D Social…</p> : null}
           {batch.status === "scheduled" ? <p className="text-sm font-semibold text-emerald-700">Customer approved · D2D Social scheduled automatically</p> : null}
           {isPlatformAdmin && ["approved", "failed"].includes(batch.status) ? <form action={retryApprovedDeliveryAction}><input type="hidden" name="batchId" value={batch.id} /><button disabled={!schedulingEnabled} title={schedulingEnabled ? undefined : "Production scheduling is disabled"} className="portal-primary-button px-3 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50">Retry approved delivery</button></form> : null}
