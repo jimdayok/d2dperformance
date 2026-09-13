@@ -9,10 +9,10 @@ import {
   MoveRight,
   X,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { companyName, parentBrandName } from "@/lib/site-data";
 
 const websiteManagementUrl = "https://webadmin.d2dmktg.com";
 const brandVaultUrl = "https://brandvault.d2dmktg.com";
@@ -208,13 +208,22 @@ export function RefinedNav() {
         <div
           className="performance-primary-inner nav-brand-top"
         >
-          <Link href="/" className="group min-w-0">
-            <span className="block text-[0.7rem] font-medium uppercase tracking-[0.38em] text-[var(--nav-top-muted,var(--color-muted))] transition group-hover:text-[var(--nav-top-ink,var(--color-ink))]">
-              {parentBrandName}
+          <Link
+            href="/"
+            className="performance-brand group min-w-0"
+            aria-label="D2D Performance home"
+          >
+            <span className="performance-brand-wordmark" aria-hidden="true">
+              <Image
+                src="/assets/original/day2day-marketing-reverse.png"
+                alt=""
+                width={982}
+                height={283}
+                loading="eager"
+                unoptimized
+              />
             </span>
-            <span className="mt-1 block font-display text-[1.35rem] font-semibold tracking-[-0.03em] text-[var(--nav-top-ink,var(--color-ink))]">
-              {companyName}
-            </span>
+            <span className="performance-brand-descriptor">Performance</span>
           </Link>
 
           <nav
