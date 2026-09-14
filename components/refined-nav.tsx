@@ -9,15 +9,16 @@ import {
   MoveRight,
   X,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { companyName, parentBrandName } from "@/lib/site-data";
 
 const websiteManagementUrl = "https://webadmin.d2dmktg.com";
 const brandVaultUrl = "https://brandvault.d2dmktg.com";
+const socialPagesUrl = "https://social.d2dperformance.com/login";
 const marketingUrl = "https://d2dmktg.com";
-const digitalUrl = "https://d2d-digital.vercel.app";
+const digitalUrl = "https://digital.d2dmktg.com";
 
 const serviceItems = [
   {
@@ -40,6 +41,16 @@ const serviceItems = [
     label: "Information Systems",
     description: "Connect tools, definitions, workflows, and ownership.",
   },
+  {
+    href: "/#operational-tools",
+    label: "Operational Tools",
+    description: "Open the connected D2D client platform suite.",
+  },
+  {
+    href: "/brand-development",
+    label: "Brand Discovery",
+    description: "Start or resume the guided brand discovery.",
+  },
 ] as const;
 
 const primaryItems = [
@@ -49,13 +60,18 @@ const primaryItems = [
 
 const clientItems = [
   {
+    href: socialPagesUrl,
+    label: "D2D Social Pages",
+    description: "Plan, review, approve, and publish social content.",
+  },
+  {
     href: brandVaultUrl,
-    label: "Brand Vault",
+    label: "D2D Brand Vault",
     description: "Find approved logos, files, and brand guidelines.",
   },
   {
     href: websiteManagementUrl,
-    label: "Website Management",
+    label: "D2D Site Manager",
     description: "Review and update your D2D-managed website.",
   },
 ] as const;
@@ -180,7 +196,7 @@ export function RefinedNav() {
           <Link className="is-current" href="/#top" aria-current="page">
             <ChartNoAxesCombined aria-hidden="true" />
             <strong>D2D Performance</strong>
-            <small>Lead + improve</small>
+            <small>Tools + solutions</small>
           </Link>
         </div>
       </nav>
@@ -192,12 +208,20 @@ export function RefinedNav() {
         <div
           className="performance-primary-inner nav-brand-top"
         >
-          <Link href="/" className="group min-w-0">
-            <span className="block text-[0.7rem] font-medium uppercase tracking-[0.38em] text-[var(--nav-top-muted,var(--color-muted))] transition group-hover:text-[var(--nav-top-ink,var(--color-ink))]">
-              {parentBrandName}
-            </span>
-            <span className="mt-1 block font-display text-[1.35rem] font-semibold tracking-[-0.03em] text-[var(--nav-top-ink,var(--color-ink))]">
-              {companyName}
+          <Link
+            href="/"
+            className="performance-brand group min-w-0"
+            aria-label="D2D Performance home"
+          >
+            <span className="performance-brand-wordmark" aria-hidden="true">
+              <Image
+                src="/assets/original/d2d-performance.png"
+                alt=""
+                width={500}
+                height={125}
+                loading="eager"
+                unoptimized
+              />
             </span>
           </Link>
 

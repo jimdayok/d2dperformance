@@ -13,19 +13,24 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
+    "@sparticuz/chromium": "^152.0.0",
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.108.2",
     "altcha": "^3.2.1",
     "altcha-lib": "^2.3.2",
     "framer-motion": "^12.42.0",
+    "ipaddr.js": "^2.2.0",
     "jose": "^6.2.3",
     "lucide-react": "^1.22.0",
-    "next": "^16.2.12",
+    "next": "^16.3.4",
     "next-themes": "^0.4.6",
+    "pdf-lib": "^1.17.1",
+    "puppeteer-core": "^25.10.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hook-form": "^7.82.0",
     "resend": "^6.16.0",
+    "sharp": "0.35.4",
     "sonner": "^2.0.7",
     "zod": "^4.4.3"
   },
@@ -35,14 +40,15 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "^16.2.12",
+    "eslint-config-next": "^16.3.4",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   },
   "overrides": {
+    "js-yaml": "4.3.2",
     "nanoid": "3.3.18",
     "postcss": "8.5.23",
-    "sharp": "0.35.3"
+    "sharp": "0.35.4"
   }
 }

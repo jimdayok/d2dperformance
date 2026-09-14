@@ -59,10 +59,10 @@ export function validateContactSubmission(payload: ContactSubmission) {
 }
 
 export function getContactFormConfig() {
-  const to = normalizeOptional(CONTACT_FORM_TO_EMAIL) ?? "andrea@d2dmktg.com";
+  const to = normalizeOptional(CONTACT_FORM_TO_EMAIL) ?? "info@d2dmktg.com";
   const preferredFrom =
     normalizeOptional(CONTACT_FORM_FROM_EMAIL) ??
-    "D2D Marketing <andrea@d2dmktg.com>";
+    "D2D Marketing <info@d2dmktg.com>";
   const fallbackFrom = normalizeOptional(BRAND_DISCOVERY_FROM_EMAIL);
 
   return {

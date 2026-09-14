@@ -18,14 +18,29 @@ export const getAccessibleSites = cache(async () => {
   const user = await getCurrentUser();
   if (!user) return [];
   const supabase = await createSupabaseServerClient();
-  const [{ data: profile }, { data: memberships }] = await Promise.all([
+  const [{ data: profile }, { data: memberships }, { data: productMemberships }] = await Promise.all([
     supabase.from("profiles").select("is_platform_admin,display_name,email").eq("id", user.id).single(),
     supabase.from("organization_members").select("organization_id,role").eq("user_id", user.id),
+    supabase.from("organization_product_members").select("organization_id").eq("user_id", user.id).eq("product", "web_management"),
   ]);
   const isPlatformAdmin = Boolean(profile?.is_platform_admin);
   if (!isPlatformAdmin && !memberships?.length) return [];
   let query = supabase.from("sites").select("id,organization_id,slug,name,publishing_mode,production_url,preview_url").eq("status", "active");
-  if (!isPlatformAdmin) query = query.in("organization_id", (memberships ?? []).map((membership) => membership.organization_id));
+  if (!isPlatformAdmin) {
+    const websiteOrganizationIds = (productMemberships ?? []).map((membership) => membership.organization_id);
+    if (websiteOrganizationIds.length === 0) return [];
+    const { data: entitlements } = await supabase.from("product_entitlements")
+      .select("organization_id")
+      .eq("product", "web_management")
+      .eq("status", "active")
+      .in("organization_id", websiteOrganizationIds);
+    const entitledOrganizationIds = new Set((entitlements ?? []).map((entitlement) => entitlement.organization_id));
+    const allowedOrganizationIds = (memberships ?? [])
+      .map((membership) => membership.organization_id)
+      .filter((organizationId) => entitledOrganizationIds.has(organizationId));
+    if (allowedOrganizationIds.length === 0) return [];
+    query = query.in("organization_id", allowedOrganizationIds);
+  }
   const { data: sites } = await query;
   return (sites ?? []).map((site) => ({
     site: site as SiteRow,

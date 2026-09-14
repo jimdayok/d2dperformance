@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import {
+  markupNoteSchema,
   normalizeReviewUrl,
   overallQuestions,
   pageFeedbackSchema,
@@ -59,6 +60,40 @@ describe("website feedback workflow", () => {
     ).toBe(true);
   });
 
+  it("validates page-specific website markup", () => {
+    expect(markupNoteSchema.safeParse({
+      id: "mark-1",
+      kind: "circle",
+      category: "modify_text",
+      x: 0.15,
+      y: 0.2,
+      width: 0.35,
+      height: 0.12,
+      text: "Replace this heading with the new copy.",
+    }).success).toBe(true);
+    expect(markupNoteSchema.safeParse({
+      id: "mark-2",
+      kind: "circle",
+      category: "change_picture",
+      x: 1.2,
+      y: 0.2,
+      width: 0.35,
+      height: 0.12,
+      text: "Use the team photo.",
+    }).success).toBe(false);
+    expect(markupNoteSchema.safeParse({
+      id: "mark-3",
+      kind: "draw",
+      category: "general",
+      x: 0.12,
+      y: 0.18,
+      width: 0.42,
+      height: 0.2,
+      points: [{ x: 0.12, y: 0.18 }, { x: 0.3, y: 0.3 }, { x: 0.54, y: 0.22 }],
+      text: "The spacing in this section feels uneven.",
+    }).success).toBe(true);
+  });
+
   it("keeps the CTA and editor handoff contracts", async () => {
     const [
       digital,
@@ -70,6 +105,8 @@ describe("website feedback workflow", () => {
       sessionRoute,
       server,
       workspace,
+      markupCanvas,
+      markupMigration,
     ] = await Promise.all([
       readFile("app/(d2dmktg)/digital/page.tsx", "utf8"),
       readFile("components/site-manager/structured-entry-editor.tsx", "utf8"),
@@ -80,6 +117,8 @@ describe("website feedback workflow", () => {
       readFile("app/api/website-feedback/sessions/route.ts", "utf8"),
       readFile("lib/website-feedback-server.ts", "utf8"),
       readFile("components/website-feedback/feedback-workspace.tsx", "utf8"),
+      readFile("components/website-feedback/markup-canvas.tsx", "utf8"),
+      readFile("supabase/migrations/202609110001_website_feedback_markup.sql", "utf8"),
     ]);
     expect(digital).toContain("/digital/website-feedback");
     expect(structured).toContain("PreviewReviewAction");
@@ -95,12 +134,21 @@ describe("website feedback workflow", () => {
     expect(structured).toContain("encodeURIComponent(payload.url)");
     expect(sessionRoute).toContain(".middleware(verificationRequest, false)");
     expect(sessionRoute).toContain("verificationResponse.json()");
-    expect(server).toContain("if (delivery.error)");
-    expect(server).toContain("resend.batch.send");
+    expect(server).toContain("if (rejected)");
+    expect(server).toContain("generateWebsiteFeedbackPdf");
+    expect(server).toContain("attachments:");
+    expect(server).toContain("idempotencyKey");
     expect(server).toContain("Your website feedback copy");
     expect(workspace).toContain("Draft · save separately");
     expect(workspace).toContain(
       "event.source !== frameRef.current?.contentWindow",
     );
+    expect(workspace).not.toContain("submit it to Jim");
+    expect(markupCanvas).toContain("Circle an area");
+    expect(markupCanvas).toContain("Draw freehand");
+    expect(markupCanvas).toContain("Draw arrow");
+    expect(markupCanvas).toContain("Modify text");
+    expect(markupCanvas).toContain("Change picture");
+    expect(markupMigration).toContain("annotations jsonb");
   });
 });

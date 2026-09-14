@@ -54,7 +54,7 @@ export function EcosystemPositionSection() {
             <span>Improve it</span>
             <em>Current</em>
           </div>
-          <h3 className="font-display">D2D Marketing</h3>
+          <h3 className="font-display">D2D Performance</h3>
           <p>
             Align leadership, establish the operating cadence, and improve the
             systems that turn strategy into repeatable execution.

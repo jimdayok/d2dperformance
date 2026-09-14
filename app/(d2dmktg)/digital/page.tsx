@@ -114,7 +114,7 @@ export default function Home() {
             <a href={performanceUrl}>
               <Gauge aria-hidden="true" />
               <strong>D2D Performance</strong>
-              <small>Lead + improve</small>
+              <small>Tools + solutions</small>
             </a>
           </div>
         </div>
