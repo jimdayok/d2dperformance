@@ -1819,9 +1819,7 @@ textarea {
   scroll-margin-top: 4rem;
   margin: clamp(1.5rem, 3vw, 3rem) 0;
   color: #f7f1e7;
-  background:
-    radial-gradient(circle at 12% 0%, rgba(184, 106, 50, 0.2), transparent 32rem),
-    linear-gradient(135deg, #221813 0%, #111313 48%, #0e1112 100%);
+  background: #111313;
 }
 
 #brand-discovery {
@@ -1835,21 +1833,8 @@ textarea {
   }
 }
 
-.performance-platforms::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.4;
-  background-image:
-    linear-gradient(rgba(247, 241, 231, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(247, 241, 231, 0.025) 1px, transparent 1px);
-  background-size: 70px 70px;
-}
-
 .performance-platforms-inner {
   position: relative;
-  z-index: 1;
   width: min(100% - 3rem, 1340px);
   margin: 0 auto;
   padding: clamp(5rem, 8vw, 8.5rem) 0 clamp(4.5rem, 7vw, 7rem);
@@ -1889,182 +1874,132 @@ textarea {
   line-height: 1.9;
 }
 
-.performance-platform-grid {
+.performance-platform-directory {
   margin-top: clamp(4rem, 7vw, 6.5rem);
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(1rem, 2vw, 1.7rem);
+  border-bottom: 1px solid rgba(247, 241, 231, 0.18);
 }
 
-.performance-platform-card {
+.performance-platform-entry {
   --platform-accent: #f0c5ce;
-  min-height: 590px;
-  display: flex;
-  flex-direction: column;
-  padding: clamp(1.3rem, 2.3vw, 2.1rem);
-  border: 1px solid color-mix(in oklab, var(--platform-accent) 88%, transparent);
-  border-radius: 1.4rem;
-  background: rgba(31, 38, 42, 0.93);
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.22);
+  display: grid;
+  grid-template-columns: 72px minmax(250px, 0.9fr) minmax(260px, 1fr) auto;
+  align-items: center;
+  gap: clamp(1.5rem, 4vw, 4.5rem);
+  min-height: 230px;
+  padding: clamp(2rem, 4vw, 3.4rem) 0;
+  border-top: 1px solid rgba(247, 241, 231, 0.18);
 }
 
-.performance-platform-card.is-site-manager {
+.performance-platform-entry.is-site-manager {
   --platform-accent: #63e4ff;
 }
 
-.performance-platform-card.is-brand-vault {
+.performance-platform-entry.is-brand-vault {
   --platform-accent: #b86a32;
 }
 
-.performance-platform-card.is-discovery {
+.performance-platform-entry.is-discovery {
   --platform-accent: #d88349;
 }
 
-.performance-platform-logo {
-  min-height: 150px;
+.performance-platform-index {
   display: grid;
-  place-items: center;
-  padding: clamp(1.2rem, 2vw, 1.8rem);
-  border: 1px solid var(--platform-accent);
-  border-radius: 1rem;
-  background: rgba(10, 13, 14, 0.36);
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--platform-accent);
 }
 
-.performance-platform-logo img {
-  width: 100%;
+.performance-platform-index span {
+  font-size: 0.62rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+}
+
+.performance-platform-index i {
+  height: 1px;
+  background: var(--platform-accent);
+}
+
+.performance-platform-identity > p {
+  margin: 0 0 1.3rem;
+  color: var(--platform-accent);
+  font-size: 0.64rem;
+  font-weight: 650;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.performance-platform-identity img {
+  display: block;
+  width: min(100%, 340px);
   height: auto;
 }
 
-.performance-platform-wordmark {
-  display: grid;
-  justify-items: center;
+.performance-platform-entry.is-discovery .performance-platform-identity img {
+  width: min(100%, 245px);
+}
+
+.performance-platform-copy h3 {
+  margin: 0;
   color: #fffaf2;
-  text-align: center;
-}
-
-.performance-platform-wordmark span,
-.performance-platform-wordmark small {
-  color: var(--platform-accent);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-}
-
-.performance-platform-wordmark strong {
-  margin: 0.45rem 0 0.55rem;
-  font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(1.65rem, 3vw, 2.7rem);
-  font-weight: 600;
-  letter-spacing: -0.04em;
-}
-
-.performance-platform-card h3 {
-  margin: 2rem 0 0;
-  color: #fffaf2;
-  font-size: clamp(2rem, 3vw, 3rem);
+  font-size: clamp(1.75rem, 3vw, 2.55rem);
   font-weight: 500;
-  line-height: 1;
+  line-height: 1.05;
   letter-spacing: -0.035em;
 }
 
-.performance-platform-description {
-  min-height: 5.5rem;
-  margin: 1.1rem 0 0;
-  color: rgba(247, 241, 231, 0.83);
+.performance-platform-copy p {
+  max-width: 490px;
+  margin: 0.9rem 0 0;
+  color: rgba(247, 241, 231, 0.7);
   font-size: 1rem;
-  line-height: 1.75;
+  line-height: 1.7;
 }
 
-.performance-platform-detail {
-  display: grid;
-  grid-template-columns: 76px 1fr;
-  align-items: center;
-  gap: 1.15rem;
-  margin-top: 1.6rem;
-  padding-top: 1.6rem;
-  border-top: 1px solid color-mix(in oklab, var(--platform-accent) 72%, transparent);
-}
-
-.performance-platform-mark {
-  width: 76px;
-  height: 76px;
-  border-radius: 0.5rem;
-}
-
-.performance-platform-icon {
-  display: grid;
-  place-items: center;
-  border: 1px solid color-mix(in oklab, var(--platform-accent) 65%, transparent);
-  background: color-mix(in oklab, var(--platform-accent) 12%, #111313);
-  color: var(--platform-accent);
-}
-
-.performance-platform-icon svg {
-  width: 2rem;
-  height: 2rem;
-}
-
-.performance-platform-detail div > span,
-.performance-platform-detail div > strong {
-  display: block;
-  text-transform: uppercase;
-}
-
-.performance-platform-detail div > span {
-  color: var(--platform-accent);
-  font-size: 0.62rem;
-  letter-spacing: 0.2em;
-}
-
-.performance-platform-detail div > strong {
-  margin-top: 0.7rem;
-  color: rgba(255, 250, 242, 0.86);
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.11em;
-  line-height: 1.55;
-}
-
-.performance-platform-card > a {
+.performance-platform-entry > a {
   width: fit-content;
-  margin-top: auto;
-  padding: 2.2rem 0 0.6rem;
+  padding: 0.75rem 0;
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.6rem;
   color: #fffaf2;
-  font-size: 0.73rem;
+  font-size: 0.7rem;
   font-weight: 650;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  border-bottom: 1px solid var(--platform-accent);
 }
 
-.performance-platform-card > a svg {
+.performance-platform-entry > a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.performance-platform-entry {
+  position: relative;
+}
+
+.performance-platform-entry > a svg {
   width: 0.9rem;
   height: 0.9rem;
   color: var(--platform-accent);
   transition: transform 180ms ease;
 }
 
-.performance-platform-card > a:hover svg,
-.performance-platform-card > a:focus-visible svg {
+.performance-platform-entry > a:hover svg,
+.performance-platform-entry > a:focus-visible svg {
   transform: translate(0.18rem, -0.18rem);
 }
 
-.performance-platform-card > a:focus-visible {
+.performance-platform-entry > a:focus-visible {
   outline: 2px solid var(--platform-accent);
   outline-offset: 0.4rem;
 }
 
-.performance-platforms-footer {
-  margin: 2.6rem 0 0;
-  color: rgba(216, 131, 73, 0.84);
-  font-size: 0.66rem;
-  font-weight: 650;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+.performance-platform-entry:has(> a:hover),
+.performance-platform-entry:has(> a:focus-visible) {
+  background: color-mix(in oklab, var(--platform-accent) 4%, transparent);
 }
 
 @media (max-width: 980px) {
@@ -2077,20 +2012,13 @@ textarea {
     max-width: 680px;
   }
 
-  .performance-platform-grid {
-    grid-template-columns: 1fr;
+  .performance-platform-entry {
+    grid-template-columns: 52px minmax(220px, 0.8fr) minmax(260px, 1fr);
   }
 
-  .performance-platform-card {
-    min-height: auto;
-  }
-
-  .performance-platform-description {
-    min-height: 0;
-  }
-
-  .performance-platform-card > a {
-    margin-top: 2rem;
+  .performance-platform-entry > a {
+    grid-column: 3;
+    margin-top: -1rem;
   }
 }
 
@@ -2109,15 +2037,41 @@ textarea {
     line-height: 1.75;
   }
 
-  .performance-platform-card h3 {
-    font-size: 2.25rem;
+  .performance-platform-entry {
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 1.2rem;
+    min-height: 0;
+    padding: 2.6rem 0;
   }
 
-  .performance-platform-logo {
-    min-height: 125px;
+  .performance-platform-index {
+    align-self: start;
+    margin-top: 0.15rem;
   }
 
-  .performance-platforms-footer {
-    line-height: 1.8;
+  .performance-platform-index i {
+    display: none;
+  }
+
+  .performance-platform-identity,
+  .performance-platform-copy,
+  .performance-platform-entry > a {
+    grid-column: 2;
+  }
+
+  .performance-platform-identity img {
+    width: min(100%, 310px);
+  }
+
+  .performance-platform-entry.is-discovery .performance-platform-identity img {
+    width: min(100%, 230px);
+  }
+
+  .performance-platform-copy h3 {
+    font-size: 2rem;
+  }
+
+  .performance-platform-entry > a {
+    margin-top: 0.35rem;
   }
 }

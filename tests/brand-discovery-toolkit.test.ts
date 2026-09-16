@@ -8,6 +8,9 @@ describe("Brand Discovery toolkit placement", () => {
 
     expect(tools).toContain('name: "D2D Brand Discovery"');
     expect(tools).toContain('href: "/brand-development#brand-discovery"');
+    expect(tools).toContain('logo: "/assets/original/day2day-marketing-reverse.png"');
+    expect(tools).not.toContain("App / favicon");
+    expect(tools).not.toContain("Open platform");
     expect(navigation).toContain('label: "Brand Discovery"');
   });
 

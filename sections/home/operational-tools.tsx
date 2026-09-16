@@ -1,56 +1,66 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, SearchCheck, type LucideIcon } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
 type Platform = {
   name: string;
+  category: string;
   description: string;
   href: string;
-  rhythm: string;
+  action: string;
+  logo: string;
+  logoWidth: number;
+  logoHeight: number;
   className: string;
   external?: boolean;
-  logo?: string;
-  mark?: string;
-  icon?: LucideIcon;
 };
 
 const platforms: Platform[] = [
   {
     name: "D2D Brand Discovery",
+    category: "Brand direction",
     description:
-      "Clarify the business, audience, positioning and brand direction in one guided experience.",
+      "Clarify the business, audience, positioning and brand direction before the creative work begins.",
     href: "/brand-development#brand-discovery",
-    rhythm: "Discover / Clarify / Begin",
+    action: "Start Brand Discovery",
+    logo: "/assets/original/day2day-marketing-reverse.png",
+    logoWidth: 982,
+    logoHeight: 283,
     className: "is-discovery",
-    icon: SearchCheck,
   },
   {
     name: "D2D Social Pages",
+    category: "Social planning",
     description: "Plan, review, approve and publish social content.",
     logo: "/assets/platforms/d2d-social-pages-logo.png",
-    mark: "/assets/platforms/d2d-social-pages-mark.png",
+    logoWidth: 2827,
+    logoHeight: 631,
     href: "https://social.d2dperformance.com/login",
-    rhythm: "Plan / Approve / Publish",
+    action: "Open Social Pages",
     className: "is-social",
     external: true,
   },
   {
     name: "D2D Site Manager",
+    category: "Website management",
     description: "Manage site content and day-to-day digital operations.",
     logo: "/assets/platforms/d2d-site-manager-logo.png",
-    mark: "/assets/platforms/d2d-site-manager-mark.png",
+    logoWidth: 2827,
+    logoHeight: 631,
     href: "https://webadmin.d2dmktg.com/portal/login",
-    rhythm: "Update / Manage / Improve",
+    action: "Open Site Manager",
     className: "is-site-manager",
     external: true,
   },
   {
     name: "D2D Brand Vault",
+    category: "Brand assets",
     description: "Organize approved logos, images, standards and shared files.",
     logo: "/assets/platforms/d2d-brand-vault-logo.png",
-    mark: "/assets/platforms/d2d-brand-vault-mark.png",
+    logoWidth: 2827,
+    logoHeight: 631,
     href: "https://brandvault.d2dmktg.com/auth/login",
-    rhythm: "Organize / Approve / Protect",
+    action: "Open Brand Vault",
     className: "is-brand-vault",
     external: true,
   },
@@ -62,75 +72,51 @@ export function OperationalToolsSection() {
       <div className="performance-platforms-inner">
         <div className="performance-platforms-heading">
           <div>
-            <p className="performance-platforms-eyebrow">D2D Performance Platforms</p>
+            <p className="performance-platforms-eyebrow">The D2D working system</p>
             <h2 className="font-display">
-              Operational tools that keep the DAY2DAY moving.
+              Start with direction. Keep the work moving.
             </h2>
           </div>
           <p>
-            D2D Performance houses the connected platform layer—practical
-            places for clients to plan, approve, publish, update and protect
-            the work.
+            Four focused destinations for shaping the brand, managing the
+            website, approving social content and keeping the right files in
+            the right hands.
           </p>
         </div>
 
-        <div className="performance-platform-grid">
-          {platforms.map((platform) => {
-            const PlatformIcon = platform.icon;
+        <div className="performance-platform-directory">
+          {platforms.map((platform, index) => {
             const linkContent = (
               <>
-                Open {platform.name}
+                {platform.action}
                 <ArrowUpRight aria-hidden="true" />
               </>
             );
 
             return (
               <article
-                className={`performance-platform-card ${platform.className}`}
+                className={`performance-platform-entry ${platform.className}`}
                 key={platform.name}
               >
-                <div className="performance-platform-logo">
-                  {platform.logo ? (
-                    <Image
-                      src={platform.logo}
-                      alt={`${platform.name} logo`}
-                      width={2827}
-                      height={631}
-                      sizes="(max-width: 760px) 82vw, 42vw"
-                    />
-                  ) : (
-                    <div className="performance-platform-wordmark" aria-hidden="true">
-                      <span>D2D</span>
-                      <strong>Brand Discovery</strong>
-                      <small>Start with clarity</small>
-                    </div>
-                  )}
+                <div className="performance-platform-index" aria-hidden="true">
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <i />
                 </div>
 
-                <h3 className="font-display">{platform.name}</h3>
-                <p className="performance-platform-description">
-                  {platform.description}
-                </p>
+                <div className="performance-platform-identity">
+                  <p>{platform.category}</p>
+                  <Image
+                    src={platform.logo}
+                    alt={`${platform.name} logo`}
+                    width={platform.logoWidth}
+                    height={platform.logoHeight}
+                    sizes="(max-width: 760px) 80vw, 340px"
+                  />
+                </div>
 
-                <div className="performance-platform-detail">
-                  {platform.mark ? (
-                    <Image
-                      className="performance-platform-mark"
-                      src={platform.mark}
-                      alt=""
-                      width={1024}
-                      height={1024}
-                      sizes="76px"
-                    />
-                  ) : (
-                    <span className="performance-platform-mark performance-platform-icon" aria-hidden="true">
-                      {PlatformIcon ? <PlatformIcon /> : null}
-                    </span>
-                  )}
-                  <div>
-                    <span>{platform.icon ? "Guided tool" : "App / favicon"}</span>
-                    <strong>{platform.rhythm}</strong>
-                  </div>
+                <div className="performance-platform-copy">
+                  <h3 className="font-display">{platform.name}</h3>
+                  <p>{platform.description}</p>
                 </div>
 
                 {platform.external ? (
@@ -144,10 +130,6 @@ export function OperationalToolsSection() {
             );
           })}
         </div>
-
-        <p className="performance-platforms-footer">
-          One D2D system / Clearer ownership / Better day-to-day control
-        </p>
       </div>
     </section>
   );
