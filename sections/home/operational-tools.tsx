@@ -23,9 +23,9 @@ const platforms: Platform[] = [
       "Clarify the business, audience, positioning and brand direction before the creative work begins.",
     href: "/brand-development#brand-discovery",
     action: "Start Brand Discovery",
-    logo: "/assets/original/day2day-marketing-reverse.png",
-    logoWidth: 982,
-    logoHeight: 283,
+    logo: "/assets/platforms/d2d-brand-discovery-logo.png",
+    logoWidth: 2827,
+    logoHeight: 631,
     className: "is-discovery",
   },
   {

@@ -1899,7 +1899,7 @@ textarea {
 }
 
 .performance-platform-entry.is-discovery {
-  --platform-accent: #d88349;
+  --platform-accent: #b79cff;
 }
 
 .performance-platform-index {
@@ -1934,10 +1934,6 @@ textarea {
   display: block;
   width: min(100%, 340px);
   height: auto;
-}
-
-.performance-platform-entry.is-discovery .performance-platform-identity img {
-  width: min(100%, 245px);
 }
 
 .performance-platform-copy h3 {
@@ -2061,10 +2057,6 @@ textarea {
 
   .performance-platform-identity img {
     width: min(100%, 310px);
-  }
-
-  .performance-platform-entry.is-discovery .performance-platform-identity img {
-    width: min(100%, 230px);
   }
 
   .performance-platform-copy h3 {
