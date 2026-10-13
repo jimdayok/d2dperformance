@@ -171,7 +171,7 @@ function MarketingCalendarPanel({ promotions, batches, items, nowIso, canReview 
 function IndividualPostApproval({item}:{item:SocialItem}){
  const [state,action,pending]=useActionState(approveSocialItemAction,initialState);
  const approved=item.approved_revision===item.current_revision;
- return <div className="mt-5"><form action={action}><input type="hidden" name="itemId" value={item.id}/><input type="hidden" name="revision" value={item.current_revision}/><button disabled={pending||approved} className="portal-primary-button px-4 py-2.5 text-sm font-semibold disabled:opacity-50">{approved?"Post approved":pending?"Saving approval…":"Approve this post"}</button></form><p className="mt-2 text-xs text-[#6d6258]">Your approval is saved for this exact post. The campaign schedules once every platform post is approved.</p><Feedback state={state}/></div>;
+ return <div className="mt-5"><form action={action}><input type="hidden" name="itemId" value={item.id}/><input type="hidden" name="revision" value={item.current_revision}/><button disabled={pending||approved} className="portal-primary-button px-4 py-2.5 text-sm font-semibold disabled:opacity-50">{approved?"Post approved":pending?"Saving approval…":"Approve this post"}</button></form><p className="mt-2 text-xs text-[#6d6258]">Approval applies to this exact post. The campaign schedules once every platform post is approved.</p><Feedback state={state}/></div>;
 }
 
 function DeliveryResults({ batches, items }: { batches: Batch[]; items: SocialItem[] }) {
