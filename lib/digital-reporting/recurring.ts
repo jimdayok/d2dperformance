@@ -97,7 +97,7 @@ export async function prepareMonthlyDrafts(now = new Date()) {
       const snapshot: Snapshot = {
         ...emptyContent(),
         summary:
-          "Monthly draft prepared for administrator review. No performance conclusions can be drawn until the period's evidence is supplied.",
+          "This month's results are waiting to be confirmed. D2D will explain the important changes and next steps after reviewing the information.",
         organizationName: org.name,
         organizationId: e.organization_id,
         kind: "monthly",

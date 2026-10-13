@@ -199,11 +199,11 @@ export type Snapshot = ReportContent & {
 export function emptyContent(): ReportContent {
   return {
     summary:
-      "Review the available evidence and describe this customer's performance.",
+      "Results are waiting to be checked. D2D will explain the findings here before your report is released.",
     workCompleted: "",
     nextSteps: "",
     limitations:
-      "Analytics, search, AI prompt-panel and lead tracking connections have not been verified for this report. No values have been estimated.",
+      "We still need access to your website visitor, Google search, customer inquiry and AI-check information. These results stay open until they can be confirmed.",
     metrics: metricDefinitions.map(([key, , , , source]) => ({
       key,
       value: null,
@@ -211,7 +211,8 @@ export function emptyContent(): ReportContent {
       evidence: "",
       measuredAt: null,
       status: "missing",
-      reason: "No verified data supplied for this period.",
+      reason:
+        "We have not received the information needed to measure this yet.",
       method: "Not connected",
     })),
   };
