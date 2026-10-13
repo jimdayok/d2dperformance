@@ -42,7 +42,7 @@ export async function POST(request:Request){
   const {data:batch,error:batchError}=await supabase.rpc('create_manual_social_batch',{check_organization:input.organizationId,check_marketing_plan:input.planId,check_title:creative.title,check_scheduled_for:input.scheduledFor,check_captions:captions,check_media:[{url:publicUrl,altText:creative.headline}]});if(batchError||!batch?.id)throw Error(batchError?.message||'The generated approval draft could not be saved.');
   const {error:reviewError}=await supabase.rpc('submit_social_batch_for_client_review',{check_batch:batch.id});if(reviewError)throw Error('The draft was saved but could not enter customer review.');
   await admin.from('social_ai_jobs').update({status:'completed',batch_id:batch.id,message:'Copy and media saved for approval.',updated_at:new Date().toISOString()}).eq('id',input.requestId);
- }catch(error){await admin.from('social_ai_jobs').update({status:'failed',message:error instanceof Error?error.message:'Generation failed. Please try again.',updated_at:new Date().toISOString()}).eq('id',input.requestId);}});
+ }catch(error){await admin.from('social_ai_jobs').update({status:'failed',message:error instanceof z.ZodError?'AI returned copy that did not fit the post. Please try again.':error instanceof Error?error.message:'Generation failed. Please try again.',updated_at:new Date().toISOString()}).eq('id',input.requestId);}});
  return NextResponse.json({jobId:input.requestId,status:'processing'},{status:202});
  }catch(error){return NextResponse.json({error:error instanceof Error?error.message:'The draft could not be created.'},{status:400})}
 }

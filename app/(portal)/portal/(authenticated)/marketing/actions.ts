@@ -489,7 +489,7 @@ export async function createApprovedDraftsAction(formData: FormData) {
     if (row.current_revision !== row.approved_revision) throw new Error("A post changed after approval.");
     if (row.shoutrrr_post_id) continue;
     const item = row as SocialItemRow & { current_revision: number; approved_revision: number };
-    const postId = await createPlatformDraft({ platform: item.platform, caption: item.caption, media: item.media ?? [] });
+    const postId = await createPlatformDraft({ organizationId:batch.organization_id, platform: item.platform, caption: item.caption, media: item.media ?? [] });
     const { error } = await supabase.rpc("record_social_item_shoutrrr_post", {
       check_item: item.id,
       check_post_id: postId,
