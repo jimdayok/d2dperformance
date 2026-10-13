@@ -34,7 +34,7 @@ export default async function MarketingPage({
   const planIds = (plans ?? []).map((plan) => plan.id);
   const [items, planVersions] = await Promise.all([
     batchIds.length > 0 ? supabase.from("social_content_items")
-      .select("id,batch_id,content_day,platform,caption,media,creative_brief,scheduled_for,shoutrrr_post_id")
+      .select("id,batch_id,content_day,platform,caption,media,creative_brief,scheduled_for,shoutrrr_post_id,current_revision,approved_revision")
       .in("batch_id", batchIds).order("scheduled_for").then(({ data }) => data ?? []) : Promise.resolve([]),
     planIds.length > 0 ? supabase.from("marketing_plan_versions")
       .select("marketing_plan_id,revision,summary,plan")

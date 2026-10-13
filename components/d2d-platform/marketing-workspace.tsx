@@ -4,6 +4,7 @@
 import { useActionState, useRef, useState } from "react";
 import { ArrowRight, BarChart3, CalendarDays, CheckCircle2, ClipboardCheck, Expand, ListChecks, Megaphone, Sparkles, X } from "lucide-react";
 import {
+  approveSocialItemAction,
   createManualBatchAction,
   createMarketingPlanAction,
   createPromotionAction,
@@ -25,7 +26,7 @@ import type { MarketingPlanContent } from "@/lib/d2d-platform/types";
 type Access = { organizationId: string; organizationName: string; role: string };
 type Plan = { id: string; title: string; period_start: string; period_end: string; status: string; current_revision: number; approved_revision: number | null; summary: string; plan: MarketingPlanContent };
 type Promotion = { id: string; name: string; description: string; starts_at: string; ends_at: string; channels: string[]; priority: string; status: string };
-type SocialItem = { id: string; batch_id: string; content_day: number; platform: string; caption: string; media: Array<{ url: string; altText?: string }>; creative_brief: string; scheduled_for: string; shoutrrr_post_id: string | null };
+type SocialItem = { id: string; batch_id: string; content_day: number; platform: string; caption: string; media: Array<{ url: string; altText?: string }>; creative_brief: string; scheduled_for: string; shoutrrr_post_id: string | null; current_revision: number; approved_revision: number | null };
 type Batch = { id: string; title: string; period_start: string; period_end: string; status: string; sync_error: string | null };
 
 const initialState: MarketingActionState = {};
@@ -120,7 +121,11 @@ function PlatformLogo({ platform }: { platform: string }) {
   </svg>;
 }
 
-function MarketingCalendarPanel({ promotions, batches, items, nowIso }: { promotions: Promotion[]; batches: Batch[]; items: SocialItem[]; nowIso: string }) {
+function MarketingCalendarPanel({ promotions, batches, items, nowIso, canReview }: { promotions: Promotion[]; batches: Batch[]; items: SocialItem[]; nowIso: string; canReview: boolean }) {
+  const dialogRef=useRef<HTMLDialogElement>(null);
+  const [selectedId,setSelectedId]=useState<string|null>(null);
+  const selected=items.find(item=>item.id===selectedId);
+  const selectedBatch=batches.find(batch=>batch.id===selected?.batch_id);
   const [monthOffset, setMonthOffset] = useState(0);
   const events = buildMarketingCalendar({ promotions, batches, items });
   const todayKey = centralDateKey(nowIso);
@@ -148,15 +153,25 @@ function MarketingCalendarPanel({ promotions, batches, items, nowIso }: { promot
               const isToday = key === todayKey;
               return <div role="gridcell" aria-label={`${key}${dayEvents.length ? `, ${dayEvents.length} events` : ""}`} key={key} className={`min-h-24 p-1.5 ${inMonth ? "bg-[#fffdf9]" : "bg-[#f1ede7] text-[#a79b90]"} ${isToday ? "ring-2 ring-inset ring-[#9a5f34]" : ""}`}>
                 <p className="text-xs font-semibold">{date.getUTCDate()}</p>
-                <div className="mt-2 flex flex-wrap gap-1">{dayEvents.map(event => <a key={`${event.kind}-${event.id}`} href={event.kind === "post" ? "#content" : "#promotions"} aria-label={`${event.platform ?? "Business update"}: ${event.label}, ${event.status.replaceAll("_", " ")}`} title={`${event.platform ?? "Business update"} · ${event.label} · ${event.status.replaceAll("_", " ")}`} className={`inline-flex items-center justify-center rounded p-1.5 focus-visible:outline-2 focus-visible:outline-offset-2 ${event.kind === "promotion" ? "bg-[#f0dfcf] text-[#7b4725]" : event.status === "scheduled" || event.status === "published" ? "bg-[#dcebe3] text-[#28543f]" : "bg-[#eee3d5] text-[#7b4725]"}`}>{event.platform ? <PlatformLogo platform={event.platform}/> : <Megaphone className="size-4" aria-hidden="true"/>}</a>)}</div>
+                <div className="mt-2 flex flex-wrap gap-1">{dayEvents.map(event => <button type="button" key={`${event.kind}-${event.id}`} onClick={()=>{if(event.kind === "post"){setSelectedId(event.id);dialogRef.current?.showModal();}else{document.getElementById("promotions")?.scrollIntoView({behavior:"smooth"});}} aria-label={`${event.platform ?? "Business update"}: ${event.label}, ${event.status.replaceAll("_", " ")}`} title={`${event.platform ?? "Business update"} · ${event.label} · ${event.status.replaceAll("_", " ")}`} className={`inline-flex items-center justify-center rounded p-1.5 focus-visible:outline-2 focus-visible:outline-offset-2 ${event.kind === "promotion" ? "bg-[#f0dfcf] text-[#7b4725]" : event.status === "scheduled" || event.status === "published" ? "bg-[#dcebe3] text-[#28543f]" : "bg-[#eee3d5] text-[#7b4725]"}`}>{event.platform ? <PlatformLogo platform={event.platform}/> : <Megaphone className="size-4" aria-hidden="true"/>}</button>)}</div>
               </div>;
             })}
           </div>
         </div></div>
       </div>)}
     </div>
-    <p className="mt-3 text-xs text-[#6d6258]">Green: scheduled or published · Sand: awaiting approval or preparation · Select a logo to review the posts.</p>
+    <p className="mt-3 text-xs text-[#6d6258]">Green: scheduled or published · Sand: awaiting approval or preparation · Select a logo to open that exact post.</p>
+    <dialog ref={dialogRef} onClose={()=>setSelectedId(null)} aria-label="Review calendar post" className="max-h-[90vh] w-[min(48rem,94vw)] overflow-y-auto rounded-2xl border-0 bg-[#fffdf9] p-5 text-[#302a25] shadow-2xl backdrop:bg-black/60 sm:p-7">
+      <form method="dialog" className="mb-4 flex justify-end"><button className="portal-secondary-button px-3 py-2" aria-label="Close post review">Close ×</button></form>
+      {selected&&selectedBatch?<><p className="text-xs font-semibold uppercase tracking-wide">Day {selected.content_day} · {selected.platform}</p><h3 className="mt-2 font-display text-xl font-semibold">{selectedBatch.title}</h3><p className="my-3 text-sm">{displayCentralDateTime(selected.scheduled_for)}</p><div className="flex flex-wrap gap-3">{selected.media.map(media=><ReviewImage key={media.url} media={media} platform={selected.platform}/>)}</div><h4 className="mt-5 font-semibold">Post copy</h4><p className="mt-2 whitespace-pre-wrap text-sm leading-6">{selected.caption}</p>{canReview&&selectedBatch.status === "client_review"?<><IndividualPostApproval key={selected.id} item={selected}/><SpecificChangeRequest batch={selectedBatch} item={selected}/></>:<p className="mt-5 text-sm font-semibold">{statusLabel(selectedBatch.status)}</p>}</>:null}
+    </dialog>
   </section>;
+}
+
+function IndividualPostApproval({item}:{item:SocialItem}){
+ const [state,action,pending]=useActionState(approveSocialItemAction,initialState);
+ const approved=item.approved_revision===item.current_revision;
+ return <div className="mt-5"><form action={action}><input type="hidden" name="itemId" value={item.id}/><input type="hidden" name="revision" value={item.current_revision}/><button disabled={pending||approved} className="portal-primary-button px-4 py-2.5 text-sm font-semibold disabled:opacity-50">{approved?"Post approved":pending?"Saving approval…":"Approve this post"}</button></form><p className="mt-2 text-xs text-[#6d6258]">Your approval is saved for this exact post. The campaign schedules once every platform post is approved.</p><Feedback state={state}/></div>;
 }
 
 function DeliveryResults({ batches, items }: { batches: Batch[]; items: SocialItem[] }) {
@@ -236,7 +251,8 @@ function SpecificChangeRequest({ batch, item }: { batch: Batch; item: SocialItem
 
 function ClientReviewChecklist({ batch, items }: { batch: Batch; items: SocialItem[] }) {
   const [reviewed, setReviewed] = useState<string[]>([]);
-  const allReviewed = items.length > 0 && reviewed.length === items.length;
+  const reviewedIds=[...new Set([...reviewed,...items.filter(item=>item.approved_revision===item.current_revision).map(item=>item.id)])];
+  const allReviewed = items.length > 0 && reviewedIds.length === items.length;
   const toggle = (itemId: string, checked: boolean) => {
     setReviewed((current) => checked
       ? [...new Set([...current, itemId])]
@@ -245,9 +261,9 @@ function ClientReviewChecklist({ batch, items }: { batch: Batch; items: SocialIt
   return <div className="w-full rounded-xl border border-[#356b52]/20 bg-white p-4 sm:p-5">
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div><p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#356b52]">Exact review checklist</p><h4 className="mt-1 font-display text-xl font-semibold">Confirm every platform post</h4><p className="mt-1 text-xs leading-5 text-[#756a60]">Check each post after reviewing its caption, image, platform, and Central publish time.</p></div>
-      <span className="rounded-full bg-[#e5f0e9] px-3 py-1 text-xs font-semibold text-[#28543f]">{reviewed.length} of {items.length} reviewed</span>
+      <span className="rounded-full bg-[#e5f0e9] px-3 py-1 text-xs font-semibold text-[#28543f]">{reviewedIds.length} of {items.length} reviewed</span>
     </div>
-    <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{items.map((item) => <label key={item.id} className="flex cursor-pointer items-start gap-3 rounded-lg border border-[#241c17]/10 bg-[#fffdf9] p-3 text-sm"><input type="checkbox" checked={reviewed.includes(item.id)} onChange={(event) => toggle(item.id, event.target.checked)} className="mt-0.5" /><span><strong className="block capitalize">Day {item.content_day} · {item.platform}</strong><span className="mt-1 block text-xs text-[#756a60]">{displayCentralDateTime(item.scheduled_for)}</span></span></label>)}</div>
+    <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{items.map((item) => <label key={item.id} className="flex cursor-pointer items-start gap-3 rounded-lg border border-[#241c17]/10 bg-[#fffdf9] p-3 text-sm"><input type="checkbox" checked={reviewedIds.includes(item.id)} disabled={item.approved_revision===item.current_revision} onChange={(event) => toggle(item.id, event.target.checked)} className="mt-0.5" /><span><strong className="block capitalize">Day {item.content_day} · {item.platform}</strong><span className="mt-1 block text-xs text-[#756a60]">{displayCentralDateTime(item.scheduled_for)}</span></span></label>)}</div>
     <form action={reviewBatchAction} className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
       <input type="hidden" name="batchId" value={batch.id} />
       <input type="hidden" name="decision" value="approved" />
@@ -417,7 +433,7 @@ export function MarketingWorkspace({ access, plans, promotions, batches, items, 
 
     <MarketingToday plans={plans} promotions={promotions} batches={batches} items={items} nowIso={nowIso} />
 
-    <MarketingCalendarPanel promotions={promotions} batches={batches} items={items} nowIso={nowIso} />
+    <MarketingCalendarPanel promotions={promotions} batches={batches} items={items} nowIso={nowIso} canReview={canReview} />
 
     <DeliveryResults batches={batches} items={items} />
 

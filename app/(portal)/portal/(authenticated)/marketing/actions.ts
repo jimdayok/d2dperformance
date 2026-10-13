@@ -530,3 +530,19 @@ export async function scheduleApprovedBatchAction(formData: FormData) {
   }
   revalidatePath("/portal/marketing");
 }
+
+export async function approveSocialItemAction(_previous: MarketingActionState, formData: FormData): Promise<MarketingActionState> {
+  try {
+    requireWritableMarketingEnvironment();
+    const user = await requireSignedIn();
+    const itemId = idSchema.parse(formData.get("itemId"));
+    const revision = Number(formData.get("revision"));
+    if (!Number.isInteger(revision) || revision < 1) throw new Error("Refresh and review the current post.");
+    const supabase = await createSupabaseServerClient();
+    const {data,error} = await supabase.rpc("approve_social_item",{check_item:itemId,check_revision:revision});
+    if(error) throw new Error(error.message);
+    if(data.status === "approved") { try { await deliverApprovedBatch(data.batchId,user.id); } catch { /* Delivery persists failures for staff to resolve. */ } }
+    revalidatePath("/portal/marketing");
+    return {message:data.status === "approved" ? "Post approved. All campaign posts are approved and ready for delivery." : "Post approved. The campaign will schedule after every platform post is approved."};
+  } catch(error) { return initialFailure(error); }
+}
