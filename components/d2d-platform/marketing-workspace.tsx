@@ -1,6 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- customer-approved image hosts are dynamic and validated server-side */
 
+import { AIPostCreator } from "./ai-post-creator";
 import { useActionState, useRef, useState } from "react";
 import { ArrowRight, BarChart3, CalendarDays, CheckCircle2, ClipboardCheck, Expand, ListChecks, Megaphone, Sparkles, X } from "lucide-react";
 import {
@@ -433,6 +434,7 @@ export function MarketingWorkspace({ access, plans, promotions, batches, items, 
 
     <MarketingToday plans={plans} promotions={promotions} batches={batches} items={items} nowIso={nowIso} />
 
+    {canCreate ? <AIPostCreator key={access.organizationId} organizationId={access.organizationId} plans={plans} /> : null}
     <MarketingCalendarPanel promotions={promotions} batches={batches} items={items} nowIso={nowIso} canReview={canReview} />
 
     <DeliveryResults batches={batches} items={items} />
