@@ -34,7 +34,7 @@ export async function POST(request:Request){
  const {error:insertError}=await admin.from('social_ai_jobs').insert({id:input.requestId,organization_id:input.organizationId,created_by:user.id,status:'processing',brand_sources:brand.source});if(insertError)throw Error('The draft request could not be saved.');
  after(async()=>{try{
   const {creative,background}=await generateCreative(brand,input.topic,version.plan);
-  const bytes=input.kind==='video'?await renderVideo(background,brand.logo,creative.scenes,creative.cta,creative.color):await composeGraphic(background,brand.logo,creative.headline,creative.cta,creative.color);
+  const bytes=input.kind==='video'?await renderVideo(background,brand.logo,creative.scenes,creative.cta,creative.color,creative.fontStyle):await composeGraphic(background,brand.logo,creative.headline,creative.cta,creative.color,1350,creative.fontStyle);
   const bucket='d2d-social-campaigns',path=`${input.organizationId}/ai/${input.requestId}.${input.kind==='video'?'mp4':'jpg'}`;
   const {error:uploadError}=await admin.storage.from(bucket).upload(path,bytes,{contentType:input.kind==='video'?'video/mp4':'image/jpeg',upsert:false});if(uploadError)throw Error('Generated media could not be saved.');
   const {data:{publicUrl}}=admin.storage.from(bucket).getPublicUrl(path);
