@@ -3,6 +3,10 @@
     {
       "path": "/api/brand-discovery/abandoned",
       "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/digital-reports/prepare-monthly",
+      "schedule": "0 14 1 * *"
     }
   ]
 }
