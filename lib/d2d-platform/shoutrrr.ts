@@ -9,6 +9,7 @@ type ConnectedAccount = {
 type MediaInput = { url: string; altText?: string };
 
 type DraftInput = {
+  organizationId: string;
   platform: ConnectedAccount["platform"];
   caption: string;
   media: MediaInput[];
@@ -54,6 +55,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       signal: controller.signal,
       headers: {
         Accept: "application/json",
+        "User-Agent": "Mozilla/5.0 D2D-Social",
         Authorization: `Bearer ${apiKey}`,
         ...(init?.body ? { "Content-Type": "application/json" } : {}),
         ...init?.headers,
@@ -78,12 +80,13 @@ export async function listConnectedAccounts(): Promise<ConnectedAccount[]> {
 async function uploadMedia(input: MediaInput): Promise<string> {
   const result = await request<{ id: string }>("/media", {
     method: "POST",
-    body: JSON.stringify({ url: validateMediaUrl(input.url), alt_text: input.altText ?? null }),
+    body: JSON.stringify({ url: validateMediaUrl(input.url), alt_text: input.altText ?? null, ...(/\.mp4(?:[?#]|$)/i.test(input.url) ? {media_kind:"video",duration_seconds:20,width:1080,height:1920} : {}) }),
   });
   return result.id;
 }
 
 export async function createPlatformDraft(input: DraftInput): Promise<string> {
+  if(input.organizationId !== "209800de-4a2e-41cd-99a7-53bdf5fff3d1") throw new Error("Configure this customer’s publishing workspace before scheduling its approved content.");
   const accounts = await listConnectedAccounts();
   const accountId = approvedAccountId(input.platform);
   const account = accounts.find((row) => row.id === accountId && row.platform === input.platform && row.status === "active");

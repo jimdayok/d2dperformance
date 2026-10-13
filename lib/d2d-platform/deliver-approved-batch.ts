@@ -93,7 +93,7 @@ export async function deliverApprovedBatch(batchId: string, actorId: string) {
 
       let postId = item.shoutrrr_post_id;
       if (!postId) {
-        postId = await createPlatformDraft({ platform: item.platform, caption: item.caption, media: item.media ?? [] });
+        postId = await createPlatformDraft({ organizationId:batch.organization_id, platform: item.platform, caption: item.caption, media: item.media ?? [] });
         const { error: linkError } = await supabase
           .from("social_content_items")
           .update({ shoutrrr_post_id: postId, updated_at: new Date().toISOString() })

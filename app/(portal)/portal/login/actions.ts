@@ -1,46 +1,18 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export type LoginState = { error?: string; message?: string };
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-  next: z.string().optional(),
-});
-
-function safePortalDestination(value?: string) {
-  return value?.startsWith("/portal/") && !value.startsWith("//")
-    ? value
-    : "/portal/dashboard";
+export async function login(): Promise<LoginState> {
+  return { error: "Use D2D Account single sign-on." };
 }
-
-export async function login(_: LoginState, formData: FormData): Promise<LoginState> {
-  const parsed = loginSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password"),
-    next: formData.get("next") || undefined,
-  });
-  if (!parsed.success) return { error: "Enter a valid email and password." };
-  const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
-  if (error) return { error: "Sign-in failed. Check your details or reset your password." };
-  redirect(safePortalDestination(parsed.data.next));
-}
-
-export async function requestPasswordReset(_: LoginState, formData: FormData): Promise<LoginState> {
-  const email = z.string().email().safeParse(formData.get("email"));
-  if (!email.success) return { error: "Enter your email address first." };
-  const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL ?? "https://webadmin.d2dmktg.com";
-  const supabase = await createSupabaseServerClient();
-  await supabase.auth.resetPasswordForEmail(email.data, { redirectTo: `${portalUrl}/auth/callback?next=/portal/set-password` });
-  return { message: "If an account exists, password reset instructions have been sent." };
+export async function requestPasswordReset(): Promise<LoginState> {
+  return { error: "Manage your password through D2D Account." };
 }
 
 export async function signOut() {
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
-  redirect("/portal/login");
+  redirect("https://account.d2dperformance.com/realms/d2d/protocol/openid-connect/logout?client_id=d2d-site-manager");
 }

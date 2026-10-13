@@ -19,6 +19,7 @@ export default async function LoginPage({
   const { next, auth_error: authError } = await searchParams;
   const destination = safePortalDestination(next);
   if (hasSupabaseConfig() && await getCurrentUser()) redirect(destination);
+  if (!authError && process.env.D2D_SSO_ENABLED === "true") redirect(`/portal/login/d2d?next=${encodeURIComponent(destination)}`);
   return (
     <main className="portal-login grid min-h-screen place-items-center px-4 py-6 sm:px-6 lg:px-10">
       <section className="grid w-full max-w-6xl overflow-hidden border border-[#201a16]/12 bg-[#fbf7f1] shadow-[0_40px_120px_rgba(34,24,17,0.14)] lg:min-h-[44rem] lg:grid-cols-[0.9fr_1.1fr]">

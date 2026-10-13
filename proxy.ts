@@ -68,6 +68,8 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(portalUrl);
   }
 
+  if (url.pathname === "/portal/set-password" || url.pathname === "/portal/auth/confirm") return NextResponse.redirect(new URL("/portal/login/d2d", request.url));
+
   let response = NextResponse.next({ request });
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

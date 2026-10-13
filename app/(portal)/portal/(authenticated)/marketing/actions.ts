@@ -489,7 +489,7 @@ export async function createApprovedDraftsAction(formData: FormData) {
     if (row.current_revision !== row.approved_revision) throw new Error("A post changed after approval.");
     if (row.shoutrrr_post_id) continue;
     const item = row as SocialItemRow & { current_revision: number; approved_revision: number };
-    const postId = await createPlatformDraft({ platform: item.platform, caption: item.caption, media: item.media ?? [] });
+    const postId = await createPlatformDraft({ organizationId:batch.organization_id, platform: item.platform, caption: item.caption, media: item.media ?? [] });
     const { error } = await supabase.rpc("record_social_item_shoutrrr_post", {
       check_item: item.id,
       check_post_id: postId,
@@ -529,4 +529,20 @@ export async function scheduleApprovedBatchAction(formData: FormData) {
     throw error;
   }
   revalidatePath("/portal/marketing");
+}
+
+export async function approveSocialItemAction(_previous: MarketingActionState, formData: FormData): Promise<MarketingActionState> {
+  try {
+    requireWritableMarketingEnvironment();
+    const user = await requireSignedIn();
+    const itemId = idSchema.parse(formData.get("itemId"));
+    const revision = Number(formData.get("revision"));
+    if (!Number.isInteger(revision) || revision < 1) throw new Error("Refresh and review the current post.");
+    const supabase = await createSupabaseServerClient();
+    const {data,error} = await supabase.rpc("approve_social_item",{check_item:itemId,check_revision:revision});
+    if(error) throw new Error(error.message);
+    if(data.status === "approved") { try { await deliverApprovedBatch(data.batchId,user.id); } catch { /* Delivery persists failures for staff to resolve. */ } }
+    revalidatePath("/portal/marketing");
+    return {message:data.status === "approved" ? "Post approved. All campaign posts are approved and ready for delivery." : "Post approved. The campaign will schedule after every platform post is approved."};
+  } catch(error) { return initialFailure(error); }
 }
