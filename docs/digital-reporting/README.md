@@ -78,3 +78,11 @@ The admin-only landing page is `/portal/admin/analytics`, linked from Administra
 Reporting migration timestamps were moved to `202610130003` and `202610130004` to avoid collisions with the private-hub and social-limit migrations already on the main branch.
 
 The report sender uses `DIGITAL_REPORT_FROM_EMAIL` when configured, otherwise the existing portal instructions or contact-form sender. No report is sent simply by configuring a sender.
+
+## Activated October 13, 2026
+
+Reporting and logo migrations were applied transactionally to the verified D2D Performance project (`jxawbtbtjenurksrjhqf`) and registered in migration history. Analytics is live on `webadmin.d2dmktg.com/portal/admin/analytics`; the private D2D Sites Operations Hub Administration section uses the existing owner handoff to open that page. Authenticated administrator navigation into the reporting workspace, real customer selection, email configuration status, and anonymous redirects were verified on production. Production reporting tables were empty at activation: no customers were enrolled and no reports were sent.
+
+Monthly draft preparation has its administrator actor and cron authentication configured. It prepares drafts only for enrolled customers with an established audit baseline. It does not collect external measurements. GA4/Search Console data, documented AI-answer checks, inquiry records, and technical measurement evidence still need to be connected or entered. Provider inbox delivery has not been tested by sending a client report.
+
+All 112 application tests and the PostgreSQL reporting workflow checks passed before activation; one additional test then passed for reuse of the existing D2D sender. The Analytics landing page checks the platform admin role before loading account information. The live signed hub handoff and report workspace were verified through Jim’s existing account.
