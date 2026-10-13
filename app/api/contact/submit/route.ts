@@ -1,3 +1,5 @@
+import { createWebsiteFeedbackAltcha } from "@/lib/website-feedback-altcha";
+import { isUnsolicitedLinkPitch } from "@/lib/inquiry-spam";
 import {
   sendContactSubmissionEmail,
   validateContactSubmission,
@@ -19,6 +21,7 @@ export async function POST(request: Request) {
       return untrustedOriginResponse();
     }
 
+    const verificationRequest = request.clone();
     const bodyText = await request.text();
     const payload = safeJsonParse<ContactSubmission | null>(bodyText, null);
 
@@ -36,6 +39,20 @@ export async function POST(request: Request) {
     const validationError = validateContactSubmission(payload);
     if (validationError) {
       return jsonError(validationError, 400);
+    }
+
+    if (isUnsolicitedLinkPitch(payload.message)) {
+      return jsonError("This form is for project inquiries. Unsolicited link-placement offers are not accepted.", 422);
+    }
+
+    try {
+      const response = await createWebsiteFeedbackAltcha().verifyHandler(verificationRequest);
+      const result = await response.json();
+      if (!result.verification?.verified) {
+        return jsonError("Complete the bot verification and try again.", 403);
+      }
+    } catch {
+      return jsonError("Verification is temporarily unavailable. Please try again.", 503);
     }
 
     await sendContactSubmissionEmail(payload);

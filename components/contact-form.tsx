@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AltchaVerification } from "./website-feedback/altcha-verification";
 
 type FormValues = {
   name: string;
@@ -65,6 +66,7 @@ export function ContactForm({
   const [submitState, setSubmitState] = useState<"idle" | "sending" | "success" | "error">(
     "idle",
   );
+  const [verificationKey, setVerificationKey] = useState(0);
   const [feedback, setFeedback] = useState("");
 
   function updateField<K extends keyof FormValues>(field: K, value: FormValues[K]) {
@@ -87,6 +89,7 @@ export function ContactForm({
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    const proof = new FormData(event.currentTarget).get("altcha");
     const nextErrors = validate(values);
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
@@ -106,6 +109,7 @@ export function ContactForm({
         },
         body: JSON.stringify({
           ...values,
+          altcha: proof,
           page: window.location.href,
           source: document.referrer || null,
         }),
@@ -136,6 +140,8 @@ export function ContactForm({
           ? error.message
           : "We couldn't send your message right now. Please try again in a moment.",
       );
+    } finally {
+      setVerificationKey((current) => current + 1);
     }
   }
 
@@ -235,6 +241,11 @@ export function ContactForm({
             </p>
           ) : null}
         </label>
+
+        <div>
+          <AltchaVerification key={verificationKey} />
+          <p className="mt-2 text-sm text-[var(--color-muted)]">Complete the bot verification before sending.</p>
+        </div>
 
         <button
           type="submit"
