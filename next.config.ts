@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  outputFileTracingIncludes: { "/api/social-ai": ["./node_modules/ffmpeg-static/ffmpeg", "./public/social-ai/original-instrumental.wav", "./public/social-ai/fonts/*", "./public/social-ai/fonts.conf"] },
   async redirects() {
     return [
       {

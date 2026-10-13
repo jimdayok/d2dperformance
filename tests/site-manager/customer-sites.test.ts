@@ -4,8 +4,8 @@ import { acadiaHeroSchema } from "@/lib/site-manager/sites/acadia-eye/validation
 import { phoenixGatewaySchema } from "@/lib/site-manager/sites/phoenix-builds/validation";
 
 describe("customer site definitions", () => {
-  it("registers Alford, Acadia Eye, and Phoenix Builds", () => {
-    expect(listSiteDefinitions().map((site) => site.key).sort()).toEqual(["acadia-eye", "alford-custom-homes", "phoenix-builds"]);
+  it("registers Alford, Acadia Eye, Phoenix Builds, and D2D Marketing", () => {
+    expect(listSiteDefinitions().map((site) => site.key).sort()).toEqual(["acadia-eye", "alford-custom-homes", "d2d-marketing", "phoenix-builds"]);
   });
 
   it("keeps preview paths explicitly scoped", () => {
