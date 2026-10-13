@@ -113,41 +113,49 @@ function dateFromKey(value: string) {
   return new Date(`${value}T12:00:00.000Z`);
 }
 
+function PlatformLogo({ platform }: { platform: string }) {
+  const name = platform === "linkedin" ? "LinkedIn" : platform === "instagram" ? "Instagram" : platform === "facebook" ? "Facebook" : platform;
+  return <svg role="img" aria-label={name} viewBox="0 0 24 24" className="size-4 shrink-0" fill="currentColor">
+    {platform === "facebook" ? <path d="M24 12a12 12 0 1 0-13.875 11.854v-8.385H7.078V12h3.047V9.356c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953h-1.513c-1.49 0-1.956.925-1.956 1.874V12h3.328l-.532 3.469h-2.796v8.385A12.003 12.003 0 0 0 24 12Z" /> : platform === "instagram" ? <><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" strokeWidth="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="2"/><circle cx="17.5" cy="6.5" r="1.2"/></> : platform === "linkedin" ? <><rect x="1" y="1" width="22" height="22" rx="2"/><circle cx="6" cy="6.5" r="1.5" fill="white"/><path fill="white" d="M4.5 9h3v10h-3zm5 0h3v1.4c.8-1.2 1.8-1.7 3.2-1.7 2.7 0 3.8 1.6 3.8 4.6V19h-3v-5.1c0-1.7-.5-2.5-1.8-2.5s-2.2 1-2.2 2.6v5h-3z"/></> : platform === "youtube" ? <><rect x="1" y="4" width="22" height="16" rx="5"/><path d="m10 8 6 4-6 4z" fill="white"/></> : platform === "x" || platform === "twitter" ? <path d="M3 2h5l5 7 6-7h2l-7 9 8 11h-5l-6-8-7 8H2l8-10z"/> : <><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2"/><text x="12" y="16" textAnchor="middle" fontSize="12">{name.slice(0,1).toUpperCase()}</text></>}
+  </svg>;
+}
+
 function MarketingCalendarPanel({ promotions, batches, items, nowIso }: { promotions: Promotion[]; batches: Batch[]; items: SocialItem[]; nowIso: string }) {
+  const [monthOffset, setMonthOffset] = useState(0);
   const events = buildMarketingCalendar({ promotions, batches, items });
   const todayKey = centralDateKey(nowIso);
   const today = dateFromKey(todayKey);
-  const start = new Date(today);
-  start.setUTCDate(start.getUTCDate() - start.getUTCDay());
-  const days = Array.from({ length: 42 }, (_, index) => {
-    const date = new Date(start);
-    date.setUTCDate(start.getUTCDate() + index);
-    return { date, key: date.toISOString().slice(0, 10) };
+  const months = Array.from({ length: 3 }, (_, index) => {
+    const month = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + monthOffset + index, 1));
+    const start = new Date(month); start.setUTCDate(1 - start.getUTCDay());
+    return { month, label: new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "UTC" }).format(month), days: Array.from({ length: 42 }, (_, day) => { const date = new Date(start); date.setUTCDate(start.getUTCDate() + day); return { date, key: date.toISOString().slice(0,10) }; }) };
   });
-  const monthLabel = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "UTC" }).format(today);
   return <section id="calendar" className="scroll-mt-8">
-    <SectionHeading icon={CalendarDays} eyebrow="One visible schedule" title="Marketing calendar">See customer updates, approval work, and every platform post in one place. Nothing on this calendar bypasses the approval gate.</SectionHeading>
-    <div className="portal-panel mt-6 overflow-hidden">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#241c17]/10 p-5">
-        <h3 className="font-display text-2xl font-semibold">{monthLabel}</h3>
-        <div className="flex flex-wrap gap-3 text-xs text-[#6d6258]"><span className="inline-flex items-center gap-2"><span className="size-2 rounded-full bg-[#356b52]" />Social post</span><span className="inline-flex items-center gap-2"><span className="size-2 rounded-full bg-[#b26f3f]" />Business update</span></div>
-      </div>
-      <div className="overflow-x-auto">
-        <div className="min-w-[42rem]">
-          <div className="grid grid-cols-7 border-b border-[#241c17]/10 bg-[#f8f2e9] text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-[#776b61]">{["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => <div key={day} className="px-1 py-3">{day}</div>)}</div>
-          <div role="grid" aria-label={`${monthLabel} marketing calendar`} className="grid grid-cols-7 gap-px bg-[#241c17]/10">
+    <SectionHeading icon={CalendarDays} eyebrow="One visible schedule" title="Marketing calendar">See three months of posts and business updates. Platform logos identify each network; posts awaiting approval stay marked for review.</SectionHeading>
+    <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+      <p className="text-sm font-semibold" aria-live="polite">{months[0].label} – {months[2].label}</p>
+      <div className="flex flex-wrap gap-2"><button type="button" className="portal-secondary-button px-3 py-2 text-sm" aria-label="Previous month" onClick={() => setMonthOffset(value => value - 1)}>← Previous month</button><button type="button" className="portal-secondary-button px-3 py-2 text-sm" onClick={() => setMonthOffset(0)}>This month</button><button type="button" className="portal-secondary-button px-3 py-2 text-sm" aria-label="Next month" onClick={() => setMonthOffset(value => value + 1)}>Next month →</button></div>
+    </div>
+    <div className="mt-4 grid gap-5 xl:grid-cols-3">
+      {months.map(({ month, label, days }) => <div key={label} className="portal-panel overflow-hidden">
+        <h3 className="border-b border-[#241c17]/10 p-4 font-display text-xl font-semibold">{label}</h3>
+        <div className="overflow-x-auto"><div className="min-w-[21rem]">
+          <div className="grid grid-cols-7 border-b border-[#241c17]/10 bg-[#f8f2e9] text-center text-[10px] font-semibold text-[#776b61]">{["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(day => <div key={day} className="py-2">{day}</div>)}</div>
+          <div role="grid" aria-label={`${label} marketing calendar`} className="grid grid-cols-7 gap-px bg-[#241c17]/10">
             {days.map(({ date, key }) => {
-              const dayEvents = events.filter((event) => event.dateKey === key);
+              const inMonth = date.getUTCMonth() === month.getUTCMonth();
+              const dayEvents = inMonth ? events.filter(event => event.dateKey === key) : [];
               const isToday = key === todayKey;
-              return <div role="gridcell" key={key} className={`min-h-28 bg-[#fffdf9] p-2 ${isToday ? "ring-2 ring-inset ring-[#9a5f34]" : ""}`}>
-                <p className={`text-xs font-semibold ${isToday ? "text-[#9a5f34]" : "text-[#665b52]"}`}>{date.getUTCDate()}</p>
-                <div className="mt-2 grid gap-1.5">{dayEvents.slice(0, 3).map((event) => <div key={`${event.kind}-${event.id}`} title={event.label} className={`truncate rounded px-1.5 py-1 text-[10px] font-semibold ${event.kind === "promotion" ? "bg-[#f0dfcf] text-[#7b4725]" : "bg-[#dcebe3] text-[#28543f]"}`}>{event.platform ? `${event.platform.slice(0, 2).toUpperCase()} · ` : ""}{event.label}</div>)}{dayEvents.length > 3 ? <p className="text-[10px] text-[#766b61]">+{dayEvents.length - 3} more</p> : null}</div>
+              return <div role="gridcell" aria-label={`${key}${dayEvents.length ? `, ${dayEvents.length} events` : ""}`} key={key} className={`min-h-24 p-1.5 ${inMonth ? "bg-[#fffdf9]" : "bg-[#f1ede7] text-[#a79b90]"} ${isToday ? "ring-2 ring-inset ring-[#9a5f34]" : ""}`}>
+                <p className="text-xs font-semibold">{date.getUTCDate()}</p>
+                <div className="mt-2 flex flex-wrap gap-1">{dayEvents.map(event => <a key={`${event.kind}-${event.id}`} href={event.kind === "post" ? "#content" : "#promotions"} aria-label={`${event.platform ?? "Business update"}: ${event.label}, ${event.status.replaceAll("_", " ")}`} title={`${event.platform ?? "Business update"} · ${event.label} · ${event.status.replaceAll("_", " ")}`} className={`inline-flex items-center justify-center rounded p-1.5 focus-visible:outline-2 focus-visible:outline-offset-2 ${event.kind === "promotion" ? "bg-[#f0dfcf] text-[#7b4725]" : event.status === "scheduled" || event.status === "published" ? "bg-[#dcebe3] text-[#28543f]" : "bg-[#eee3d5] text-[#7b4725]"}`}>{event.platform ? <PlatformLogo platform={event.platform}/> : <Megaphone className="size-4" aria-hidden="true"/>}</a>)}</div>
               </div>;
             })}
           </div>
-        </div>
-      </div>
+        </div></div>
+      </div>)}
     </div>
+    <p className="mt-3 text-xs text-[#6d6258]">Green: scheduled or published · Sand: awaiting approval or preparation · Select a logo to review the posts.</p>
   </section>;
 }
 
