@@ -6,9 +6,9 @@ import { getProductAccess } from "@/lib/d2d-platform/access";
 import { getProductLaunchHref } from "@/lib/d2d-platform/product-navigation";
 
 const productDetails = {
-  social: { name: "D2D Social", description: "Review marketing plans, share sales and specials, approve social content, and monitor scheduled work.", icon: Share2 },
-  brand_vault: { name: "Brand Vault", description: "Keep approved logos, photography, and brand files organized in one secure customer library.", icon: FolderHeart },
-  web_management: { name: "Web Management", description: "Review website content, publishing status, and feedback for D2D-managed websites.", icon: Globe2 },
+  social: { name: "D2D Social", description: "Review marketing plans, share sales and specials, approve social content, and monitor scheduled work.", icon: Share2, logo: "/d2d-social.png" },
+  brand_vault: { name: "Brand Vault", description: "Keep approved logos, photography, and brand files organized in one secure customer library.", icon: FolderHeart, logo: "/d2d-brand-vault.png" },
+  web_management: { name: "Web Management", description: "Review website content, publishing status, and feedback for D2D-managed websites.", icon: Globe2, logo: "/d2d-site-manager.png" },
 } as const;
 
 export default async function DashboardPage() {
@@ -51,12 +51,11 @@ export default async function DashboardPage() {
               <div className="grid gap-5 border-t border-[#241c17]/10 bg-[#f4f0e9] p-5 md:grid-cols-2 xl:grid-cols-3 sm:p-7">
                 {customer.products.map((product) => {
                   const details = productDetails[product.product];
-                  const Icon = details.icon;
                   const internalHref = getProductLaunchHref(product, sites);
                   const external = internalHref.startsWith("http");
                   const actionLabel = product.product === "web_management" && !external ? "Open website editor" : "Open service";
                   return <article key={`${product.organizationId}:${product.product}`} className="portal-site-card p-6">
-                    <div className="flex items-start justify-between gap-4"><span className="grid size-11 place-items-center border border-[#9a5f34]/20 bg-[#9a5f34]/8 text-[#9a5f34]"><Icon size={19} strokeWidth={1.7} /></span><span className="text-xs font-medium text-[#776b61]"><span className="mr-2 inline-block size-1.5 rounded-full bg-emerald-600" />Active</span></div>
+                    <div className="flex items-start justify-between gap-4"><img src={details.logo} alt={details.name} className="h-16 max-w-[75%] rounded-lg bg-[#192b2c] p-3 object-contain" /><span className="text-xs font-medium text-[#776b61]"><span className="mr-2 inline-block size-1.5 rounded-full bg-emerald-600" />Active</span></div>
                     <h3 className="mt-7 font-display text-3xl font-semibold">{details.name}</h3>
                     <p className="mt-3 min-h-20 text-sm leading-6 text-[#6d6258]">{details.description}</p>
                     <div className="mt-5 border-t border-[#241c17]/10 pt-5">

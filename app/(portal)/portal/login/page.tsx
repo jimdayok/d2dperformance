@@ -25,8 +25,7 @@ export default async function LoginPage({
       <section className="grid w-full max-w-6xl overflow-hidden border border-[#201a16]/12 bg-[#fbf7f1] shadow-[0_40px_120px_rgba(34,24,17,0.14)] lg:min-h-[44rem] lg:grid-cols-[0.9fr_1.1fr]">
         <div className="portal-login-story relative flex min-h-[24rem] flex-col overflow-hidden bg-[#17201d] p-8 text-white sm:p-10 lg:p-14">
           <div className="relative z-10 flex items-center gap-3">
-            <span className="grid size-12 place-items-center bg-[#d6a77f] text-sm font-semibold tracking-[-0.08em] text-[#17201d]">D2D</span>
-            <div><p className="text-[9px] font-semibold uppercase tracking-[0.34em] text-[#d6a77f]">Marketing</p><p className="mt-1 font-display text-2xl leading-none">D2D Account</p></div>
+            <img src="/d2d-site-manager.png" alt="DAY2DAY Site Manager" className="w-full max-w-sm rounded-lg bg-[#192b2c] p-4" />
           </div>
           <div className="relative z-10 my-auto py-12">
             <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#d6a77f]">One account for your D2D services</p>

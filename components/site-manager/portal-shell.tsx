@@ -19,15 +19,11 @@ export async function PortalShell({ children, definition, access, displayName, s
     <div className="portal-shell min-h-screen lg:grid lg:grid-cols-[19rem_minmax(0,1fr)]">
       <aside className="portal-sidebar border-b border-white/10 px-5 py-5 text-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:border-r lg:border-b-0 lg:px-6 lg:py-7">
         <Link href="/portal/dashboard" className="group flex items-center gap-3">
-          <span className="grid size-11 place-items-center border border-[#d6a77f]/55 bg-[#d6a77f] text-sm font-semibold tracking-[-0.08em] text-[#17201d] transition-transform group-hover:-rotate-2">D2D</span>
-          <span>
-            <span className="block text-[9px] font-semibold uppercase tracking-[0.32em] text-[#d6a77f]">Marketing</span>
-            <span className="mt-1 block font-display text-[1.65rem] leading-none">D2D Account</span>
-          </span>
+          <img src="/d2d-site-manager.png" alt="DAY2DAY Site Manager" className="w-full max-w-64 rounded-lg bg-[#192b2c] p-3" />
         </Link>
 
         <nav aria-label="D2D Account" className="mt-8 grid gap-1 border-t border-white/12 pt-6">
-          <Link href="/portal/dashboard" className="portal-sidebar-link"><LayoutGrid size={15} /> My services</Link>
+          <Link href="/portal/dashboard" className="portal-sidebar-link"><LayoutGrid size={15} /> My services</Link><Link href="/portal/assessments" className="portal-sidebar-link"><Globe2 size={15}/> AI visibility &amp; SEO reports</Link>
           {canUseSocial ? <Link href="/portal/marketing" className="portal-sidebar-link"><Share2 size={15} /> Social &amp; marketing</Link> : null}
           {isPlatformAdmin ? <Link href="/portal/admin/products" className="portal-sidebar-link"><Settings2 size={15} /> Administration</Link> : null}
         </nav>
