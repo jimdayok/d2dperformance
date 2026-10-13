@@ -31,7 +31,7 @@ Not implemented: OAuth to GA4/Search Console; property discovery; automatic CRM/
 
 ## Deployment prerequisites (not applied by this change)
 
-1. Back up and review the target Supabase schema; apply `supabase/migrations/202610130001_digital_performance_reports.sql` after the existing customer-platform migrations. Use the SQL migration only once.
+1. Back up and review the target Supabase schema; apply `supabase/migrations/202610130003_digital_performance_reports.sql` after the existing customer-platform migrations. Use the SQL migration only once.
 2. Confirm existing Supabase auth and server service-role configuration for the same D2D Admin project.
 3. Configure `RESEND_API_KEY`, a verified `DIGITAL_REPORT_FROM_EMAIL`, `CRON_SECRET`, and `DIGITAL_REPORT_AUTOMATION_ACTOR_ID`. Keep them server-only and separate for preview/production. No credentials belong in source or reports.
 4. Review/deploy this branch, verify administrator and customer sessions against the target database, then prepare an audit using actual evidence. Complete a delivery test only to an explicitly authorized test recipient. No customer emails have been sent during development.
@@ -67,6 +67,14 @@ New reports include a dedicated graph page for website visitors, unpaid Google s
 
 The administrator can upload a PNG, JPG or WebP customer logo under **Personalize the report** after saving the customer's enrollment. Uploads are limited to 2 MB and 4 million pixels, validated by file signatures and decoding, converted to a bounded PNG, and stored privately per organization with an integrity digest. SVG and remote image URLs are not accepted. The saved logo appears alongside D2D on every newly generated page and is included in the immutable report snapshot. Changing or removing a logo increments the customer's settings revision and invalidates pending approval. Previously saved/released PDFs retain the original logo. Reissuing audit branding does not replace the original measurement baseline. Pending/uncertain delivery prevents logo changes until reconciliation.
 
-Apply the additive `supabase/migrations/202610130002_digital_report_branding.sql` **after** the original reporting migration before deploying this revision. This migration has been tested in embedded PostgreSQL but has not been applied to production.
+Apply the additive `supabase/migrations/202610130004_digital_report_branding.sql` **after** the original reporting migration before deploying this revision. This migration has been tested in embedded PostgreSQL but has not been applied to production.
 
 The Alford review PDFs are explicitly labeled **DESIGN EXAMPLE / SAMPLE DATA** on every page, with an illustration caption on each graph and a cover explanation. They use Alford's existing website logo, resized without changing the artwork. Their example figures are not Alford performance measurements and are never saved as customer reports or emailed. Sample-data rendering requires the explicit review-copy option, which is not exposed by the report API or monthly preparation job. Actual reports use the customer's saved logo and supplied evidence only.
+
+## D2D Analytics administration
+
+The admin-only landing page is `/portal/admin/analytics`, linked from Administration headquarters and the admin sidebar. It provides the client reporting tool at `/portal/reports` and a home for future analytics tools. Customers continue to see only their released PDFs through Performance reports. The private D2D Sites Operations Hub links through `/launch/analytics`; its signed, single-use existing owner handoff redirects to the Analytics landing page, which still checks the platform administrator role. No customer permissions or report delivery behavior are expanded.
+
+Reporting migration timestamps were moved to `202610130003` and `202610130004` to avoid collisions with the private-hub and social-limit migrations already on the main branch.
+
+The report sender uses `DIGITAL_REPORT_FROM_EMAIL` when configured, otherwise the existing portal instructions or contact-form sender. No report is sent simply by configuring a sender.

@@ -141,7 +141,7 @@ export function ReportingWorkspace({
           D2D Marketing
         </p>
         <h1 className="mt-2 font-display text-4xl">
-          Digital Performance Reporting
+          D2D Analytics · Client reports
         </h1>
         <p className="mt-3 text-stone-600">
           Generate PDF → Preview → Review → Approve → Send Report. Every

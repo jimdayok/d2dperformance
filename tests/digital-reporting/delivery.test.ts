@@ -21,7 +21,7 @@ vi.mock("resend", () => ({
     emails = { send: mocks.send };
   },
 }));
-import { executeReportCommand } from "@/lib/digital-reporting/service";
+import { executeReportCommand, emailReady } from "@/lib/digital-reporting/service";
 import { POST } from "@/app/api/digital-reports/route";
 const organizationId = "20000000-0000-4000-8000-000000000001",
   reportId = "30000000-0000-4000-8000-000000000001";
@@ -54,6 +54,15 @@ beforeEach(() => {
   mocks.admin.mockReturnValue({ rpc: finish });
 });
 describe("manual report delivery", () => {
+  it("reuses the existing D2D sender while preserving manual delivery", async () => {
+    delete process.env.DIGITAL_REPORT_FROM_EMAIL;
+    process.env.CONTACT_FORM_FROM_EMAIL = "D2D <reports@example.com>";
+    expect(emailReady()).toBe(true);
+    await executeReportCommand({ action: "send", organizationId, reportId, expected: 1 });
+    expect(mocks.send.mock.calls[0][0].from).toBe("D2D <reports@example.com>");
+    delete process.env.CONTACT_FORM_FROM_EMAIL;
+  });
+
   it("approval only records approval and never calls email", async () => {
     await executeReportCommand({
       action: "approve",

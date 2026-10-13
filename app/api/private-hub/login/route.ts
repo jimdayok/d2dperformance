@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     const { data, error } = await client.auth.verifyOtp({ type: "magiclink", token_hash: link.properties.hashed_token });
     if (error || data.user?.email !== claim.sub) throw Error();
     // No external email is sent. Existing account roles and RLS remain in force.
-    const response = NextResponse.redirect(new URL(claim.target === "review" ? "/portal/marketing" : "/portal/dashboard", request.url), { status: 303, headers: { "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" } });
+    const response = NextResponse.redirect(new URL(claim.target === "review" ? "/portal/marketing" : claim.target === "analytics" ? "/portal/admin/analytics" : "/portal/dashboard", request.url), { status: 303, headers: { "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" } });
     // Cross-site POST omits old SameSite=Lax cookies. Expire leftover chunks
     // explicitly before writing the new session, so an old longer SSO cookie
     // cannot corrupt the new shorter session on the redirected GET.

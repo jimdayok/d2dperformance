@@ -20,13 +20,13 @@ await db.exec(`
 `);
 await db.exec(
   readFileSync(
-    "supabase/migrations/202610130001_digital_performance_reports.sql",
+    "supabase/migrations/202610130003_digital_performance_reports.sql",
     "utf8",
   ),
 );
 await db.exec(
   readFileSync(
-    "supabase/migrations/202610130002_digital_report_branding.sql",
+    "supabase/migrations/202610130004_digital_report_branding.sql",
     "utf8",
   ),
 );

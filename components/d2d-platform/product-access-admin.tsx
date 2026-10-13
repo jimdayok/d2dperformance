@@ -594,7 +594,7 @@ export function ProductAccessAdmin({
         <p className="mt-3 max-w-3xl text-sm leading-6 text-[#6d6258]">Add customers and people, assign every D2D service from one place, and monitor account activity and file usage.</p>
       </header>
 
-      <a href="/portal/reports" className="portal-panel block border p-5"><span className="font-display text-2xl">Digital Performance Reporting</span><span className="mt-2 block text-sm text-[#6d6258]">Enroll customers, prepare audit and monthly PDFs, review, approve, and manually send each report.</span></a>
+      <a href="/portal/admin/analytics" className="portal-panel block border p-5"><span className="font-display text-2xl">D2D Analytics</span><span className="mt-2 block text-sm text-[#6d6258]">Create initial and monthly client reports, manage recipients, and review results. More analytics tools will be added here.</span></a>
 
       <DashboardOverview dashboard={dashboard} />
 

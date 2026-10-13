@@ -48,9 +48,13 @@ export async function requireReportAdmin() {
   if (!(await getPlatformAdminStatus()))
     throw new Error("Platform administrator permission required.");
 }
+function reportSender() {
+  return process.env.DIGITAL_REPORT_FROM_EMAIL || process.env.PORTAL_INSTRUCTIONS_FROM_EMAIL || process.env.CONTACT_FORM_FROM_EMAIL;
+}
+
 export function emailReady() {
   return Boolean(
-    process.env.RESEND_API_KEY && process.env.DIGITAL_REPORT_FROM_EMAIL,
+    process.env.RESEND_API_KEY && reportSender(),
   );
 }
 async function command(
@@ -246,7 +250,7 @@ export async function executeReportCommand(raw: unknown) {
       process.env.RESEND_API_KEY,
     ).emails.send(
       {
-        from: process.env.DIGITAL_REPORT_FROM_EMAIL!,
+        from: reportSender()!,
         to: claim.recipients,
         subject: `D2D Digital Performance Report | ${v.snapshot.organizationName} | ${v.snapshot.period.slice(0, 7)}`,
         text: `Your D2D Digital Performance Report is attached. This report covers ${v.snapshot.period.slice(0, 7)} and includes the available evidence, baseline comparisons, and next steps.\n\nD2D Marketing`,
