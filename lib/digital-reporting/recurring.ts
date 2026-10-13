@@ -94,10 +94,26 @@ export async function prepareMonthlyDrafts(now = new Date()) {
           metrics: pv!.snapshot.metrics,
         };
       }
+      const { data: branding, error: brandingError } = await db
+        .from("digital_report_branding")
+        .select("png_base64,sha256,filename")
+        .eq("organization_id", e.organization_id)
+        .maybeSingle();
+      if (brandingError)
+        throw new Error(
+          "Customer logo settings could not be loaded. Apply the reporting logo migration.",
+        );
       const snapshot: Snapshot = {
         ...emptyContent(),
         summary:
           "This month's results are waiting to be confirmed. D2D will explain the important changes and next steps after reviewing the information.",
+        clientLogo: branding
+          ? {
+              pngBase64: branding.png_base64,
+              sha256: branding.sha256,
+              filename: branding.filename,
+            }
+          : null,
         organizationName: org.name,
         organizationId: e.organization_id,
         kind: "monthly",

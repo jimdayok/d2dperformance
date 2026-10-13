@@ -47,7 +47,7 @@ export default async function ReportsPage() {
       </div>
     );
   } else if (isAdmin) {
-    const [orgs, enrollments, events] = await Promise.all([
+    const [orgs, enrollments, events, branding] = await Promise.all([
       db
         .from("organizations")
         .select("id,name")
@@ -61,13 +61,23 @@ export default async function ReportsPage() {
         )
         .order("created_at", { ascending: false })
         .limit(100),
+      db.from("digital_report_branding").select("organization_id,filename"),
     ]);
     if (orgs.error || enrollments.error || events.error)
       throw new Error("Reporting customer data could not be loaded.");
+    if (branding.error)
+      throw new Error(
+        "Apply the customer logo migration to enable report personalization.",
+      );
     body = (
       <ReportingWorkspace
         organizations={orgs.data ?? []}
-        enrollments={enrollments.data ?? []}
+        enrollments={(enrollments.data ?? []).map((e) => ({
+          ...e,
+          logoFilename:
+            branding.data?.find((b) => b.organization_id === e.organization_id)
+              ?.filename ?? null,
+        }))}
         reports={reportResult.data ?? []}
         versions={versionResult.data ?? []}
         deliveries={deliveryResult.data ?? []}

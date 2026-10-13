@@ -160,8 +160,24 @@ export async function executeReportCommand(raw: unknown) {
         metrics: v!.snapshot.metrics,
       };
     }
+    const { data: branding, error: brandingError } = await db
+      .from("digital_report_branding")
+      .select("png_base64,sha256,filename")
+      .eq("organization_id", input.organizationId)
+      .maybeSingle();
+    if (brandingError)
+      throw new Error(
+        "Customer logo settings could not be loaded. Apply the reporting logo migration.",
+      );
     const snapshot: Snapshot = {
       ...input.content,
+      clientLogo: branding
+        ? {
+            pngBase64: branding.png_base64,
+            sha256: branding.sha256,
+            filename: branding.filename,
+          }
+        : null,
       organizationName: organization.name,
       organizationId: input.organizationId,
       kind: input.kind,

@@ -175,6 +175,7 @@ export const enrollmentSchema = z
   });
 export type EnrollmentInput = z.infer<typeof enrollmentSchema>;
 export type Snapshot = ReportContent & {
+  clientLogo?: { pngBase64: string; sha256: string; filename: string } | null;
   organizationName: string;
   organizationId: string;
   kind: "audit" | "monthly";

@@ -1,4 +1,5 @@
 import { PGlite } from "@electric-sql/pglite";
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
 const db = new PGlite();
@@ -20,6 +21,12 @@ await db.exec(`
 await db.exec(
   readFileSync(
     "supabase/migrations/202610130001_digital_performance_reports.sql",
+    "utf8",
+  ),
+);
+await db.exec(
+  readFileSync(
+    "supabase/migrations/202610130002_digital_report_branding.sql",
     "utf8",
   ),
 );
@@ -309,4 +316,103 @@ await fails(
   "permission denied",
 );
 await db.exec("reset role");
+
+await identity(admin);
+const pendingNovember = (
+  await db.query(
+    "select id,current_version from digital_reports where kind='monthly' and period='2026-11-01'",
+  )
+).rows[0];
+await cmd("review", pendingNovember.id, pendingNovember.current_version);
+await cmd("approve", pendingNovember.id, pendingNovember.current_version);
+const logoBytes = readFileSync("public/assets/reporting/d2d-mark.png");
+const logo = {
+  pngBase64: logoBytes.toString("base64"),
+  sha256: createHash("sha256").update(logoBytes).digest("hex"),
+  filename: "QA-logo.png",
+};
+await db.query("select digital_report_set_logo($1,$2,$3)", [
+  org,
+  2,
+  JSON.stringify(logo),
+]);
+assert.equal(
+  (
+    await db.query("select status from digital_reports where id=$1", [
+      pendingNovember.id,
+    ])
+  ).rows[0].status,
+  "draft",
+  "Logo edits invalidate approval",
+);
+assert.equal(
+  (await db.query("select revision from digital_report_enrollments")).rows[0]
+    .revision,
+  3,
+);
+assert.equal(
+  (await db.query("select baseline_version_id from digital_report_enrollments"))
+    .rows[0].baseline_version_id,
+  baseline,
+);
+await fails(
+  () =>
+    db.query("select digital_report_set_logo($1,$2,$3)", [
+      org,
+      2,
+      JSON.stringify(logo),
+    ]),
+  "changed",
+);
+await cmd(
+  "draft",
+  audit.id,
+  2,
+  draftPayload({ ...refreshed, clientLogo: logo }, "audit", "2026-09-01", 3),
+);
+await cmd("review", audit.id, 3);
+await cmd("approve", audit.id, 3);
+assert.equal(
+  (await db.query("select baseline_version_id from digital_report_enrollments"))
+    .rows[0].baseline_version_id,
+  baseline,
+  "Reissuing a logo does not replace the audit baseline",
+);
+await identity(client);
+await fails(
+  () =>
+    db.query("select digital_report_set_logo($1,$2,$3)", [
+      org,
+      3,
+      JSON.stringify(logo),
+    ]),
+  "administrator",
+);
+await db.exec("set role authenticated");
+assert.equal(
+  (await db.query("select * from digital_report_branding")).rows.length,
+  0,
+  "Customer logo upload storage is administrator-only",
+);
+await db.exec("reset role");
+await identity(admin);
+await db.query("select digital_report_set_logo($1,$2,$3)", [org, 3, null]);
+assert.equal(
+  (await db.query("select count(*)::int n from digital_report_branding"))
+    .rows[0].n,
+  0,
+  "Logo removal is explicit",
+);
+assert.equal(
+  (
+    await db.query("select current_version from digital_reports where id=$1", [
+      audit.id,
+    ])
+  ).rows[0].current_version,
+  3,
+  "Old PDF versions remain unchanged",
+);
+console.log(
+  "PASS: customer logo authorization, approval invalidation, immutable baseline on logo reissue, versioned logo snapshots, and explicit logo removal.",
+);
 await db.close();

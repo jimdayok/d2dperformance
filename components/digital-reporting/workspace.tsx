@@ -1,4 +1,5 @@
 "use client";
+import { CustomerLogo } from "./customer-logo";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -19,6 +20,7 @@ export type Enrollment = {
   proposal_reference: string;
   revision: number;
   baseline_version_id: string | null;
+  logoFilename?: string | null;
 };
 export type Report = {
   id: string;
@@ -268,6 +270,13 @@ export function ReportingWorkspace({
           </button>
         </form>
       </section>
+      <CustomerLogo
+        organizationId={org}
+        revision={e?.revision ?? null}
+        filename={e?.logoFilename ?? null}
+        disabled={busy}
+        onMessage={setMessage}
+      />
       <section className="rounded border border-stone-200 bg-white p-5">
         <h2 className="font-display text-2xl">Reports & delivery history</h2>
         <p className="mt-2 text-sm text-stone-600">

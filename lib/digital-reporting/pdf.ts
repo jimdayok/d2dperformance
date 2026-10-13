@@ -1,16 +1,36 @@
+import { createHash } from "node:crypto";
+import {
+  drawIcon,
+  drawComparisonGraph,
+  chartPoints,
+  type IconName,
+} from "./graphics";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { PDFDocument, StandardFonts, rgb, type PDFFont } from "pdf-lib";
+import {
+  PDFDocument,
+  StandardFonts,
+  rgb,
+  type PDFFont,
+  type PDFImage,
+} from "pdf-lib";
 import { clientChange, clientMetrics, clientValue } from "./client-language";
 import type { Metric, Snapshot } from "./model";
 
-export type ReportPdfOptions = { templateDraft?: boolean };
+export type ReportPdfOptions = {
+  templateDraft?: boolean;
+  illustrativeData?: boolean;
+};
 /** Two client-facing layouts. Approval/delivery state never changes a saved PDF. */
 export async function renderReportPdf(
   snapshot: Snapshot,
   version: number,
   options: ReportPdfOptions = {},
 ) {
+  if (options.illustrativeData && !options.templateDraft)
+    throw new Error(
+      "Illustrative figures are allowed only in clearly marked review examples.",
+    );
   const doc = await PDFDocument.create();
   const regular = await doc.embedFont(StandardFonts.Helvetica),
     bold = await doc.embedFont(StandardFonts.HelveticaBold),
@@ -18,6 +38,16 @@ export async function renderReportPdf(
   const mark = await doc.embedPng(
     await readFile(join(process.cwd(), "public/assets/reporting/d2d-mark.png")),
   );
+  let customerMark: PDFImage | null = null;
+  if (snapshot.clientLogo) {
+    const bytes = Buffer.from(snapshot.clientLogo.pngBase64, "base64");
+    if (
+      createHash("sha256").update(bytes).digest("hex") !==
+      snapshot.clientLogo.sha256
+    )
+      throw new Error("Customer logo integrity check failed.");
+    customerMark = await doc.embedPng(bytes);
+  }
   const plum = rgb(0.29, 0.2, 0.2),
     rose = rgb(0.98, 0.8, 0.81),
     cream = rgb(0.97, 0.96, 0.93),
@@ -93,14 +123,40 @@ export async function renderReportPdf(
       font: regular,
       color: cream,
     });
-    if (options.templateDraft)
-      page.drawText("TEMPLATE DRAFT / FOR REVIEW", {
-        x: 386,
-        y: 774,
-        size: 8,
-        font: bold,
-        color: rose,
+    if (customerMark) {
+      page.drawRectangle({
+        x: 427,
+        y: 702,
+        width: 141,
+        height: 62,
+        color: cream,
       });
+      const factor = Math.min(
+        125 / customerMark.width,
+        52 / customerMark.height,
+      );
+      const w = customerMark.width * factor,
+        h = customerMark.height * factor;
+      page.drawImage(customerMark, {
+        x: 427 + (141 - w) / 2,
+        y: 702 + (62 - h) / 2,
+        width: w,
+        height: h,
+      });
+    }
+    if (options.templateDraft)
+      page.drawText(
+        options.illustrativeData
+          ? "DESIGN EXAMPLE / SAMPLE DATA"
+          : "TEMPLATE DRAFT / FOR REVIEW",
+        {
+          x: 386,
+          y: 774,
+          size: 8,
+          font: bold,
+          color: rose,
+        },
+      );
   }
   header(
     monthly
@@ -133,7 +189,22 @@ export async function renderReportPdf(
   function heading(s: string) {
     if (y < 120) newPage(sections.at(-1) ?? "Continued");
     y -= 7;
-    paragraph(s, 16, serif, plum);
+    const lower = s.toLowerCase();
+    const icon: IconName = lower.includes("google")
+      ? "search"
+      : lower.includes("ai assistant")
+        ? "sparkles"
+        : lower.includes("people using")
+          ? "people"
+          : lower.includes("next step")
+            ? "inquiry"
+            : lower.includes("website")
+              ? "website"
+              : lower.includes("figure")
+                ? "chart"
+                : "plan";
+    drawIcon(page, icon, 44, y - 2, 18, plum);
+    paragraph(s, 16, serif, plum, 500, 68);
   }
   function note(s: string) {
     paragraph(s, 9.5, regular, muted);
@@ -282,8 +353,20 @@ export async function renderReportPdf(
           : key === "organic_clicks"
             ? "Visits from Google"
             : "Customer inquiries";
+      drawIcon(
+        page,
+        key === "users"
+          ? "people"
+          : key === "organic_clicks"
+            ? "search"
+            : "inquiry",
+        x + 12,
+        y - 25,
+        14,
+        plum,
+      );
       page.drawText(label, {
-        x: x + 12,
+        x: x + 34,
         y: y - 20,
         size: 10,
         font: bold,
@@ -347,7 +430,12 @@ export async function renderReportPdf(
   const confirmed = snapshot.metrics.filter(
     (m) => m.status === "verified",
   ).length;
-  if (confirmed === 0)
+  if (options.illustrativeData)
+    callout(
+      "Design example only",
+      "These sample figures show how the charts and comparisons will look. They are not actual results for this customer. Final reports will use confirmed information.",
+    );
+  else if (confirmed === 0)
     callout(
       monthly ? "What we can confirm this month" : "A clear starting point",
       "We do not yet have measured results for this report. That does not mean your business had no visitors or inquiries. It means we need the information before we can make a fair assessment.",
@@ -358,6 +446,43 @@ export async function renderReportPdf(
       `${confirmed} of the ${snapshot.metrics.length} measures in this review have supporting information. A result marked 'Not measured' is unknown, not zero. We explain any gaps at the back of this report.`,
     );
 
+  newPage(monthly ? "Your progress in pictures" : "Your starting picture");
+  title(
+    monthly
+      ? "Your progress, at a glance."
+      : "Your starting picture, at a glance.",
+  );
+  paragraph(
+    monthly
+      ? "These graphs compare your starting point, last month and this month. Each graph uses its own scale. Missing or differently counted results are left blank."
+      : "These graphs show your first recorded results. Your monthly reviews will add comparisons so you can see what changed. Missing results stay blank rather than becoming zero.",
+  );
+  for (const [key, label, icon] of [
+    ["users", "People who visited your website", "people"],
+    ["organic_clicks", "Visits from Google search", "search"],
+    ["leads", "Confirmed customer inquiries", "inquiry"],
+  ] as const) {
+    if (y < 215) newPage("Your results in pictures");
+    drawComparisonGraph(
+      page,
+      chartPoints(snapshot, key),
+      label,
+      icon,
+      44,
+      y,
+      524,
+      132,
+      regular,
+      bold,
+      Boolean(options.illustrativeData),
+    );
+    y -= 148;
+  }
+  note(
+    monthly
+      ? "The starting point stays tied to your original review. The last-month result is shown only when the information can be compared fairly."
+      : "This is a starting measurement, not a claim of growth. Later reviews will show whether these results change.",
+  );
   newPage(
     monthly
       ? "How customers found you this month"
@@ -378,7 +503,7 @@ export async function renderReportPdf(
   );
   if (monthly && metric("organic_clicks").status === "verified")
     note(
-      `Google search visits compared with last month: ${clientChange(metric("organic_clicks"), previous("organic_clicks"))}`,
+      `Google search visits: ${clientChange(metric("organic_clicks"), previous("organic_clicks"))}`,
     );
   heading("Finding you through AI assistants");
   resultTable(["ai_mentions", "ai_citations"]);
@@ -549,8 +674,9 @@ export async function renderReportPdf(
       "No verified data supplied for this period.",
       "We have not received the information needed to measure this yet.",
     ];
-    const detail =
-      m.status === "verified"
+    const detail = options.illustrativeData
+      ? "Design example only. These figures demonstrate the layout and charts; no customer measurements or evidence were collected."
+      : m.status === "verified"
         ? `Checked: ${date}. Supporting record: ${m.evidence}.\nWhat was included: ${m.method}.`
         : commonReasons.includes(m.reason)
           ? ""
@@ -574,11 +700,13 @@ export async function renderReportPdf(
       }),
     );
     const status =
-      m.status === "verified"
-        ? "Measured"
-        : m.status === "not_applicable"
-          ? "Does not apply"
-          : "Not measured";
+      options.illustrativeData && m.status === "verified"
+        ? "Example only"
+        : m.status === "verified"
+          ? "Measured"
+          : m.status === "not_applicable"
+            ? "Does not apply"
+            : "Not measured";
     page.drawText(status, { x: 484, y, size: 9, font: regular, color: muted });
     y -= labelRows.length * 15 + 2;
     for (const row of [...coveredRows, ...detailRows]) {
