@@ -5,16 +5,17 @@ import {requireProductAccess} from '@/lib/d2d-platform/access';
 import {createSupabaseAdminClient} from '@/lib/supabase/admin';
 import {createSupabaseServerClient} from '@/lib/supabase/server';
 import {loadBrand} from '@/lib/social-ai/brand';
-import {generateCreative} from '@/lib/social-ai/generate';
+import {generateCreative,prepareCreative,estimateCreative} from '@/lib/social-ai/generate';
+import {defaultLimits,summarizeJobs,centralPeriodStart} from '@/lib/social-ai/usage';
 import {composeGraphic,renderVideo} from '@/lib/social-ai/render';
 export const runtime='nodejs';
 export const maxDuration=300;
-const inputSchema=z.object({requestId:z.string().uuid(),organizationId:z.string().uuid(),planId:z.string().uuid(),logoId:z.string().uuid().optional(),topic:z.string().trim().min(8).max(2000),kind:z.enum(['graphic','video']),platforms:z.array(z.enum(['facebook','instagram','linkedin'])).min(1).max(3),scheduledFor:z.string().datetime()});
+const inputSchema=z.object({requestId:z.string().uuid(),organizationId:z.string().uuid(),planId:z.string().uuid(),logoId:z.string().uuid().optional(),topic:z.string().trim().min(8).max(2000),kind:z.enum(['graphic','video']),platforms:z.array(z.enum(['facebook','instagram','linkedin'])).min(1).max(3),scheduledFor:z.string().datetime(),estimateOnly:z.boolean().optional()});
 export async function GET(request:Request){
  try{const user=await getCurrentUser();if(!user)return NextResponse.json({error:'Sign in first.'},{status:401});const params=new URL(request.url).searchParams;
- if(params.get('job')){const id=z.string().uuid().parse(params.get('job'));const {data:job}=await createSupabaseAdminClient().from('social_ai_jobs').select('id,organization_id,status,batch_id,message').eq('id',id).eq('created_by',user.id).maybeSingle();if(!job)return NextResponse.json({error:'Draft not found.'},{status:404});await requireProductAccess(job.organization_id,'social',['manager','creator']);return NextResponse.json(job,{headers:{'Cache-Control':'no-store'}});}
- const org=z.string().uuid().parse(params.get('organization'));const access=await requireProductAccess(org,'social',['manager','creator']);const brand=await loadBrand(org,access.organizationSlug);
- return NextResponse.json({logos:brand.logos.map(l=>({id:l.id,title:l.title})),guideCount:brand.guideCount,logoTitle:brand.logoTitle},{headers:{'Cache-Control':'no-store'}});
+ if(params.get('job')){const id=z.string().uuid().parse(params.get('job'));const {data:job}=await createSupabaseAdminClient().from('social_ai_jobs').select('id,organization_id,status,batch_id,message,token_estimate,copy_usage,image_usage').eq('id',id).eq('created_by',user.id).maybeSingle();if(!job)return NextResponse.json({error:'Draft not found.'},{status:404});await requireProductAccess(job.organization_id,'social',['manager','creator']);return NextResponse.json(job,{headers:{'Cache-Control':'no-store'}});}
+ const org=z.string().uuid().parse(params.get('organization'));const access=await requireProductAccess(org,'social',['manager','creator']);const brand=await loadBrand(org,access.organizationSlug);const admin=createSupabaseAdminClient();const periods=centralPeriodStart();const [{data:limits,error:limitsError},{data:jobs,error:jobsError}]=await Promise.all([admin.from('social_ai_limits').select('*').eq('organization_id',org).maybeSingle(),admin.from('social_ai_jobs').select('created_at,copy_usage,image_usage').eq('organization_id',org).gte('created_at',periods.month)]);if(limitsError||jobsError)throw Error('Customer usage could not be loaded.');
+ return NextResponse.json({logos:brand.logos.map(l=>({id:l.id,title:l.title})),guideCount:brand.guideCount,logoTitle:brand.logoTitle,limits:limits??defaultLimits,usage:summarizeJobs(jobs??[],periods.day),canManage:access.role==='platform_admin'},{headers:{'Cache-Control':'no-store'}});
  }catch(error){return NextResponse.json({error:error instanceof Error?error.message:'Brand details unavailable.'},{status:400})}
 }
 export async function POST(request:Request){
@@ -26,14 +27,18 @@ export async function POST(request:Request){
  const access=await requireProductAccess(input.organizationId,'social',['manager','creator']);
  const admin=createSupabaseAdminClient(),supabase=await createSupabaseServerClient();
  const {data:existing}=await admin.from('social_ai_jobs').select('id,created_by,status').eq('id',input.requestId).maybeSingle();if(existing){if(existing.created_by!==user.id)throw Error('Draft request not available.');return NextResponse.json({jobId:existing.id,status:existing.status});}
- const {count}=await admin.from('social_ai_jobs').select('id',{count:'exact',head:true}).eq('created_by',user.id).gte('created_at',new Date(Date.now()-86400000).toISOString());if((count??0)>=20)throw Error('The daily generation limit is reached. Try again tomorrow.');
  const {data:plan}=await supabase.from('marketing_plans').select('id,status,current_revision,approved_revision').eq('id',input.planId).eq('organization_id',input.organizationId).single();
  if(!plan||plan.status!=='approved'||plan.current_revision!==plan.approved_revision)throw Error('Choose a current approved marketing plan.');
  const {data:version}=await supabase.from('marketing_plan_versions').select('plan').eq('marketing_plan_id',plan.id).eq('revision',plan.current_revision).single();if(!version)throw Error('The approved plan could not be loaded.');
  const brand=await loadBrand(input.organizationId,access.organizationSlug,input.logoId);
- const {error:insertError}=await admin.from('social_ai_jobs').insert({id:input.requestId,organization_id:input.organizationId,created_by:user.id,status:'processing',brand_sources:brand.source});if(insertError)throw Error('The draft request could not be saved.');
+ const {data:limits,error:limitsError}=await admin.from('social_ai_limits').select('*').eq('organization_id',input.organizationId).maybeSingle();if(limitsError)throw Error('Customer limits could not be loaded.');
+ const rules=limits??defaultLimits;if(!rules.enabled)throw Error('AI generation is paused for this customer. Contact D2D.');if(input.kind==='video'&&!rules.video_enabled)throw Error('Video generation is disabled for this customer.');
+ const payload=await prepareCreative(brand,input.topic,version.plan);const estimate=await estimateCreative(payload);
+ if(input.estimateOnly)return NextResponse.json({estimate});
+ const {data:reservation,error:reserveError}=await admin.rpc('reserve_social_ai_job',{check_id:input.requestId,check_organization:input.organizationId,check_user:user.id,check_kind:input.kind,check_sources:brand.source,check_estimate:estimate});
+ if(reserveError)throw Error(reserveError.message);if(reservation.existing)return NextResponse.json({jobId:reservation.id,status:reservation.status});
  after(async()=>{try{
-  const {creative,background}=await generateCreative(brand,input.topic,version.plan);
+  const {creative,background}=await generateCreative(payload,async stage=>{const {error}=await admin.from('social_ai_jobs').update({[stage.stage==='copy'?'copy_usage':'image_usage']:stage}).eq('id',input.requestId);if(error)throw Error('API usage could not be recorded.');});
   const bytes=input.kind==='video'?await renderVideo(background,brand.logo,creative.scenes,creative.cta,creative.color,creative.fontStyle):await composeGraphic(background,brand.logo,creative.headline,creative.cta,creative.color,1350,creative.fontStyle);
   const bucket='d2d-social-campaigns',path=`${input.organizationId}/ai/${input.requestId}.${input.kind==='video'?'mp4':'jpg'}`;
   const {error:uploadError}=await admin.storage.from(bucket).upload(path,bytes,{contentType:input.kind==='video'?'video/mp4':'image/jpeg',upsert:false});if(uploadError)throw Error('Generated media could not be saved.');
@@ -43,6 +48,6 @@ export async function POST(request:Request){
   const {error:reviewError}=await supabase.rpc('submit_social_batch_for_client_review',{check_batch:batch.id});if(reviewError)throw Error('The draft was saved but could not enter customer review.');
   await admin.from('social_ai_jobs').update({status:'completed',batch_id:batch.id,message:'Copy and media saved for approval.',updated_at:new Date().toISOString()}).eq('id',input.requestId);
  }catch(error){await admin.from('social_ai_jobs').update({status:'failed',message:error instanceof z.ZodError?'AI returned copy that did not fit the post. Please try again.':error instanceof Error?error.message:'Generation failed. Please try again.',updated_at:new Date().toISOString()}).eq('id',input.requestId);}});
- return NextResponse.json({jobId:input.requestId,status:'processing'},{status:202});
+ return NextResponse.json({jobId:input.requestId,status:'processing',estimate},{status:202});
  }catch(error){return NextResponse.json({error:error instanceof Error?error.message:'The draft could not be created.'},{status:400})}
 }
