@@ -1,11 +1,7 @@
 import { Mail, PhoneCall, ShieldCheck } from "lucide-react";
-import { ButtonLink } from "@/components/button-link";
 import { ContactPlanner } from "@/components/project-brief/contact-planner";
-import { PageIntro } from "@/components/page-intro";
 import {
   companyName,
-  contactAudience,
-  leadershipProfiles,
   primaryEmail,
   primaryPhone,
   primaryPhoneHref,
@@ -22,51 +18,12 @@ export const metadata = createMetadata({
 export default function ContactPage() {
   return (
     <>
-      <PageIntro
-        eyebrow="Contact"
-        title="Start a discovery conversation."
-        description="Reach out to discuss leadership, growth, brand development, sales messaging, or the operational constraints limiting progress."
-      />
-      <section className="mx-auto max-w-7xl px-6 py-18 lg:px-8">
-        <div className="mb-8 grid gap-6 lg:grid-cols-[1.02fr_0.98fr]">
-          <article className="editorial-frame p-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--color-accent)]">
-              Best fit conversations
-            </p>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              {contactAudience.map((item) => (
-                <div
-                  key={item}
-                  className="rounded-[1.4rem] border border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-5 text-sm leading-7 text-[var(--color-muted)]"
-                >
-                  {item}
-                </div>
-              ))}
-            </div>
-          </article>
-          <article className="rounded-[2rem] bg-[var(--color-charcoal)] p-8 text-white">
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--color-sand)]">
-              Who you&apos;ll hear from
-            </p>
-            <div className="mt-5 space-y-5">
-              {leadershipProfiles.map((profile) => (
-                <div
-                  key={profile.name}
-                  className="rounded-[1.4rem] border border-white/12 bg-white/6 px-5 py-5"
-                >
-                  <p className="text-sm font-semibold text-white">{profile.name}</p>
-                  <p className="mt-1 text-xs uppercase tracking-[0.22em] text-white/58">
-                    {profile.role}
-                  </p>
-                  <p className="mt-3 text-sm leading-7 text-white/76">
-                    {profile.focus}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </article>
+      <section className="performance-contact-page mx-auto max-w-7xl px-6 pb-18 lg:px-8">
+        <div className="mb-8 max-w-3xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--color-accent)]">Contact D2D Performance</p>
+          <h1 className="mt-4 font-display text-4xl leading-tight tracking-[-0.03em] md:text-5xl">Let&apos;s improve how your business works.</h1>
+          <p className="mt-4 text-base leading-8 text-[var(--color-muted)]">Tell us about your revenue goals, reporting needs, or the systems slowing your team down.</p>
         </div>
-
         <div className="grid gap-8 lg:grid-cols-[0.7fr_0.3fr]">
           <div className="platform-contact performance-contact"><ContactPlanner platform="performance" /></div>
 
@@ -78,9 +35,8 @@ export default function ContactPage() {
               {companyName}
             </h2>
             <p className="mt-5 text-base leading-8 text-white/75">
-              Discovery conversations are designed for owners, founders, and
-              leadership teams who want clearer strategy and more dependable
-              execution.
+              Discuss revenue improvement, dashboards, business information
+              systems, and the operational challenges you want to solve.
             </p>
             <div className="mt-8 space-y-4 text-sm text-white/78">
               <a
@@ -102,13 +58,7 @@ export default function ContactPage() {
                 {serviceArea}
               </p>
             </div>
-            <div className="mt-8">
-              <ButtonLink href="/brand-development#brand-discovery" variant="light">
-                <span className="inline-flex items-center gap-2">
-                  Start the discovery
-                </span>
-              </ButtonLink>
-            </div>
+
           </aside>
         </div>
       </section>

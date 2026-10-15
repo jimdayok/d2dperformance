@@ -2116,3 +2116,6 @@ textarea {
 .performance-contact { --brief-bg:var(--color-bg);--brief-ink:var(--color-ink);--brief-accent:var(--color-accent);--brief-button-ink:var(--color-bg);--brief-line:var(--color-border-strong);--brief-error:#b74848; }
 
 altcha-widget .altcha-checkbox svg, altcha-widget .altcha-spinner { pointer-events: none; }
+
+.performance-contact-page { padding-top: 12rem; }
+@media(max-width:640px) { .performance-contact-page { padding-top: 10rem; } }
