@@ -1,6 +1,6 @@
 import { Mail, PhoneCall, ShieldCheck } from "lucide-react";
 import { ButtonLink } from "@/components/button-link";
-import { ContactForm } from "@/components/contact-form";
+import { ContactPlanner } from "@/components/project-brief/contact-planner";
 import { PageIntro } from "@/components/page-intro";
 import {
   companyName,
@@ -15,7 +15,7 @@ import { createMetadata } from "@/lib/metadata";
 
 export const metadata = createMetadata({
   title: "Contact",
-  description: "Start a discovery conversation with D2D Marketing.",
+  description: "Discuss revenue improvement, dashboards, business systems, website development, or app development with D2D Performance.",
   path: "/contact",
 });
 
@@ -67,8 +67,8 @@ export default function ContactPage() {
           </article>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[0.55fr_0.45fr]">
-          <ContactForm />
+        <div className="grid gap-8 lg:grid-cols-[0.7fr_0.3fr]">
+          <div className="platform-contact performance-contact"><ContactPlanner platform="performance" /></div>
 
           <aside className="rounded-[2rem] bg-[var(--color-charcoal)] p-8 text-white">
             <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[var(--color-sand)]">

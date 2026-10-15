@@ -2067,3 +2067,52 @@ textarea {
     margin-top: 0.35rem;
   }
 }
+
+.platform-contact {
+  --altcha-color-base: var(--brief-bg);
+  --altcha-color-base-content: var(--brief-ink);
+  --altcha-border-color: var(--brief-line);
+  --altcha-color-primary: var(--brief-accent);
+  --altcha-color-primary-content: var(--brief-button-ink);
+  --altcha-max-width: 100%;
+  color: var(--brief-ink);
+  background: var(--brief-bg);
+}
+.platform-contact .contact-planner { padding: clamp(1.5rem,5vw,4rem); border: 1px solid var(--brief-line); }
+.platform-contact .planner-intro { margin-bottom: 2.5rem; }
+.platform-contact h2 { font-family: var(--font-display), Georgia, serif; font-size: clamp(2.3rem,4vw,4rem); line-height: 1.1; margin: .7rem 0 1.2rem; }
+.platform-contact p { line-height: 1.7; }
+.platform-contact .planner-fields,.platform-contact .planner-detail { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.5rem; }
+.platform-contact label > span,.platform-contact legend { display:block;font-size:.75rem;letter-spacing:.06em;margin-bottom:.7rem; }
+.platform-contact input:not([type=checkbox]):not([type=hidden]),.platform-contact select,.platform-contact textarea { width:100%;min-height:50px;border:1px solid var(--brief-line);border-radius:0;background:var(--brief-bg);color:var(--brief-ink);font:inherit;padding:.7rem; }
+.platform-contact textarea { min-height:150px;resize:vertical; }
+.platform-contact input:focus-visible,.platform-contact select:focus-visible,.platform-contact textarea:focus-visible,.platform-contact button:focus-visible { outline:2px solid var(--brief-accent);outline-offset:3px; }
+.platform-contact .planner-needs { border:0;margin:2.5rem 0;padding:0; }
+.platform-contact .planner-needs > div { display:flex;gap:.65rem;flex-wrap:wrap; }
+.platform-contact .planner-needs button { display:inline-flex;align-items:center;gap:.4rem;border:1px solid var(--brief-line);background:transparent;color:var(--brief-ink);font:inherit;font-size:.8rem;padding:.75rem;cursor:pointer; }
+.platform-contact .planner-needs svg { width:15px;height:15px;opacity:.4; }
+.platform-contact .planner-needs .is-selected { background:var(--brief-accent);color:var(--brief-button-ink); }
+.platform-contact .planner-needs .is-selected svg { opacity:1; }
+.platform-contact .planner-privacy { display:flex;align-items:flex-start;gap:.75rem;margin-top:2rem; }
+.platform-contact .planner-privacy input { width:18px;height:18px;flex-shrink:0;accent-color:var(--brief-accent);margin-top:.2rem; }
+.platform-contact .planner-privacy span { font-size:.8rem;line-height:1.7;text-transform:none;letter-spacing:0; }
+.platform-contact .planner-privacy a { text-decoration:underline; }
+.platform-contact .marketing-altcha { margin:1.5rem 0;display:grid;gap:.5rem; }
+.platform-contact altcha-widget { display:block;width:100%; }
+.platform-contact .verification-control { min-height:72px; }
+.platform-contact .verification-label { margin:0;font-size:.85rem;font-weight:600; }
+.platform-contact .marketing-altcha small { font-size:.8rem; }
+.platform-contact .marketing-altcha button { text-decoration:underline;cursor:pointer; }
+.platform-contact .planner-submit { display:inline-flex;align-items:center;gap:1.5rem;background:var(--brief-accent);color:var(--brief-button-ink);padding:1rem 1.4rem;font:inherit;border:0;cursor:pointer; }
+.platform-contact .planner-submit:disabled { opacity:.5;cursor:not-allowed; }
+.platform-contact .planner-submit svg { width:18px; }
+.platform-contact .planner-note { font-size:.85rem;margin-top:1rem; }
+.platform-contact .is-error,.platform-contact .field-error { color:var(--brief-error); }
+.platform-contact .form-honeypot { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap; }
+@media(max-width:640px) {
+ .platform-contact .planner-fields,.platform-contact .planner-detail { grid-template-columns:1fr; }
+}
+
+.performance-contact { --brief-bg:var(--color-bg);--brief-ink:var(--color-ink);--brief-accent:var(--color-accent);--brief-button-ink:var(--color-bg);--brief-line:var(--color-border-strong);--brief-error:#b74848; }
+
+altcha-widget .altcha-checkbox svg, altcha-widget .altcha-spinner { pointer-events: none; }
