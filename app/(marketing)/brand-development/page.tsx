@@ -24,7 +24,7 @@ export const metadata = createMetadata({
 export default function BrandDevelopmentPage() {
   return (
     <>
-      <section className="mx-auto max-w-7xl px-6 pt-14 lg:px-8 lg:pt-18">
+      <section className="d2d-chrome-clearance mx-auto max-w-7xl px-6 pt-14 lg:px-8 lg:pt-18">
         <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="rounded-[2.4rem] border border-[var(--color-border)] bg-[var(--color-card)] p-8 shadow-[0_24px_80px_rgba(15,23,42,0.08)] md:p-12">
             <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--color-accent)]">

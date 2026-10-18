@@ -1,19 +1,16 @@
+import {RefinedNav} from "@/components/refined-nav";
 import {
   ArrowDown,
   ArrowRight,
   Blocks,
   Braces,
-  Code2,
   Gauge,
   Layers3,
-  Menu,
-  Megaphone,
   MessageSquareText,
   MonitorSmartphone,
   PanelsTopLeft,
   Workflow,
 } from "lucide-react";
-import { MobileScrollHeader } from "@/components/mobile-scroll-header";
 import { PublicPagePolish } from "@/components/public-page-polish";
 import { SiteFooter } from "@/components/site-footer";
 import { createMetadata } from "@/lib/metadata";
@@ -83,12 +80,6 @@ function Arrow() {
 export default function Home() {
   return (
     <div className="digital-site">
-      <MobileScrollHeader
-        breakpoint={760}
-        ecosystemSelector=".ecosystem-nav"
-        headerSelector=".site-header"
-        menuSelector=".mobile-nav"
-      />
       <PublicPagePolish
         rootSelector=".digital-site"
         targetSelector="main > section"
@@ -97,60 +88,7 @@ export default function Home() {
         Skip to content
       </a>
 
-      <nav className="ecosystem-nav" aria-label="D2D companies">
-        <div className="ecosystem-inner">
-          <span className="ecosystem-label">The D2D system</span>
-          <div className="ecosystem-links">
-            <a href={marketingUrl}>
-              <Megaphone aria-hidden="true" />
-              <strong>D2D Marketing</strong>
-              <small>Clarify + connect</small>
-            </a>
-            <a className="is-current" href="#top" aria-current="page">
-              <Code2 aria-hidden="true" />
-              <strong>D2D Digital</strong>
-              <small>Build + integrate</small>
-            </a>
-            <a href={performanceUrl}>
-              <Gauge aria-hidden="true" />
-              <strong>D2D Performance</strong>
-              <small>Tools + solutions</small>
-            </a>
-          </div>
-        </div>
-      </nav>
-
-      <header className="site-header">
-        <a className="brand" href="#top" aria-label="D2D Digital home">
-          <span className="brand-parent">DAY2DAY</span>
-          <span className="brand-name">D2D DIGITAL<span aria-hidden="true">_</span></span>
-        </a>
-
-        <nav className="desktop-nav" aria-label="Primary navigation">
-          <a href="#capabilities">Capabilities</a>
-          <a href="#approach">Approach</a>
-          <a href="#systems">Systems</a>
-        </nav>
-
-        <a className="header-cta" href={digitalContactUrl}>
-          Plan a digital build <Arrow />
-        </a>
-
-        <details className="mobile-nav">
-          <summary>
-            <Menu aria-hidden="true" />
-            <span>Menu</span>
-          </summary>
-          <nav aria-label="Mobile navigation">
-            <a href="#capabilities">Capabilities</a>
-            <a href="#approach">Approach</a>
-            <a href="#systems">Systems</a>
-            <a href={marketingUrl}>D2D Marketing / Main</a>
-            <a href={performanceUrl}>D2D Performance</a>
-            <a href={digitalContactUrl}>Plan a digital build</a>
-          </nav>
-        </details>
-      </header>
+      <RefinedNav />
 
       <main id="main">
         <section className="hero" id="top">

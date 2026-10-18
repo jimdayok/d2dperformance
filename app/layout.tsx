@@ -1,3 +1,4 @@
+import "@d2d/navigation/styles.css";
 import type { Metadata } from "next";
 import { Fraunces, IBM_Plex_Sans } from "next/font/google";
 import { Toaster } from "sonner";

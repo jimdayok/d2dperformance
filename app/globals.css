@@ -2119,3 +2119,6 @@ altcha-widget .altcha-checkbox svg, altcha-widget .altcha-spinner { pointer-even
 
 .performance-contact-page { padding-top: 12rem; }
 @media(max-width:640px) { .performance-contact-page { padding-top: 10rem; } }
+
+/* Keep the discovery introduction clear of the shared fixed family header. */
+.d2d-chrome-clearance{padding-top:180px}@media(max-width:767px){.d2d-chrome-clearance{padding-top:200px}}
