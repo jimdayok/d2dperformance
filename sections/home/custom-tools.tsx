@@ -1,0 +1,24 @@
+export function CustomToolsSection(){return <div className="performance-custom-tools">        <section className="business-examples section" id="tool-examples">
+          <div className="section-intro">
+            <p className="eyebrow dark">Custom apps + tools</p>
+            <h2>Build around the way your business works.</h2>
+            <p>A spreadsheet, a repeated email, or a manual handoff can be the starting point for a better system. We define the users, business rules, information, and decisions first, then design an app that brings them together. The examples below are illustrative concepts showing what a tailored solution could include.</p>
+          </div>
+          <div className="tool-examples">
+            {[
+              {title: "Quote builders", label: "Sales / pricing / proposals", copy: "Guide your team or customer through products, services, options, and quantities. Apply approved pricing rules, package choices, and discount permissions, then create a consistent proposal for review. Connect accepted quotes to your CRM or accounting workflow when that integration is part of the scope.", steps: ["Choose a service", "Compare package options", "Review and approve the quote"], result: "A repeatable path from conversation to proposal."},
+              {title: "Presentation template systems", label: "Templates / AI imagery / brand control", copy: "Turn approved slide layouts, messages, and brand assets into a reusable presentation system. Start with an audience and a brief, assemble the right sections, and use AI to generate supporting imagery from an approved visual direction. Your team reviews images, facts, and the finished story before exporting or sharing.", steps: ["Select audience + template", "Generate image concepts", "Review, refine, and export"], result: "More consistent presentations with less rebuilding."},
+              {title: "Business dashboards", label: "Visibility / decisions / accountability", copy: "Bring selected information from sales, marketing, finance, or operations into one useful view. Define what each metric means, who owns it, and how often it updates. Give leadership the overview and team members the detail they need, with filters, trends, and source context.", steps: ["Pipeline by stage", "Results against goals", "Last updated + source"], result: "A shared view of the numbers that guide the next decision."},
+              {title: "Interactive customer portals", label: "Customers / collaboration / progress", copy: "Give customers a branded place to follow project progress, review proposals, approve creative, upload documents, or find resources. Shape access around each customer and role, with clear statuses and a history of key actions. Connect the portal to the internal workflow so your team can keep the experience current.", steps: ["Project: in progress", "Proposal: ready for review", "Documents: available"], result: "A clearer customer experience from first approval to delivery."},
+              {title: "Customer weather alert systems", label: "Roofing example / service / follow-up", copy: "For a roofing business, a custom tool could compare customer service locations with official weather alerts and flag areas that may need follow-up. Build a workflow for reviewing the alert, contacting opted-in customers, and scheduling an inspection. Weather alerts indicate possible exposure; an inspection establishes roof condition.", steps: ["Weather alert near a service address", "Team reviews affected locations", "Customer receives approved follow-up"], result: "Timely service communication tied to real customer locations."},
+              {title: "E-commerce sites + tools", label: "Catalog / checkout / customer accounts", copy: "Build a buying experience around your products and how customers order. Scope product options, bundles, subscriptions, account pricing, and repeat orders as needed. Connect payments, inventory, fulfillment, and customer communications to the platforms your business uses.", steps: ["Find + configure a product", "Review cart + checkout", "Track or reorder"], result: "A storefront connected to the work behind every order."},
+            ].map((example, index) => (
+              <article className="tool-example" key={example.title}>
+                <div><p className="eyebrow dark">0{index + 1} / {example.label}</p><h3>{example.title}</h3><p>{example.copy}</p><strong>{example.result}</strong></div>
+                <div className="example-preview" aria-label={`${example.title} illustrative workflow`}><small>ILLUSTRATIVE WORKFLOW</small><h4>{example.title}</h4><ol>{example.steps.map(step => <li key={step}>{step}</li>)}</ol><span>Designed around your business rules</span></div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+</div>;}

@@ -1,3 +1,4 @@
+import { CustomToolsSection } from "@/sections/home/custom-tools";
 import { HomeHero } from "@/sections/home/hero";
 import { HomeProcessSection } from "@/sections/home/process";
 import { ResultsSection } from "@/sections/home/results";
@@ -9,9 +10,9 @@ import { companyName, siteUrl } from "@/lib/site-data";
 import { createMetadata, sanitizeJsonLd } from "@/lib/metadata";
 
 export const metadata = createMetadata({
-  title: "Revenue Improvement & Business Intelligence",
+  title: "Digital Tools, Portals & Business Dashboards",
   description:
-    "Objective business analysis, revenue improvement, dashboards, information systems, and technology-supported operating advisory.",
+    "Custom digital tools, customer portals, dashboards, and connected workflows built around your business.",
 });
 
 const homeJsonLd = {
@@ -20,7 +21,7 @@ const homeJsonLd = {
   name: companyName,
   url: siteUrl,
   description:
-    "D2D Performance helps business owners improve revenue and operations with objective analysis, dashboards, business information systems, and practical technology advisory.",
+    "D2D Performance builds custom digital tools, customer portals, business dashboards, and connected workflows for day-to-day operations.",
 };
 
 export default function Home() {
@@ -31,8 +32,9 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: sanitizeJsonLd(homeJsonLd) }}
       />
       <HomeHero />
-      <WhatWeDoSection />
       <OperationalToolsSection />
+      <CustomToolsSection />
+      <WhatWeDoSection />
       <WhyStallSection />
       <HomeProcessSection />
       <ServicesGridSection />

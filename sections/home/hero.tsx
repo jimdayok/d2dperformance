@@ -32,26 +32,26 @@ export function HomeHero() {
         <div className="performance-hero-copy">
           <p className="performance-kicker">
             <span />
-            Revenue · Information · Decisions
+            Digital tools · Portals · Connected systems
           </p>
           <h1>
-            Turn business information into
-            <span>better operating decisions.</span>
+            Digital tools built for
+            <span>the work behind your business.</span>
           </h1>
           <p className="performance-lede">
-            D2D Performance helps leaders improve revenue and operations with
-            connected information systems, decision-ready dashboards, objective
-            analysis, and technology that supports how the business actually works.
+            D2D Performance builds custom tools, customer portals, business dashboards,
+            and connected workflows. Give your team a clearer way to manage the
+            work, serve customers, and use the information already in your business.
           </p>
           <div className="performance-actions">
-            <ButtonLink href="#performance-framework">
+            <ButtonLink href="#operational-tools">
               <span className="inline-flex items-center gap-2">
-                Build the operating picture
+                Explore our platforms
                 <ArrowRight className="h-4 w-4" />
               </span>
             </ButtonLink>
-            <a className="performance-text-link" href="#analysis">
-              Explore the analysis tools
+            <a className="performance-text-link" href="#tool-examples">
+              See custom tool examples
               <ArrowDown aria-hidden="true" className="h-4 w-4" />
             </a>
           </div>
