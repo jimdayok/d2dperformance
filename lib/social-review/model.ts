@@ -3,8 +3,9 @@ export type ReviewStatus = typeof reviewStatuses[number];
 export type ReviewPost = {
  id: string; organization_id: string; title: string; project: string; status: ReviewStatus;
  revision: number; lock_version: number; approved_revision: number | null; planned_for: string | null; is_test: boolean;
+ source_legacy_item_id?: string | null; legacy_batch_status?:string|null; legacy_provider_post_id?:string|null;
  source_draft_id: string | null; updated_at: string;
- content: { captions: Record<string,string>; mediaIds: string[]; kind: string; tags: string[]; brief: string; campaign?:string;contentType?:"evergreen"|"campaign";productFocus?:string;sampleImage?: string; sampleImages?: string[] };
+ content: { captions: Record<string,string>; mediaIds: string[]; kind: string; tags: string[]; brief: string; campaign?:string;contentType?:"evergreen"|"campaign";productFocus?:string;legacyMedia?:unknown;sampleImage?: string; sampleImages?: string[] };
  media: {url:string; type:string; alt:string}[];
 };
 export type ReviewActivity = {id:string;post_id:string;kind:string;body:string;actor_name:string;created_at:string};

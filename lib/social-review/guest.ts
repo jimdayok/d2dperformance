@@ -1,3 +1,4 @@
+import {legacyCreative} from "./legacy";
 import "server-only";
 import {createHash} from "node:crypto";
 import {createSupabaseAdminClient} from "@/lib/supabase/admin";
@@ -14,5 +15,5 @@ export async function loadGuestReview(token:string){
  const ids=[...new Set((posts.data??[]).flatMap(p=>p.content.mediaIds??[]))] as string[];
  const media=ids.length?await db.from("social_studio_media").select("id,name,mime_type,storage_path").eq("organization_id",link.organization_id).in("id",ids):{data:[],error:null};if(media.error)return null;
  const signed=await Promise.all((media.data??[]).map(async m=>{const {data,error}=await db.storage.from("social-studio").createSignedUrl(m.storage_path,900);if(error||!data)return null;return {id:m.id,url:data.signedUrl.replace(process.env.SUPABASE_SERVER_URL||process.env.NEXT_PUBLIC_SUPABASE_URL!,process.env.NEXT_PUBLIC_SUPABASE_URL!),type:m.mime_type,alt:m.name};}));
- return {live,organizationId:link.organization_id,linkId:link.id,expiresAt:link.expires_at,organizationName:org.data.name,posts:(posts.data??[]).map(p=>({...p,media:p.is_test?(p.content.sampleImages||[p.content.sampleImage]).filter(Boolean).map((url:string)=>({url,type:"image/jpeg",alt:"Sample creative"})):(p.content.mediaIds??[]).flatMap((id:string)=>{const m=signed.find(x=>x?.id===id);return m?[{url:m.url,type:m.type,alt:m.alt}]:[]})})),activity:activity.data??[]};
+ return {live,organizationId:link.organization_id,linkId:link.id,expiresAt:link.expires_at,organizationName:org.data.name,posts:(posts.data??[]).map(p=>({...p,media:p.is_test?(p.content.sampleImages||[p.content.sampleImage]).filter(Boolean).map((url:string)=>({url,type:"image/jpeg",alt:"Sample creative"})):legacyCreative(p.content).length?legacyCreative(p.content):(p.content.mediaIds??[]).flatMap((id:string)=>{const m=signed.find(x=>x?.id===id);return m?[{url:m.url,type:m.type,alt:m.alt}]:[]})})),activity:activity.data??[]};
 }
