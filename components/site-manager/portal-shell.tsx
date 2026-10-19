@@ -6,7 +6,7 @@ import { hasRole } from "@/lib/site-manager/permissions";
 import { PortalNav } from "@/components/site-manager/portal-nav";
 import { getPlatformAdminStatus, getProductAccess } from "@/lib/d2d-platform/access";
 
-export async function PortalShell({ children, definition, access, displayName, siteCount }: { children: React.ReactNode; definition: SiteDefinition | null; access: UserAccess | null; displayName: string; siteCount: number }) {
+export async function PortalShell({ children, definition, access, displayName, siteCount, productName }: { children: React.ReactNode; definition: SiteDefinition | null; access: UserAccess | null; displayName: string; siteCount: number; productName?: string }) {
   const nav = definition?.navigation.filter((item) => !item.requiredRole || (access && hasRole(access, item.requiredRole))) ?? [];
   const [products, platformAdmin] = await Promise.all([getProductAccess(), getPlatformAdminStatus()]);
   const canUseSocial = products.some((product) => product.product === "social");
@@ -19,7 +19,7 @@ export async function PortalShell({ children, definition, access, displayName, s
     <div className="portal-shell min-h-screen lg:grid lg:grid-cols-[19rem_minmax(0,1fr)]">
       <aside className="portal-sidebar border-b border-white/10 px-5 py-5 text-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:border-r lg:border-b-0 lg:px-6 lg:py-7">
         <Link href="/portal/dashboard" className="group flex items-center gap-3">
-          <img src="/d2d-site-manager.png" alt="DAY2DAY Site Manager" className="w-full max-w-64 rounded-lg bg-[#192b2c] p-3" />
+          <img src={productName === "D2D Social" ? "/d2d-social.png" : "/d2d-site-manager.png"} alt={productName ?? "DAY2DAY Site Manager"} className="w-full max-w-64 rounded-lg bg-[#192b2c] p-3" />
         </Link>
 
         <nav aria-label="D2D Account" className="mt-8 grid gap-1 border-t border-white/12 pt-6">
@@ -73,10 +73,10 @@ export async function PortalShell({ children, definition, access, displayName, s
         <header className="portal-topbar flex min-h-[4.5rem] items-center justify-between gap-4 px-5 lg:px-9">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#9a5f34]">D2D control center</p>
-            <p className="mt-1 text-sm font-semibold text-[#27231f]">{definition?.name ?? "Your services"}</p>
+            <p className="mt-1 text-sm font-semibold text-[#27231f]">{definition?.name ?? productName ?? "Your services"}</p>
           </div>
           <div className="flex items-center gap-3">
-            <span className="hidden items-center gap-2 text-xs font-medium text-[#6d6258] sm:flex"><span className="size-1.5 rounded-full bg-emerald-600" /> Systems operational</span>
+            <span className="hidden items-center gap-2 text-xs font-medium text-[#6d6258] sm:flex"><span className="size-1.5 rounded-full bg-emerald-600" /> {process.env.D2D_STUDIO_STAGING==="true"?"Private staging":"Systems operational"}</span>
             {process.env.NODE_ENV !== "production" ? <span className="rounded-full border border-amber-900/15 bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900">{process.env.NODE_ENV}</span> : null}
           </div>
         </header>

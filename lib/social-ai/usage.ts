@@ -6,10 +6,11 @@ export function reportedTokens(value:unknown):number|null{
  const total=(usage as {total_tokens?:unknown}).total_tokens;
  return typeof total==='number'&&Number.isSafeInteger(total)&&total>=0?total:null;
 }
-export function summarizeJobs(jobs:Array<{created_at:string;copy_usage:unknown;image_usage:unknown}>,dayStart:string){
+export function summarizeJobs(jobs:Array<{created_at:string;copy_usage:unknown;image_usage:unknown;token_estimate?:unknown}>,dayStart:string){
+ const aiJobs=jobs.filter(job=>!job.token_estimate||typeof job.token_estimate!=='object'||(job.token_estimate as {totalAllowance?:unknown}).totalAllowance!==0);
  let tokens=0,unreported=0;
- for(const job of jobs){const copy=reportedTokens(job.copy_usage),image=reportedTokens(job.image_usage);tokens+=(copy??0)+(image??0);if(copy===null||image===null)unreported++;}
- return {monthRequests:jobs.length,dayRequests:jobs.filter(j=>j.created_at>=dayStart).length,reportedTokens:tokens,unreportedJobs:unreported};
+ for(const job of aiJobs){const copy=reportedTokens(job.copy_usage),image=reportedTokens(job.image_usage);tokens+=(copy??0)+(image??0);if(copy===null||image===null)unreported++;}
+ return {mediaEdits:jobs.length-aiJobs.length,monthRequests:aiJobs.length,dayRequests:aiJobs.filter(j=>j.created_at>=dayStart).length,reportedTokens:tokens,unreportedJobs:unreported};
 }
 export function centralPeriodStart(now=new Date()){
  // Intl exposes the date and current Central offset; midnight offset is resolved for that date.

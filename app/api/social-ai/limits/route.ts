@@ -1,3 +1,4 @@
+import {isSameOrigin} from "@/lib/social-ai/request";
 import {NextResponse} from 'next/server';
 import {z} from 'zod';
 import {getPlatformAdminStatus,requireProductAccess} from '@/lib/d2d-platform/access';
@@ -6,7 +7,7 @@ import {createSupabaseAdminClient} from '@/lib/supabase/admin';
 const schema=z.object({organizationId:z.string().uuid(),enabled:z.boolean(),daily_limit:z.number().int().min(0).max(100),monthly_limit:z.number().int().min(0).max(1000),concurrent_limit:z.number().int().min(1).max(5),video_enabled:z.boolean()});
 export async function POST(request:Request){
  try{
- if(request.headers.get('origin')!==new URL(request.url).origin)return NextResponse.json({error:'Refresh and try again.'},{status:403});
+ if(!isSameOrigin(request))return NextResponse.json({error:'Refresh and try again.'},{status:403});
  const user=await getCurrentUser();if(!user||!await getPlatformAdminStatus())return NextResponse.json({error:'Only D2D administrators can change customer limits.'},{status:403});
  const input=schema.parse(await request.json());await requireProductAccess(input.organizationId,'social',[]);
  const {organizationId,...limits}=input;const admin=createSupabaseAdminClient();

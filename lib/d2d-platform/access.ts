@@ -47,6 +47,12 @@ export const getProductAccess = cache(async (): Promise<ProductAccess[]> => {
   }
   const { data: entitlements } = await entitlementQuery;
   const typedEntitlements = (entitlements ?? []) as EntitlementRow[];
+  // Administrators can prepare examples without enrolling the customer.
+  if (isPlatformAdmin) {
+    const {data: customers, error} = await supabase.from("organizations").select("id").eq("status", "active");
+    if (error) throw new Error("Customer directory could not be loaded.");
+    for (const customer of customers ?? []) if (!typedEntitlements.some(e => e.organization_id === customer.id && e.product === "social")) typedEntitlements.push({organization_id:customer.id,product:"social",launch_url:"/portal/marketing?organization="+customer.id});
+  }
   const organizationIds = [...new Set(typedEntitlements.map((row) => row.organization_id))];
   if (organizationIds.length === 0) return [];
   const { data: organizations } = await supabase.from("organizations")

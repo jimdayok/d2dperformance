@@ -1,0 +1,26 @@
+begin;
+create function pg_temp.expect_error(command text, pattern text) returns void language plpgsql as $$begin begin execute command;exception when others then if position(pattern in SQLERRM)=0 then raise exception 'Unexpected rejection: %',SQLERRM;end if;return;end;raise exception 'Expected rejection';end $$;
+select set_config('request.jwt.claim.sub','088d3182-143e-48aa-8c5e-b89e22083339',true);
+update public.social_review_runtime set production_enabled=true;
+insert into public.social_studio_media(id,organization_id,storage_path,name,mime_type,created_by) values('88888888-0000-4000-8000-000000000001','187b8d4e-df2e-4b08-bf78-9b815bc94400','test/production-check.png','Private validation asset','image/png','088d3182-143e-48aa-8c5e-b89e22083339');
+insert into public.social_review_posts(id,organization_id,title,status,is_test,created_by,content) values('88888888-0000-4000-8000-000000000002','187b8d4e-df2e-4b08-bf78-9b815bc94400','Isolated production-mode check','in_progress',false,'088d3182-143e-48aa-8c5e-b89e22083339','{"captions":{"facebook":"Isolated validation"},"mediaIds":["88888888-0000-4000-8000-000000000001"]}');
+select public.transition_social_review('88888888-0000-4000-8000-000000000002',1,'submit','','{}',1);
+do $$declare token text;h text;p uuid='88888888-0000-4000-8000-000000000002';begin
+ select split_part(payload->>'review_path','/review/social/',2) into token from public.social_review_outbox where post_id=p and event='approval_requested';
+ if length(token)<>64 then raise exception 'Missing scoped real review link';end if;h=encode(sha256(convert_to(token,'utf8')),'hex');
+ perform public.client_social_review(h,p,1,2,'approve','','{}');
+ perform pg_temp.expect_error(format('select public.client_social_review(%L,%L,1,3,%L,%L)',h,p,'comment','Too fast'),'wait a moment');
+ perform pg_temp.expect_error(format('select public.client_social_review(%L,%L,1,3,%L)',h,p,'schedule'),'D2D team');
+ perform public.transition_social_review(p,1,'schedule','','{"planned_for":"2099-02-01T16:30:00Z"}',3);
+ perform public.transition_social_review(p,1,'reschedule','','{"planned_for":"2099-02-02T16:30:00Z"}',4);
+ if (select approved_revision from public.social_review_posts where id=p)<>1 then raise exception 'Reschedule cleared approval';end if;
+ perform pg_temp.expect_error(format('select public.transition_social_review(%L,1,%L,%L,%L,4)',p,'reschedule','','{"planned_for":"2099-02-03T16:30:00Z"}'),'This post changed');
+ perform public.edit_social_review_caption(p,1,5,'facebook','Revised private caption');
+ if exists(select 1 from public.social_review_posts where id=p and (approved_revision is not null or status='scheduled' or revision<>2)) then raise exception 'Content edit preserved stale approval or schedule';end if;
+ if exists(select 1 from public.social_review_outbox where post_id=p and status<>'queued') then raise exception 'Real update did not enter durable email queue';end if;
+ if exists(select 1 from public.social_review_outbox where post_id=p and sender<>'D2D Marketing <socialpages@d2dmktg.com>') then raise exception 'Wrong sender';end if;
+ perform pg_temp.expect_error(format('select public.transition_social_review(%L,2,%L,%L,%L,6)',p,'publication_preview','','{}'),'sample-only');
+ update public.social_review_links set revoked_at=now() where token_hash=h;
+ perform pg_temp.expect_error(format('select public.client_social_review(%L,%L,2,6,%L)',h,p,'comment'),'expired or is unavailable');
+end $$;
+rollback;

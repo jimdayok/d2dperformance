@@ -1,3 +1,5 @@
+"use client";
+import {usePathname} from "next/navigation";
 import Script from "next/script";
 
 const defaultGoogleTagManagerIds = ["GTM-TBJQ7ST", "GTM-PSG3J4T"];
@@ -15,6 +17,8 @@ function parseIds(value: string | undefined, defaults: string[]) {
 }
 
 export function SiteAnalytics() {
+  const pathname=usePathname();
+  if(pathname?.startsWith("/review/social/")||pathname?.startsWith("/portal"))return null;
   const googleTagManagerIds = parseIds(
     process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_IDS,
     defaultGoogleTagManagerIds,

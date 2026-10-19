@@ -172,6 +172,7 @@ export async function submitPlanAction(formData: FormData) {
 }
 
 export async function reviewPlanAction(formData: FormData) {
+  if (process.env.D2D_SOCIAL_REVIEW_STAGING === "true") throw new Error("Real approvals and scheduling are blocked in private staging.");
   requireWritableMarketingEnvironment();
   await requireSignedIn();
   const parsed = reviewSchema.parse({
@@ -329,6 +330,7 @@ export async function submitBatchAction(formData: FormData) {
 }
 
 export async function reviewBatchAction(formData: FormData) {
+  if (process.env.D2D_SOCIAL_REVIEW_STAGING === "true") throw new Error("Real approvals and scheduling are blocked in private staging.");
   requireWritableMarketingEnvironment();
   const user = await requireSignedIn();
   const parsed = reviewSchema.parse({
@@ -380,6 +382,7 @@ export async function requestSocialItemChangesAction(formData: FormData) {
 }
 
 export async function retryApprovedDeliveryAction(formData: FormData) {
+  if (process.env.D2D_SOCIAL_REVIEW_STAGING === "true") throw new Error("Real approvals and scheduling are blocked in private staging.");
   requireWritableMarketingEnvironment();
   const user = await requireSignedIn();
   const batchId = idSchema.parse(formData.get("batchId"));
@@ -470,6 +473,7 @@ type SocialItemRow = {
 };
 
 export async function createApprovedDraftsAction(formData: FormData) {
+  if (process.env.D2D_SOCIAL_REVIEW_STAGING === "true") throw new Error("Real approvals and scheduling are blocked in private staging.");
   requireWritableMarketingEnvironment();
   await requireSignedIn();
   const batchId = idSchema.parse(formData.get("batchId"));
@@ -500,6 +504,7 @@ export async function createApprovedDraftsAction(formData: FormData) {
 }
 
 export async function scheduleApprovedBatchAction(formData: FormData) {
+  if (process.env.D2D_SOCIAL_REVIEW_STAGING === "true") throw new Error("Real approvals and scheduling are blocked in private staging.");
   requireWritableMarketingEnvironment();
   await requireSignedIn();
   if (process.env.D2D_SOCIAL_SCHEDULING_ENABLED !== "true") {
@@ -533,6 +538,7 @@ export async function scheduleApprovedBatchAction(formData: FormData) {
 
 export async function approveSocialItemAction(_previous: MarketingActionState, formData: FormData): Promise<MarketingActionState> {
   try {
+    if (process.env.D2D_SOCIAL_REVIEW_STAGING === "true") throw new Error("Real approvals and scheduling are blocked in private staging.");
     requireWritableMarketingEnvironment();
     const user = await requireSignedIn();
     const itemId = idSchema.parse(formData.get("itemId"));

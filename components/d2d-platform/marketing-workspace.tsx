@@ -1,6 +1,8 @@
 "use client";
+import {SocialReviewWorkspace} from "@/components/d2d-platform/social-review-workspace";
 /* eslint-disable @next/next/no-img-element -- customer-approved image hosts are dynamic and validated server-side */
 
+import {SocialStudioLibrary,useStudio,centralLocal} from "./social-studio-library";
 import { AIPostCreator } from "./ai-post-creator";
 import { useActionState, useRef, useState } from "react";
 import { ArrowRight, BarChart3, CalendarDays, CheckCircle2, ClipboardCheck, Expand, ListChecks, Megaphone, Sparkles, X } from "lucide-react";
@@ -122,12 +124,13 @@ function PlatformLogo({ platform }: { platform: string }) {
   </svg>;
 }
 
-function MarketingCalendarPanel({ promotions, batches, items, nowIso, canReview }: { promotions: Promotion[]; batches: Batch[]; items: SocialItem[]; nowIso: string; canReview: boolean }) {
+function MarketingCalendarPanel({ promotions, batches, items, nowIso, canReview, organizationId }: { organizationId:string; promotions: Promotion[]; batches: Batch[]; items: SocialItem[]; nowIso: string; canReview: boolean }) {
   const dialogRef=useRef<HTMLDialogElement>(null);
   const [selectedId,setSelectedId]=useState<string|null>(null);
   const selected=items.find(item=>item.id===selectedId);
   const selectedBatch=batches.find(batch=>batch.id===selected?.batch_id);
   const [monthOffset, setMonthOffset] = useState(0);
+  const {drafts:studioDrafts}=useStudio(organizationId);
   const events = buildMarketingCalendar({ promotions, batches, items });
   const todayKey = centralDateKey(nowIso);
   const today = dateFromKey(todayKey);
@@ -152,8 +155,8 @@ function MarketingCalendarPanel({ promotions, batches, items, nowIso, canReview 
               const inMonth = date.getUTCMonth() === month.getUTCMonth();
               const dayEvents = inMonth ? events.filter(event => event.dateKey === key) : [];
               const isToday = key === todayKey;
-              return <div role="gridcell" aria-label={`${key}${dayEvents.length ? `, ${dayEvents.length} events` : ""}`} key={key} className={`min-h-24 p-1.5 ${inMonth ? "bg-[#fffdf9]" : "bg-[#f1ede7] text-[#a79b90]"} ${isToday ? "ring-2 ring-inset ring-[#9a5f34]" : ""}`}>
-                <p className="text-xs font-semibold">{date.getUTCDate()}</p>
+              return <div data-studio-date={key} onDragOver={e=>{if(e.dataTransfer.types.includes("application/x-d2d-draft"))e.preventDefault()}} onDrop={e=>{const id=e.dataTransfer.getData("application/x-d2d-draft");if(id){e.preventDefault();window.dispatchEvent(new CustomEvent("social-studio-drop",{detail:{id,date:key}}))}}} role="gridcell" aria-label={`${key}${dayEvents.length ? `, ${dayEvents.length} events` : ""}`} key={key} className={`min-h-24 p-1.5 ${inMonth ? "bg-[#fffdf9]" : "bg-[#f1ede7] text-[#a79b90]"} ${isToday ? "ring-2 ring-inset ring-[#9a5f34]" : ""}`}>
+                <p className="text-xs font-semibold">{date.getUTCDate()}</p>{inMonth?studioDrafts.filter(d=>d.planned_for&&centralLocal(d.planned_for).slice(0,10)===key).map(d=><button type="button" draggable onDragStart={e=>e.dataTransfer.setData("application/x-d2d-draft",d.id)} onClick={()=>window.dispatchEvent(new CustomEvent("social-studio-drop",{detail:{id:d.id,date:key}}))} key={d.id} className="mt-1 block w-full truncate rounded bg-blue-50 p-1 text-left text-[10px] text-blue-900" title={d.title}>Draft · {d.title}</button>):null}
                 <div className="mt-2 flex flex-wrap gap-1">{dayEvents.map(event => <button type="button" key={`${event.kind}-${event.id}`} onClick={()=>{if(event.kind === "post"){setSelectedId(event.id);dialogRef.current?.showModal();}else{document.getElementById("promotions")?.scrollIntoView({behavior:"smooth"});}}} aria-label={`${event.platform ?? "Business update"}: ${event.label}, ${event.status.replaceAll("_", " ")}`} title={`${event.platform ?? "Business update"} · ${event.label} · ${event.status.replaceAll("_", " ")}`} className={`inline-flex items-center justify-center rounded p-1.5 focus-visible:outline-2 focus-visible:outline-offset-2 ${event.kind === "promotion" ? "bg-[#f0dfcf] text-[#7b4725]" : event.status === "scheduled" || event.status === "published" ? "bg-[#dcebe3] text-[#28543f]" : "bg-[#eee3d5] text-[#7b4725]"}`}>{event.platform ? <PlatformLogo platform={event.platform}/> : <Megaphone className="size-4" aria-hidden="true"/>}</button>)}</div>
               </div>;
             })}
@@ -419,14 +422,20 @@ function ManualPostComposer({ organizationId, plans }: { organizationId: string;
   </details>;
 }
 
-export function MarketingWorkspace({ access, plans, promotions, batches, items, schedulingEnabled, nowIso, previewMode }: { access: Access; plans: Plan[]; promotions: Promotion[]; batches: Batch[]; items: SocialItem[]; schedulingEnabled: boolean; nowIso: string; previewMode: boolean }) {
+export function MarketingWorkspace({ access, plans, promotions, batches, items, schedulingEnabled, nowIso, previewMode, reviewWorkspace = false, reviewLive = false }: { access: Access; plans: Plan[]; promotions: Promotion[]; batches: Batch[]; items: SocialItem[]; schedulingEnabled: boolean; nowIso: string; previewMode: boolean; reviewWorkspace?: boolean; reviewLive?:boolean }) {
   const canCreate = ["platform_admin", "manager", "creator"].includes(access.role);
   const canReview = ["platform_admin", "manager", "reviewer"].includes(access.role);
   const isPlatformAdmin = access.role === "platform_admin";
+  if (reviewWorkspace) return <SocialReviewWorkspace live={reviewLive}
+    organizationId={access.organizationId} organizationName={access.organizationName}
+    createPanel={canCreate ? <AIPostCreator key={access.organizationId} organizationId={access.organizationId} plans={plans} isAdmin={isPlatformAdmin}/> : <p>Creator access is required to prepare posts.</p>}
+    libraryPanel={canCreate ? <SocialStudioLibrary organizationId={access.organizationId}/> : <p>Use the board to review posts shared with you.</p>}
+    planningPanel={<div className="space-y-8"><section><SectionHeading icon={ClipboardCheck} eyebrow="Shared direction" title="Marketing plans">Campaign direction and approved revisions.</SectionHeading>{plans.map(plan=><article key={plan.id} className="portal-panel mt-4 p-5"><h3>{plan.title}</h3><PlanDetails plan={plan}/></article>)}</section><section><SectionHeading icon={Megaphone} eyebrow="Customer input" title="Business updates">Share timing, events and offers with D2D.</SectionHeading>{canCreate?<PromotionForm organizationId={access.organizationId}/>:null}{promotions.map(p=><article key={p.id} className="portal-panel mt-4 p-5"><h3>{p.name}</h3><p>{p.description}</p></article>)}</section></div>}
+  />;
   return <div className="space-y-12">
     <header className="border-b border-[#241c17]/12 pb-7"><p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#9a5f34]">{access.organizationName}</p><h1 className="mt-3 font-display text-4xl font-semibold sm:text-5xl">Your marketing center</h1><p className="mt-3 max-w-3xl text-sm leading-6 text-[#6d6258]">See what needs your attention, share real business updates, review every post, and confirm what D2D delivered.</p>
       <nav aria-label="Marketing center sections" className="mt-6 flex flex-wrap gap-2">{[
-        ["today", "Today"], ["calendar", "Calendar"], ["results", "Results"], ["plan", "Plan"], ["promotions", "Business updates"], ["content", "Approve posts"],
+        ["ai-create", "Create"], ["studio-library","Content library"], ["today", "Today"], ["calendar", "Calendar"], ["results", "Results"], ["plan", "Plan"], ["promotions", "Business updates"], ["content", "Approve posts"],
       ].map(([href, label]) => <a key={href} href={`#${href}`} className="rounded-full border border-[#241c17]/12 bg-white px-3 py-2 text-xs font-semibold text-[#5f554c] transition hover:border-[#9a5f34]/45 hover:text-[#7b4725]">{label}</a>)}</nav>
     </header>
 
@@ -434,8 +443,9 @@ export function MarketingWorkspace({ access, plans, promotions, batches, items, 
 
     <MarketingToday plans={plans} promotions={promotions} batches={batches} items={items} nowIso={nowIso} />
 
-    {canCreate ? <AIPostCreator key={access.organizationId} organizationId={access.organizationId} plans={plans} /> : null}
-    <MarketingCalendarPanel promotions={promotions} batches={batches} items={items} nowIso={nowIso} canReview={canReview} />
+    {canCreate ? <AIPostCreator key={access.organizationId} organizationId={access.organizationId} plans={plans} isAdmin={isPlatformAdmin} /> : null}
+    {canCreate?<SocialStudioLibrary key={access.organizationId+"-library"} organizationId={access.organizationId}/>:null}
+    <MarketingCalendarPanel organizationId={access.organizationId} promotions={promotions} batches={batches} items={items} nowIso={nowIso} canReview={canReview} />
 
     <DeliveryResults batches={batches} items={items} />
 

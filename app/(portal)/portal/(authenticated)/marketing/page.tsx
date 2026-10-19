@@ -1,3 +1,5 @@
+import {reviewIsLive} from "@/lib/social-review/model";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { MarketingWorkspace } from "@/components/d2d-platform/marketing-workspace";
 import { PortalShell } from "@/components/site-manager/portal-shell";
@@ -7,12 +9,16 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { marketingPlanContentSchema } from "@/lib/d2d-platform/schemas";
 import type { MarketingPlanContent } from "@/lib/d2d-platform/types";
 
+export const metadata:Metadata={title:"D2D Social",manifest:"/social.webmanifest",appleWebApp:{capable:true,title:"D2D Social",statusBarStyle:"default"}};
+
+const liveReview=reviewIsLive(process.env);
+
 export default async function MarketingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ organization?: string }>;
+  searchParams: Promise<{ organization?: string;legacy?:string }>;
 }) {
-  const [{ organization: requestedOrganization }, productAccess, sites, user] = await Promise.all([
+  const [{ organization: requestedOrganization,legacy:legacyView }, productAccess, sites, user] = await Promise.all([
     searchParams,
     getProductAccess(),
     getAccessibleSites(),
@@ -51,8 +57,17 @@ export default async function MarketingPage({
     const version = currentPlanVersions.get(plan.id);
     return version ? [{ ...plan, summary: version.summary, plan: version.plan }] : [];
   });
-  return <PortalShell definition={null} access={sites[0]?.access ?? null} displayName={user?.user_metadata?.display_name ?? user?.email ?? "Account"} siteCount={sites.length}>
+  return <PortalShell productName="D2D Social" definition={null} access={sites[0]?.access ?? null} displayName={user?.user_metadata?.display_name ?? user?.email ?? "Account"} siteCount={sites.length}>
+
+    {(process.env.D2D_SOCIAL_REVIEW_STAGING === "true"||liveReview)?<div className="sr-account-bar"><a href="/portal/dashboard">← My services</a><form action="/portal/marketing"><label>Client<select name="organization" aria-label="Client" defaultValue={access.organizationId}>{socialAccess.map(client=><option key={client.organizationId} value={client.organizationId}>{client.organizationName}</option>)}</select></label><button>Open client</button></form><a href="/portal/account">My account</a></div>:(    <form action="/portal/marketing" className="portal-panel mb-6 flex flex-wrap items-end gap-3 p-5">
+      <label className="grid gap-2 text-sm font-semibold">Client<select name="organization" defaultValue={access.organizationId} className="portal-field px-3 py-2">{socialAccess.map(client=><option key={client.organizationId} value={client.organizationId}>{client.organizationName}</option>)}</select></label>
+      <button className="portal-primary-button px-4 py-2">Open client</button>
+      {access.role === "platform_admin" && !(process.env.D2D_SOCIAL_REVIEW_STAGING === "true"||liveReview) ? <p className="text-sm">All active clients are available for examples. No D2D Social subscription is required.</p>:null}
+    </form>)}
+
     <MarketingWorkspace
+      reviewWorkspace={(process.env.D2D_SOCIAL_REVIEW_STAGING === "true"||liveReview)&&legacyView!=="1"}
+      reviewLive={liveReview}
       access={access}
       plans={plansWithContent}
       promotions={promotions ?? []}

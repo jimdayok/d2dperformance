@@ -1,0 +1,18 @@
+{
+  "id": "/portal/marketing",
+  "name": "D2D Social",
+  "short_name": "D2D Social",
+  "description": "Review, plan, and manage social content with D2D Marketing.",
+  "start_url": "/portal/marketing?view=review",
+  "scope": "/portal/marketing",
+  "display": "standalone",
+  "background_color": "#f8f6f2",
+  "theme_color": "#302a25",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

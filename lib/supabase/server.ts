@@ -6,7 +6,8 @@ import { getSupabasePublicConfig } from "@/lib/supabase/config";
 export async function createSupabaseServerClient() {
   const { url, anonKey } = getSupabasePublicConfig();
   const cookieStore = await cookies();
-  return createServerClient(url, anonKey, {
+  return createServerClient(process.env.SUPABASE_SERVER_URL || url, anonKey, {
+    cookieOptions:{name:'sb-'+new URL(url).hostname.split('.')[0]+'-auth-token'},
     cookies: {
       getAll: () => cookieStore.getAll(),
       setAll: (items) => {
