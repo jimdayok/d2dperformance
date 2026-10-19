@@ -16,7 +16,7 @@ async function main(){
   const connected=process.env.WAVESPEED_WORKER_ENABLED==='true'&&Boolean(await provider.waveKey());
   let balance=0;
   if(connected){try{balance=await provider.checkWaveBalance()}catch{await pause(10000);continue}}
-  const {error:heartbeatError}=await admin.from('social_video_worker_state').upsert({id:true,connected,balance,budget_cents:Number(process.env.WAVESPEED_STUDIO_BUDGET_CENTS||0),updated_at:new Date().toISOString()});
+  const {error:heartbeatError}=await admin.from('social_video_worker_state').upsert({id:true,compositor_version:2,connected,balance,budget_cents:Number(process.env.WAVESPEED_STUDIO_BUDGET_CENTS||0),updated_at:new Date().toISOString()});
   if(heartbeatError)throw Error('Video service status could not be saved.');
   if(connected){
    const {data:jobs,error}=await admin.from('social_video_jobs').select('*').in('status',['queued','processing']).order('created_at').limit(1);
@@ -65,7 +65,7 @@ async function main(){
      if(tasks.every(t=>t.status==='completed')){
       await save(job.id,{message:'All four shots are ready. Adding your logo and music…'});
       const c=job.content,clips=await Promise.all(tasks.map(t=>read(t.videoPath!))),logo=await read(c.logoPath);
-      const bytes=await provider.assembleWaveClips(clips,logo,{duration:20,aspect:c.aspect,music:c.direction.music,musicVolume:c.direction.musicVolume});
+      const bytes=await provider.assembleWaveClips(clips,logo,{duration:20,aspect:c.aspect,music:c.direction.music,musicVolume:c.direction.musicVolume,logoTreatment:c.logoTreatment,logoPosition:c.logoPosition,scenes:c.scenes});
       const path=job.organization_id+'/generated/'+job.id+'-animation.mp4';
       const {error:uploadError}=await admin.storage.from('social-studio').upload(path,bytes,{contentType:'video/mp4',upsert:true});if(uploadError)throw Error('Finished video could not be saved.');
       const {error:mediaError}=await admin.from('social_studio_media').upsert({id:job.id,organization_id:job.organization_id,storage_path:path,name:c.topic.slice(0,150)+' · AI video',mime_type:'video/mp4',created_by:job.created_by});if(mediaError)throw Error('Finished media could not be recorded.');

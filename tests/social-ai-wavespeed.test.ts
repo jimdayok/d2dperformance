@@ -40,3 +40,16 @@ it('assembles exact 20-second 720p videos with selected logo, optional music and
   expect(fetch).not.toHaveBeenCalled();
  }finally{await rm(dir,{recursive:true,force:true})}
 },120000);
+
+it('composites exact timed logos and safe scene text locally without provider calls',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'wave-brand-test-')),binary=join(process.cwd(),'node_modules/ffmpeg-static/ffmpeg');
+ try{
+  const source=join(dir,'source.mp4');await promisify(execFile)(binary,['-hide_banner','-loglevel','error','-f','lavfi','-i','color=c=blue:s=160x120:r=24:d=5','-c:v','libx264','-threads','1','-pix_fmt','yuv420p','-y',source]);
+  const clips=Array(4).fill(await readFile(source)),logo=await sharp({create:{width:100,height:30,channels:4,background:'#ff0000'}}).png().toBuffer();
+  const fetch=vi.fn();vi.stubGlobal('fetch',fetch);
+  const scenes=Array.from({length:4},(_,i)=>({overlay:i===0?"Roof & <safe> 'quote'":"",transition:i===2?'fade':'cut'}));
+  const out=join(dir,'out.mp4');await writeFile(out,await assembleWaveClips(clips,logo,{duration:20,aspect:'landscape',music:'none',musicVolume:0,logoTreatment:'closing',scenes}));
+  const pixel=async(second:number)=>{const frame=join(dir,'frame'+second+'.png');await promisify(execFile)(binary,['-loglevel','error','-ss',String(second),'-i',out,'-frames:v','1','-y',frame]);return sharp(frame).extract({left:1100,top:40,width:1,height:1}).raw().toBuffer()};
+  const before=await pixel(1),after=await pixel(18);expect(before[2]).toBeGreaterThan(200);expect(before[0]).toBeLessThan(50);expect(after[0]).toBeGreaterThan(200);expect(after[2]).toBeLessThan(50);expect(fetch).not.toHaveBeenCalled();
+ }finally{await rm(dir,{recursive:true,force:true})}
+},120000);

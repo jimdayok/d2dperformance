@@ -20,7 +20,7 @@ export async function GET(request:Request){
    const {data}=await admin.storage.from("social-studio").createSignedUrl(m.storage_path,3600);
    return {id:m.id,name:m.name,mime_type:m.mime_type,purpose:m.storage_path.startsWith(organizationId+"/logos/")?"logo":"media",url:data?.signedUrl?.replace(process.env.SUPABASE_SERVER_URL||process.env.NEXT_PUBLIC_SUPABASE_URL!,process.env.D2D_STUDIO_STAGING==="true"?"/_staging/supabase":process.env.NEXT_PUBLIC_SUPABASE_URL!)??null};
   }));
-  return NextResponse.json({drafts,media:signed},{headers:{"Cache-Control":"no-store"}});
+  return NextResponse.json({drafts:new URL(request.url).searchParams.get('projects')==='1'?(drafts??[]).filter(d=>d.content?.source?.studioProject===true):(drafts??[]).filter(d=>d.content?.source?.studioProject!==true),media:signed},{headers:{"Cache-Control":"no-store"}});
  }catch(e){return NextResponse.json({error:e instanceof Error?e.message:"Library unavailable."},{status:400})}
 }
 export async function POST(request:Request){

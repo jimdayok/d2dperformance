@@ -81,7 +81,7 @@ export async function POST(request:Request) {
   }
   if(input.action==="import"){
    const {data:draft,error}=await db.from("social_studio_drafts").select("*").eq("id",input.draftId).eq("organization_id",input.organizationId).single();
-   if(error||!draft)throw Error("Choose a draft from this client's library.");
+   if(error||!draft||draft.content?.source?.studioProject)throw Error("Choose a draft from this client's library.");
    captions.parse(draft.content.captions);
    const {data:existing}=await db.from("social_review_posts").select("id").eq("source_draft_id",draft.id).maybeSingle();
    if(existing)return NextResponse.json({id:existing.id,message:"This draft is already on the board. Open it there to review the saved version."});
