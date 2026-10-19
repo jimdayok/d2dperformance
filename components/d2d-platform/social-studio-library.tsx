@@ -1,7 +1,7 @@
 "use client";
 import {useCallback,useEffect,useState} from "react";
-export type StudioMedia={id:string;name:string;mime_type:string;url:string|null};
-export type StudioDraft={id:string;title:string;revision:number;planned_for:string|null;content:{topic:string;kind:"graphic"|"video"|"carousel";captions:Record<string,string>;mediaIds:string[];brandImageIds?:string[];direction:Record<string,string|number>}};
+export type StudioMedia={id:string;name:string;mime_type:string;purpose?:"logo"|"media";url:string|null};
+export type StudioDraft={id:string;title:string;revision:number;planned_for:string|null;content:{logoId?:string;uploadedLogoId?:string;topic:string;kind:"graphic"|"video"|"carousel";captions:Record<string,string>;mediaIds:string[];brandImageIds?:string[];direction:Record<string,string|number>}};
 export function centralISO(value:string){
  if(!value)return null;
  const guess=new Date(value+":00Z");

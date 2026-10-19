@@ -7,6 +7,9 @@ export const directionSchema=z.object({
  notes:z.string().max(1500).default(""),
  motion:z.enum(["gentle","dynamic","still"]).default("gentle"),
  trimStart:z.number().min(0).max(3600).default(0),
+ music:z.enum(["none","instrumental"]).default("instrumental"),
+ musicVolume:z.number().min(0).max(100).default(15),
+ keepOriginalAudio:z.number().int().min(0).max(1).default(1),
  duration:z.number().min(5).max(30).default(20)
 });
 export function directionText(d:z.infer<typeof directionSchema>){

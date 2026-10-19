@@ -4,7 +4,7 @@ import {z} from "zod";
 import {getCurrentUser} from "@/lib/site-manager/access";
 import {requireProductAccess} from "@/lib/d2d-platform/access";
 import {createSupabaseAdminClient} from "@/lib/supabase/admin";
-const contentSchema=z.object({topic:z.string().max(4000).default(""),kind:z.enum(["graphic","video","carousel"]).default("graphic"),captions:z.record(z.string(),z.string().max(10000)).default({}),mediaIds:z.array(z.string().uuid()).max(12).default([]),brandImageIds:z.array(z.string().uuid()).max(12).default([]),direction:z.record(z.string(),z.union([z.string().max(2000),z.number()])).default({}),planId:z.string().uuid().nullable().optional(),source:z.unknown().optional()});
+const contentSchema=z.object({logoId:z.string().uuid().optional(),uploadedLogoId:z.string().uuid().optional(),topic:z.string().max(4000).default(""),kind:z.enum(["graphic","video","carousel"]).default("graphic"),captions:z.record(z.string(),z.string().max(10000)).default({}),mediaIds:z.array(z.string().uuid()).max(12).default([]),brandImageIds:z.array(z.string().uuid()).max(12).default([]),direction:z.record(z.string(),z.union([z.string().max(2000),z.number()])).default({}),planId:z.string().uuid().nullable().optional(),source:z.unknown().optional()});
 export async function GET(request:Request){
  try{
   if(!await getCurrentUser())return NextResponse.json({error:"Sign in first."},{status:401});
@@ -18,7 +18,7 @@ export async function GET(request:Request){
   if(error||mediaError)throw Error("The content library could not be loaded.");
   const signed=await Promise.all((media??[]).map(async m=>{
    const {data}=await admin.storage.from("social-studio").createSignedUrl(m.storage_path,3600);
-   return {id:m.id,name:m.name,mime_type:m.mime_type,url:data?.signedUrl?.replace(process.env.SUPABASE_SERVER_URL||process.env.NEXT_PUBLIC_SUPABASE_URL!,process.env.NEXT_PUBLIC_SUPABASE_URL!)??null};
+   return {id:m.id,name:m.name,mime_type:m.mime_type,purpose:m.storage_path.startsWith(organizationId+"/logos/")?"logo":"media",url:data?.signedUrl?.replace(process.env.SUPABASE_SERVER_URL||process.env.NEXT_PUBLIC_SUPABASE_URL!,process.env.D2D_STUDIO_STAGING==="true"?"/_staging/supabase":process.env.NEXT_PUBLIC_SUPABASE_URL!)??null};
   }));
   return NextResponse.json({drafts,media:signed},{headers:{"Cache-Control":"no-store"}});
  }catch(e){return NextResponse.json({error:e instanceof Error?e.message:"Library unavailable."},{status:400})}

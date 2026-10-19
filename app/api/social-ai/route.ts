@@ -15,12 +15,12 @@ import {defaultLimits,summarizeJobs,centralPeriodStart} from '@/lib/social-ai/us
 import {composeGraphic,renderVideo,editUploadedVideo} from '@/lib/social-ai/render';
 export const runtime='nodejs';
 export const maxDuration=300;
-const inputSchema=z.object({requestId:z.string().uuid(),organizationId:z.string().uuid(),planId:z.string().uuid().nullable().optional(),logoId:z.string().uuid().optional(),topic:z.string().trim().min(8).max(2000),kind:z.enum(['graphic','video','carousel']),platforms:z.array(z.enum(['facebook','instagram','linkedin'])).min(1).max(3),scheduledFor:z.string().datetime().nullable().optional(),direction:directionSchema.default({lighting:50,energy:50,environment:50,setting:'studio',notes:'',motion:'gentle',trimStart:0,duration:20}),mediaIds:z.array(z.string().uuid()).max(12).default([]),brandImageIds:z.array(z.string().uuid()).max(12).default([]),editOnly:z.boolean().optional(),estimateOnly:z.boolean().optional()});
+const inputSchema=z.object({requestId:z.string().uuid(),organizationId:z.string().uuid(),planId:z.string().uuid().nullable().optional(),logoId:z.string().uuid().optional(),uploadedLogoId:z.string().uuid().optional(),topic:z.string().trim().min(8).max(2000),kind:z.enum(['graphic','video','carousel']),platforms:z.array(z.enum(['facebook','instagram','linkedin'])).min(1).max(3),scheduledFor:z.string().datetime().nullable().optional(),direction:directionSchema.default({lighting:50,energy:50,environment:50,setting:'studio',notes:'',motion:'gentle',trimStart:0,duration:20,music:"instrumental",musicVolume:15,keepOriginalAudio:1}),mediaIds:z.array(z.string().uuid()).max(12).default([]),brandImageIds:z.array(z.string().uuid()).max(12).default([]),editOnly:z.boolean().optional(),estimateOnly:z.boolean().optional()});
 export async function GET(request:Request){
  try{const user=await getCurrentUser();if(!user)return NextResponse.json({error:'Sign in first.'},{status:401});const params=new URL(request.url).searchParams;
  if(params.get('job')){const id=z.string().uuid().parse(params.get('job'));const {data:job}=await createSupabaseAdminClient().from('social_ai_jobs').select('id,organization_id,status,batch_id,message,token_estimate,copy_usage,image_usage').eq('id',id).eq('created_by',user.id).maybeSingle();if(!job)return NextResponse.json({error:'Draft not found.'},{status:404});await requireProductAccess(job.organization_id,'social',['manager','creator']);return NextResponse.json(job,{headers:{'Cache-Control':'no-store'}});}
  const org=z.string().uuid().parse(params.get('organization'));const access=await requireProductAccess(org,'social',['manager','creator']);const brand=await loadBrand(org,access.organizationSlug);const admin=createSupabaseAdminClient();const periods=centralPeriodStart();const [{data:limits,error:limitsError},{data:jobs,error:jobsError}]=await Promise.all([admin.from('social_ai_limits').select('*').eq('organization_id',org).maybeSingle(),admin.from('social_ai_jobs').select('created_at,copy_usage,image_usage,token_estimate').eq('organization_id',org).gte('created_at',periods.month)]);if(limitsError||jobsError)throw Error('Customer usage could not be loaded.');
- return NextResponse.json({logos:brand.logos.map(l=>({id:l.id,title:l.title})),aiAvailable:Boolean(socialKey()),story:brand.story,voice:brand.voice,hashtags:brand.hashtags,images:brand.images,guideCount:brand.guideCount,logoTitle:brand.logoTitle,limits:limits??defaultLimits,usage:summarizeJobs(jobs??[],periods.day),canManage:access.role==='platform_admin'},{headers:{'Cache-Control':'no-store'}});
+ return NextResponse.json({brandConnected:brand.connected,brandWarning:brand.warning,vaultUrl:brand.vaultUrl,logos:brand.logos.map(l=>({id:l.id,title:l.title})),aiAvailable:Boolean(socialKey()),story:brand.story,voice:brand.voice,hashtags:brand.hashtags,images:brand.images,guideCount:brand.guideCount,logoTitle:brand.logoTitle,limits:limits??defaultLimits,usage:summarizeJobs(jobs??[],periods.day),canManage:access.role==='platform_admin'},{headers:{'Cache-Control':'no-store'}});
  }catch(error){return NextResponse.json({error:error instanceof Error?error.message:'Brand details unavailable.'},{status:400})}
 }
 export async function POST(request:Request){
@@ -28,7 +28,7 @@ export async function POST(request:Request){
  const user=await getCurrentUser();if(!user)return NextResponse.json({error:'Sign in first.'},{status:401});
  if(!isSameOrigin(request))return NextResponse.json({error:'Refresh and try again.'},{status:403});
  if(Number(request.headers.get('content-length'))>12000)return NextResponse.json({error:'Please shorten the topic.'},{status:413});
- const input=inputSchema.parse(await request.json());if(input.scheduledFor&&Date.parse(input.scheduledFor)<Date.now()+60000)throw Error('Choose a future planned publish time.');
+ const input=inputSchema.parse(await request.json());
  const access=await requireProductAccess(input.organizationId,'social',['manager','creator']);
  const admin=createSupabaseAdminClient(),supabase=await createSupabaseServerClient();
  const {data:existing}=await admin.from('social_ai_jobs').select('id,created_by,status,organization_id').eq('id',input.requestId).maybeSingle();if(existing){if(existing.created_by!==user.id||existing.organization_id!==input.organizationId)throw Error('Draft request not available.');return NextResponse.json({jobId:existing.id,status:existing.status});}
@@ -39,7 +39,7 @@ export async function POST(request:Request){
   const {data:version}=await supabase.from('marketing_plan_versions').select('plan').eq('marketing_plan_id',plan.id).eq('revision',plan.current_revision).single();
   if(!version)throw Error('The approved plan could not be loaded.');approvedPlan=version.plan;
  }else if(access.role!=='platform_admin')throw Error('Choose an approved marketing plan. D2D administrators can create client examples without a plan.');
- const brand=await loadBrand(input.organizationId,access.organizationSlug,input.logoId);
+ const brand=await loadBrand(input.organizationId,access.organizationSlug,input.logoId,input.uploadedLogoId);
  const {data:limits,error:limitsError}=await admin.from('social_ai_limits').select('*').eq('organization_id',input.organizationId).maybeSingle();if(limitsError)throw Error('Customer limits could not be loaded.');
  const rules=limits??defaultLimits;if(!rules.enabled&&!input.editOnly)throw Error('AI generation is paused for this customer. Contact D2D.');if(input.kind==='video'&&!rules.video_enabled)throw Error('Video generation is disabled for this customer.');
  const uploaded=await studioMedia(input.organizationId,input.mediaIds);
@@ -69,7 +69,7 @@ export async function POST(request:Request){
   const backgrounds=photos.length?await Promise.all(photos.map(m=>sharp(m.bytes).modulate({brightness:0.75+input.direction.lighting/200}).toBuffer())):[background];
   const outputs:Array<{bytes:Buffer;mime:string;ext:string}>=[];
   if(input.kind==='video'){
-   const bytes=videos.length?await editUploadedVideo(videos[0].bytes,brand.logo,input.direction.trimStart,input.direction.duration,input.direction.lighting):await renderVideo(backgrounds,brand.logo,creative.scenes,creative.cta,creative.color,creative.fontStyle,input.direction.motion,input.direction.duration);
+   const bytes=videos.length?await editUploadedVideo(videos[0].bytes,brand.logo,input.direction.trimStart,input.direction.duration,input.direction.lighting,input.direction.music,input.direction.musicVolume,Boolean(input.direction.keepOriginalAudio)):await renderVideo(backgrounds,brand.logo,creative.scenes,creative.cta,creative.color,creative.fontStyle,input.direction.motion,input.direction.duration,input.direction.music,input.direction.musicVolume);
    outputs.push({bytes,mime:'video/mp4',ext:'mp4'});
   }else{
    for(const photo of (input.kind==='carousel'?backgrounds:backgrounds.slice(0,1)))outputs.push({bytes:await composeGraphic(photo,brand.logo,creative.headline,creative.cta,creative.color,1350,creative.fontStyle),mime:'image/jpeg',ext:'jpg'});
@@ -83,7 +83,7 @@ export async function POST(request:Request){
    if(saveError)throw Error('Generated media could not be recorded.');mediaIds.push(mediaId);
   }
   const captions=Object.fromEntries([...new Set(input.platforms)].map(p=>[p,creative.captions[p]]));
-  const {data:draft,error:draftError}=await admin.from('social_studio_drafts').insert({organization_id:input.organizationId,title:creative.title,created_by:user.id,planned_for:input.scheduledFor??null,content:{topic:input.topic,kind:input.kind,captions,mediaIds,direction:input.direction,source:brand.source,planId:input.planId??null}}).select('id').single();
+  const {data:draft,error:draftError}=await admin.from('social_studio_drafts').insert({organization_id:input.organizationId,title:creative.title,created_by:user.id,planned_for:input.scheduledFor??null,content:{logoId:input.logoId,uploadedLogoId:input.uploadedLogoId,topic:input.topic,kind:input.kind,captions,mediaIds,direction:input.direction,source:brand.source,planId:input.planId??null}}).select('id').single();
   if(draftError||!draft)throw Error('The generated draft could not be saved to the library.');
   await admin.from('social_ai_jobs').update({status:'completed',message:'Copy and media saved in your content library. Review and choose a time when ready. Nothing has been published.',updated_at:new Date().toISOString()}).eq('id',input.requestId);
  }catch(error){await admin.from('social_ai_jobs').update({status:'failed',message:error instanceof z.ZodError?'AI returned copy that did not fit the post. Please try again.':error instanceof Error?error.message:'Generation failed. Please try again.',updated_at:new Date().toISOString()}).eq('id',input.requestId);}});
