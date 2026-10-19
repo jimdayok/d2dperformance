@@ -7,16 +7,16 @@ import {requireProductAccess} from "@/lib/d2d-platform/access";
 import {createSupabaseAdminClient} from "@/lib/supabase/admin";
 import {isSameOrigin} from "@/lib/social-ai/request";
 import {buildSocialReviewEmail} from "@/lib/social-review/email-template";
-const defaults={sender:"D2D Marketing <socialpages@d2dmktg.com>",staff_recipients:["jim@d2dmktg.com","andrea@d2dmktg.com"],client_recipients:[] as string[]};
+const defaults={sender:"D2D Marketing <noreply@d2dmktg.com>",staff_recipients:["jim@d2dmktg.com","andrea@d2dmktg.com"],client_recipients:[] as string[]};
 export async function GET(request:Request){
  try{assertReviewWorkspace(process.env);if(!await getCurrentUser())return NextResponse.json({error:"Sign in first."},{status:401});
  const org=z.uuid().parse(new URL(request.url).searchParams.get("organization"));await requireProductAccess(org,"social",["manager","creator"]);
  const db=createSupabaseAdminClient();const [settings,outbox,links]=await Promise.all([db.from("social_review_email_settings").select("sender,staff_recipients,client_recipients").eq("organization_id",org).maybeSingle(),db.from("social_review_outbox").select("*").eq("organization_id",org).order("created_at",{ascending:false}).limit(50),db.from("social_review_links").select("id,post_ids,expires_at,revoked_at").eq("organization_id",org).order("created_at",{ascending:false}).limit(50)]);
  if(settings.error||outbox.error||links.error)throw Error("Notification previews are unavailable.");
  const base=new URL(request.url).protocol+"//"+(request.headers.get("host")||new URL(request.url).host);
- const messages=(outbox.data??[]).map(row=>({...row,previews:["staff","client"].map(recipientRole=>({...buildSocialReviewEmail({event:row.event,title:row.payload.title,organization:row.payload.organization,body:row.payload.body,campaign:row.payload.campaign,reviewUrl:new URL(recipientRole==="client"?row.payload.review_path:"/portal/marketing?organization="+org,base).toString(),recipientRole,live:reviewIsLive(process.env)}),role:recipientRole,to:recipientRole==="client"?row.client_recipients:row.staff_recipients})),reviewUrl:row.payload.review_path?.startsWith("/review/social/")?row.payload.review_path:null}));
+ const messages=(outbox.data??[]).map(row=>({...row,sender:["sent","processing"].includes(row.status)?row.sender:defaults.sender,previews:["staff","client"].map(recipientRole=>({...buildSocialReviewEmail({event:row.event,title:row.payload.title,organization:row.payload.organization,body:row.payload.body,campaign:row.payload.campaign,reviewUrl:new URL(recipientRole==="client"?row.payload.review_path:"/portal/marketing?organization="+org,base).toString(),recipientRole,live:reviewIsLive(process.env)}),role:recipientRole,to:recipientRole==="client"?row.client_recipients:row.staff_recipients})),reviewUrl:row.payload.review_path?.startsWith("/review/social/")?row.payload.review_path:null}));
  const readiness=await socialEmailReadiness();
- return NextResponse.json({settings:settings.data||defaults,messages,links:links.data,delivery:reviewIsLive(process.env)?"live_outbox":"preview_only",senderVerified:readiness.verified,senderCanSend:readiness.canSend,senderStatus:readiness.reason},{headers:{"Cache-Control":"private, no-store","Referrer-Policy":"no-referrer"}});
+ return NextResponse.json({settings:{...(settings.data||defaults),sender:defaults.sender},messages,links:links.data,delivery:reviewIsLive(process.env)?"live_outbox":"preview_only",senderVerified:readiness.verified,senderCanSend:readiness.canSend,senderStatus:readiness.reason},{headers:{"Cache-Control":"private, no-store","Referrer-Policy":"no-referrer"}});
  }catch(e){return NextResponse.json({error:e instanceof Error?e.message:"Unavailable."},{status:403});}
 }
 export async function POST(request:Request){

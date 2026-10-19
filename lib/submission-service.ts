@@ -1,4 +1,4 @@
-import { Resend } from "resend";
+import { AutomatedEmailClient as Resend } from "@/lib/automated-email";
 import { createClient } from "@supabase/supabase-js";
 import type {
   DiscoveryCompletionStatus,
@@ -609,7 +609,8 @@ async function handleDiscoverySubmission(
 
   if (recipients.length > 0) {
     await resend.emails.send({
-      from: BRAND_DISCOVERY_FROM_EMAIL,
+      from: "D2D Marketing <noreply@d2dmktg.com>",
+      replyTo: "noreply@d2dmktg.com",
       to: recipients,
       subject: `${options.subjectPrefix}: ${answerToText(payload.answers.company)}`,
       text: emailBody,
@@ -621,7 +622,8 @@ async function handleDiscoverySubmission(
 
   if (options.sendCustomerConfirmation && submitterEmail) {
     await resend.emails.send({
-      from: BRAND_DISCOVERY_FROM_EMAIL,
+      from: "D2D Marketing <noreply@d2dmktg.com>",
+      replyTo: "noreply@d2dmktg.com",
       to: submitterEmail,
       subject: "We received your brand discovery request",
       text: buildCustomerConfirmationText(),
@@ -726,7 +728,8 @@ export async function sendAbandonedBrandDiscoveryNotifications(
     });
 
     await resend.emails.send({
-      from: BRAND_DISCOVERY_FROM_EMAIL,
+      from: "D2D Marketing <noreply@d2dmktg.com>",
+      replyTo: "noreply@d2dmktg.com",
       to: recipients,
       subject: `Partial Brand Discovery Started: ${getDisplayName(payload.answers)}`,
       text: partialAnswersToEmailText(payload),

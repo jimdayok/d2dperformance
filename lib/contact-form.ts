@@ -1,4 +1,4 @@
-import { Resend } from "resend";
+import { AutomatedEmailClient as Resend } from "@/lib/automated-email";
 
 export type ContactSubmission = {
   name: string;
@@ -145,29 +145,18 @@ export async function sendContactSubmissionEmail(payload: ContactSubmission) {
   const subjectTarget = normalizeOptional(payload.company) ?? payload.name.trim();
   const emailPayload = {
     to: config.to,
-    replyTo: payload.email.trim(),
+    replyTo: "noreply@d2dmktg.com",
     subject: `D2D Marketing Contact: ${subjectTarget}`,
     text: buildContactEmailText(payload, submittedAt),
     html: buildContactEmailHtml(payload, submittedAt),
   };
-  let senderUsed = config.preferredFrom;
+  const senderUsed = "D2D Marketing <noreply@d2dmktg.com>";
+  const { data, error } = await resend.emails.send({
+    from: senderUsed,
+    ...emailPayload,
+  });
 
-  try {
-    await resend.emails.send({
-      from: config.preferredFrom,
-      ...emailPayload,
-    });
-  } catch (error) {
-    if (!config.fallbackFrom || config.fallbackFrom === config.preferredFrom) {
-      throw error;
-    }
-
-    await resend.emails.send({
-      from: config.fallbackFrom,
-      ...emailPayload,
-    });
-    senderUsed = config.fallbackFrom;
-  }
+  if (error || !data?.id) throw new Error(error?.message ?? "Email provider did not confirm acceptance.");
 
   return {
     submittedAt,

@@ -1,9 +1,9 @@
 import "server-only";
-import {Resend} from "resend";
+import {AutomatedEmailClient as Resend} from "@/lib/automated-email";
 import {createSupabaseAdminClient} from "@/lib/supabase/admin";
 import {buildSocialReviewEmail} from "./email-template";
 import {reviewIsLive} from "./model";
-const sender="D2D Marketing <socialpages@d2dmktg.com>";
+const sender="D2D Marketing <noreply@d2dmktg.com>";
 export async function socialEmailReadiness(){
  if(!reviewIsLive(process.env))return {configured:false,verified:false,canSend:false,reason:"Preview-only staging"};
  if(!process.env.RESEND_API_KEY)return {configured:false,verified:false,canSend:false,reason:"Email transport is not configured"};
@@ -26,7 +26,7 @@ export async function flushSocialReviewEmails(organizationId:string){
  const base=new URL(process.env.NEXT_PUBLIC_PORTAL_URL||"https://webadmin.d2dmktg.com");if(base.protocol!=="https:")throw Error("A secure portal URL is required for client emails");
  for(const row of rows){
   if(row.post_id){const {data:post}=await db.from("social_review_posts").select("is_test").eq("id",row.post_id).eq("organization_id",organizationId).maybeSingle();if(!post||post.is_test){await db.from("social_review_outbox").update({status:"preview_only"}).eq("id",row.id).eq("status","queued");continue;}}
-  const {data:claim}=await db.from("social_review_outbox").update({status:"processing",delivery_error:null}).eq("id",row.id).eq("status","queued").select("id").maybeSingle();if(!claim)continue;
+  const {data:claim}=await db.from("social_review_outbox").update({status:"processing",delivery_error:null,sender}).eq("id",row.id).eq("status","queued").select("id").maybeSingle();if(!claim)continue;
   const providerIds:Record<string,string>=row.provider_ids||{};
   try{
    for(const role of ["staff","client"] as const){
@@ -34,7 +34,7 @@ export async function flushSocialReviewEmails(organizationId:string){
     if(providerIds[role])continue;
     const path=role==="client"&&/^\/review\/social\/[a-f0-9]{64}$/.test(row.payload.review_path||"")?row.payload.review_path:"/portal/marketing?organization="+organizationId;
     const message=buildSocialReviewEmail({event:row.event,title:row.payload.title,organization:row.payload.organization,body:row.payload.body,campaign:row.payload.campaign,reviewUrl:new URL(path,base).toString(),recipientRole:role,live:true});
-    const result=await resend.emails.send({from:sender,to,replyTo:"socialpages@d2dmktg.com",subject:message.subject,text:message.text,html:message.html},{idempotencyKey:"social-review/"+row.id+"/"+role});
+    const result=await resend.emails.send({from:sender,to,replyTo:"noreply@d2dmktg.com",subject:message.subject,text:message.text,html:message.html},{idempotencyKey:"social-review/"+row.id+"/"+role});
     if(result.error||!result.data?.id)throw Error(result.error?.message||"Email provider did not confirm acceptance");providerIds[role]=result.data.id;
     const saved=await db.from("social_review_outbox").update({provider_ids:providerIds}).eq("id",row.id).eq("status","processing");if(saved.error)throw Error("Provider accepted the email; reconcile its id before retrying");
    }

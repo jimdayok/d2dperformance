@@ -1,6 +1,6 @@
 import "server-only";
 import { createHash, randomBytes } from "node:crypto";
-import { Resend } from "resend";
+import { AutomatedEmailClient as Resend } from "@/lib/automated-email";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { generateWebsiteFeedbackPdf } from "@/lib/website-feedback-report";
 import { normalizeReviewUrl, overallQuestions, pageQuestions, type MarkupNote, type PageFeedbackInput, type SubmitFeedbackInput } from "@/lib/website-feedback-schema";
@@ -144,9 +144,9 @@ async function sendFeedbackEmail(session: Record<string, unknown>, pages: Array<
     ...(clientEmail === ownerEmail.toLowerCase() ? [] : [{ email: clientEmail, role: "client" as const }]),
   ];
   const deliveries = await Promise.all(recipients.map((recipient) => resend.emails.send({
-    from,
+    from: "D2D Marketing <noreply@d2dmktg.com>",
     to: recipient.email,
-    replyTo: recipient.role === "owner" ? clientEmail : ownerEmail,
+    replyTo: "noreply@d2dmktg.com",
     subject: recipient.role === "owner" ? `Website Feedback: ${session.company} (${pages.length} ${pages.length === 1 ? "page" : "pages"})` : `Your website feedback copy: ${session.company}`,
     text: `${recipient.role === "client" ? "Thank you for reviewing the site. This is your copy of the feedback sent to the D2D Digital and Marketing teams.\n\n" : "A client website review is ready.\n\n"}The marked-up website PDF is attached.\n\n${baseText}`,
     html: buildHtml(recipient.role),

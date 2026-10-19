@@ -1,6 +1,6 @@
 import "server-only";
 
-import { Resend } from "resend";
+import { AutomatedEmailClient as Resend } from "@/lib/automated-email";
 import {
   buildClientInstructionsEmail,
   type ClientInstructionService,
@@ -36,9 +36,9 @@ export async function sendClientInstructionsEmail(input: {
   const message = buildClientInstructionsEmail({ ...input, loginUrl, supportEmail });
   const resend = new Resend(apiKey);
   const { data, error } = await resend.emails.send({
-    from,
+    from: "D2D Marketing <noreply@d2dmktg.com>",
     to: input.email,
-    replyTo: supportEmail,
+    replyTo: "noreply@d2dmktg.com",
     subject: message.subject,
     text: message.text,
     html: message.html,

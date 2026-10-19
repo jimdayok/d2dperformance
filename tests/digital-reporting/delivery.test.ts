@@ -54,12 +54,13 @@ beforeEach(() => {
   mocks.admin.mockReturnValue({ rpc: finish });
 });
 describe("manual report delivery", () => {
-  it("reuses the existing D2D sender while preserving manual delivery", async () => {
+  it("uses the automated no-reply sender while preserving manual delivery", async () => {
     delete process.env.DIGITAL_REPORT_FROM_EMAIL;
     process.env.CONTACT_FORM_FROM_EMAIL = "D2D <reports@example.com>";
     expect(emailReady()).toBe(true);
     await executeReportCommand({ action: "send", organizationId, reportId, expected: 1 });
-    expect(mocks.send.mock.calls[0][0].from).toBe("D2D <reports@example.com>");
+    expect(mocks.send.mock.calls[0][0].from).toBe("D2D Marketing <noreply@d2dmktg.com>");
+    expect(mocks.send.mock.calls[0][0].replyTo).toBe("noreply@d2dmktg.com");
     delete process.env.CONTACT_FORM_FROM_EMAIL;
   });
 

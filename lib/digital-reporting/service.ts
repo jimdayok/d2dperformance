@@ -1,6 +1,6 @@
 import "server-only";
 import { createHash } from "node:crypto";
-import { Resend } from "resend";
+import { AutomatedEmailClient as Resend } from "@/lib/automated-email";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getPlatformAdminStatus } from "@/lib/d2d-platform/access";
@@ -250,7 +250,8 @@ export async function executeReportCommand(raw: unknown) {
       process.env.RESEND_API_KEY,
     ).emails.send(
       {
-        from: reportSender()!,
+        from: "D2D Marketing <noreply@d2dmktg.com>",
+        replyTo: "noreply@d2dmktg.com",
         to: claim.recipients,
         subject: `D2D Digital Performance Report | ${v.snapshot.organizationName} | ${v.snapshot.period.slice(0, 7)}`,
         text: `Your D2D Digital Performance Report is attached. This report covers ${v.snapshot.period.slice(0, 7)} and includes the available evidence, baseline comparisons, and next steps.\n\nD2D Marketing`,
