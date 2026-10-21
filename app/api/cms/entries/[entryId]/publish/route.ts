@@ -5,6 +5,7 @@ import { getCurrentUser, requireSiteAccess } from "@/lib/site-manager/access";
 import { canPublish } from "@/lib/site-manager/permissions";
 import { getSiteDefinition } from "@/lib/site-manager/registry";
 import { signCmsToken } from "@/lib/site-manager/tokens";
+import { revalidationHeaders } from "@/lib/site-manager/revalidation-headers";
 import { validateContent } from "@/lib/site-manager/validation";
 
 const schema = z.object({ siteSlug: z.string(), modelKey: z.string(), expectedRevision: z.number().int().positive(), path: z.string().startsWith("/") });
@@ -29,7 +30,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ ent
   const tags = valid.model.cacheTags(current?.content_key ?? "unknown", valid.data);
   try {
     const token = await signCmsToken({ audience: siteDefinition.previewAudience, siteId: siteAccess.site.id, siteSlug: input.data.siteSlug, userId: user.id, path: input.data.path, action: "revalidate", tags });
-    const response = await fetch(`${siteAccess.site.preview_url}/api/cms/revalidate`, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${token}` }, body: JSON.stringify({ path: input.data.path, tags }), cache: "no-store" });
+    const response = await fetch(`${siteAccess.site.preview_url}/api/cms/revalidate`, { method: "POST", headers: revalidationHeaders(input.data.siteSlug, siteAccess.site.preview_url, token), body: JSON.stringify({ path: input.data.path, tags }), cache: "no-store" });
     const summary = response.ok ? "Targeted revalidation accepted." : "Targeted revalidation rejected.";
     if (eventId) await createSupabaseAdminClient().from("publish_events").update({ status: response.ok ? "succeeded" : "failed", http_status: response.status, response_summary: summary, completed_at: new Date().toISOString() }).eq("id", eventId);
     return Response.json({ published: true, revalidated: response.ok, message: summary }, { status: response.ok ? 200 : 202 });
