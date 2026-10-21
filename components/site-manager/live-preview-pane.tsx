@@ -22,6 +22,7 @@ export function LivePreviewPane({
   refreshKey,
   siteName,
 }: LivePreviewPaneProps) {
+  const separatePreview = siteSlug === "roofing-ontop";
   const [previewUrl, setPreviewUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -51,6 +52,12 @@ export function LivePreviewPane({
     return () => controller.abort();
   }, [manualRefresh, open, path, refreshKey, siteSlug]);
 
+  useEffect(() => {
+    if (!open || !separatePreview) return;
+    const timer = window.setInterval(() => setManualRefresh((value) => value + 1), 240_000);
+    return () => window.clearInterval(timer);
+  }, [open, separatePreview]);
+
   if (!open) {
     return (
       <button
@@ -70,7 +77,7 @@ export function LivePreviewPane({
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#9a5f34]">Saved draft preview</p>
           <p className="mt-1 truncate text-sm font-semibold">{siteName}</p>
         </div>
-        <div role="group" aria-label="Preview viewport" className="flex items-center rounded-lg border border-black/10 bg-[#f4f0e9] p-1">
+        {!separatePreview ? <div role="group" aria-label="Preview viewport" className="flex items-center rounded-lg border border-black/10 bg-[#f4f0e9] p-1">
           <button
             type="button"
             onClick={() => setViewport("desktop")}
@@ -87,7 +94,7 @@ export function LivePreviewPane({
           >
             <Smartphone size={14} aria-hidden="true" /> Mobile
           </button>
-        </div>
+        </div> : null}
         <div className="flex items-center gap-1">
           <button type="button" onClick={() => { setLoading(true); setError(""); setManualRefresh((value) => value + 1); }} aria-label="Refresh live preview" className="rounded-lg p-2 text-black/55 hover:bg-black/5 hover:text-black">
             <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
@@ -103,7 +110,20 @@ export function LivePreviewPane({
         </div>
       </header>
       <div className="relative h-[42rem] overflow-auto bg-[#ebe7df] xl:h-auto xl:min-h-0 xl:flex-1">
-        {previewUrl && !error ? (
+        {separatePreview && previewUrl && !error ? (
+          <div className="grid h-full min-h-72 place-items-center p-8 text-center">
+            <div className="max-w-sm">
+              <Eye className="mx-auto text-[#9a5f34]" size={32} aria-hidden="true" />
+              <h2 className="mt-5 text-xl font-semibold">Your private draft is ready</h2>
+              <p className="mt-3 text-sm leading-6 text-black/65">Open your saved draft in a new tab. Your current website stays live on Kajabi.</p>
+              <a href={previewUrl} target="_blank" rel="noreferrer" className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#18201d] px-5 py-3 text-sm font-semibold !text-white">
+                Open saved draft <ExternalLink size={16} aria-hidden="true" />
+              </a>
+              <p className="mt-4 text-xs leading-5 text-black/55">Save your edits before opening the preview. Sign in to Vercel if prompted.</p>
+            </div>
+          </div>
+        ) : null}
+        {!separatePreview && previewUrl && !error ? (
           <div className={`h-full bg-white transition-[max-width,box-shadow] duration-200 ${viewport === "mobile" ? "mx-auto w-full max-w-[390px] border-x-[6px] border-[#18201d] shadow-[0_20px_55px_rgba(24,32,29,0.28)]" : "w-full"}`}>
             <iframe
               key={previewUrl}
