@@ -1,3 +1,4 @@
+import { roofingSiteDefinition } from "@/lib/site-manager/sites/roofing-ontop/definition";
 import { alfordSiteDefinition } from "@/lib/site-manager/sites/alford-custom-homes/definition";
 import { acadiaSiteDefinition } from "@/lib/site-manager/sites/acadia-eye/definition";
 import { phoenixSiteDefinition } from "@/lib/site-manager/sites/phoenix-builds/definition";
@@ -22,6 +23,7 @@ const d2dMarketingDefinition: SiteDefinition = {
 };
 
 const definitions: Record<string, SiteDefinition> = {
+  [roofingSiteDefinition.key]: roofingSiteDefinition,
   [d2dMarketingDefinition.key]: d2dMarketingDefinition,
   [alfordSiteDefinition.key]: alfordSiteDefinition,
   [acadiaSiteDefinition.key]: acadiaSiteDefinition,
