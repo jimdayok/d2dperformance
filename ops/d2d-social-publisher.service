@@ -1,0 +1,17 @@
+[Unit]
+Description=D2D approved customer social publishing (SOC-2610261625)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/jim/work/social-delivery-261026
+ExecStart=/usr/bin/python3 /home/jim/work/social-delivery-261026/scripts/social_delivery_worker.py --config /home/jim/services/social-publisher/config.json
+Restart=always
+RestartSec=10
+UMask=0077
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target
+

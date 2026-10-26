@@ -1,5 +1,5 @@
 import type {ReviewPost} from "./model";
-export function legacyDeliveryLocked(post:Pick<ReviewPost,"source_legacy_item_id"|"legacy_batch_status">){return Boolean(post.source_legacy_item_id&&["scheduled","scheduling","published"].includes(post.legacy_batch_status||""));}
+export function legacyDeliveryLocked(post:Pick<ReviewPost,"source_legacy_item_id"|"legacy_batch_status"|"delivery">){return Boolean(post.delivery&&["dispatching","submitted","published","uncertain"].includes(post.delivery.state)||post.source_legacy_item_id&&["scheduled","scheduling","published"].includes(post.legacy_batch_status||""));}
 export function legacyCreative(content:{mediaIds?:unknown;legacyMedia?:unknown}):ReviewPost["media"]{
  if(Array.isArray(content.mediaIds)&&content.mediaIds.length||!Array.isArray(content.legacyMedia))return [];
  return content.legacyMedia.flatMap((raw:unknown)=>{

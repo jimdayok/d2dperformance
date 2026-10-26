@@ -45,8 +45,10 @@ export async function GET(request:Request) {
    if(error) throw Error("A private media preview could not be opened.");
    return {id:m.id,name:m.name,type:m.mime_type,url:data.signedUrl.replace(process.env.SUPABASE_SERVER_URL||process.env.NEXT_PUBLIC_SUPABASE_URL!,process.env.NEXT_PUBLIC_SUPABASE_URL!)};
   }));
-  const mapped=(posts.data??[]).map(p=>({...p,media:p.is_test&&p.content.sampleImage?(p.content.sampleImages||[p.content.sampleImage]).map((url:string)=>({url,type:"image/jpeg",alt:"D2D portfolio photograph used only as sample creative"})):legacyCreative(p.content).length?legacyCreative(p.content):(p.content.mediaIds??[]).flatMap((id:string)=>{const m=signed.find(x=>x.id===id);return m?[{url:m.url,type:m.type,alt:m.name}]:[]})}));
-  return NextResponse.json({posts:mapped,activity:activity.data,notes:notes.data,media:signed,role:access.role,legacyBatches:legacy.data,mode:reviewIsLive(process.env)?"production-planning":"isolated-test-scheduling"},{headers:{"Cache-Control":"no-store"}});
+  const deliveries=reviewIsLive(process.env)?await db.from("social_deliveries").select("post_id,revision,state,result,created_at").eq("organization_id",org).neq("state","cancelled").order("created_at",{ascending:false}):{data:[]};
+  const routes=reviewIsLive(process.env)?await db.from("social_delivery_routes").select("platform").eq("organization_id",org):{data:[]};
+  const mapped=(posts.data??[]).map(p=>({...p,delivery:deliveries.data?.find(d=>d.post_id===p.id&&d.revision===p.revision),media:p.is_test&&p.content.sampleImage?(p.content.sampleImages||[p.content.sampleImage]).map((url:string)=>({url,type:"image/jpeg",alt:"D2D portfolio photograph used only as sample creative"})):legacyCreative(p.content).length?legacyCreative(p.content):(p.content.mediaIds??[]).flatMap((id:string)=>{const m=signed.find(x=>x.id===id);return m?[{url:m.url,type:m.type,alt:m.name}]:[]})}));
+  return NextResponse.json({posts:mapped,activity:activity.data,notes:notes.data,media:signed,role:access.role,legacyBatches:legacy.data,publishingEnabled:Boolean(routes.data?.length),mode:reviewIsLive(process.env)?"production-planning":"isolated-test-scheduling"},{headers:{"Cache-Control":"no-store"}});
  } catch(e) { return NextResponse.json({error:e instanceof Error?e.message:"Workspace unavailable."},{status:403}); }
 }
 export async function POST(request:Request) {
@@ -96,6 +98,8 @@ export async function POST(request:Request) {
   }
   const {data:post}=await db.from("social_review_posts").select("*").eq("id",input.id).eq("organization_id",input.organizationId).maybeSingle();
   if(!post)return NextResponse.json({error:"This post is not available to this client."},{status:404});
+  const delivery=await db.from("social_deliveries").select("state").eq("post_id",post.id).in("state",["dispatching","submitted","published","uncertain"]).limit(1);
+  if(delivery.data?.length&&input.action!=="comment")return NextResponse.json({error:"This post has entered publishing. Check the delivery result; create a new post for different content."},{status:409});
   if(legacyDeliveryLocked(post)&&input.action!=="comment")return NextResponse.json({error:"This existing publishing schedule is preserved. Manage its live delivery in D2D Social before changing it here."},{status:409});
   if(!post.is_test&&reviewIsLive(process.env)&&["submit","invite"].includes(input.action)){
    const {data:settings}=await db.from("social_review_email_settings").select("client_recipients").eq("organization_id",input.organizationId).maybeSingle();
@@ -113,6 +117,6 @@ export async function POST(request:Request) {
   const session=await createSupabaseServerClient();
   const {error}=await session.rpc("transition_social_review",{check_post:input.id,check_revision:input.revision,check_action:input.action,check_body:"body" in input?input.body:"",check_patch:patch,check_version:input.lockVersion});
   if(error)return NextResponse.json({error:error.message},{status:409});
-  return NextResponse.json({message:input.action==="schedule"||input.action==="reschedule"?"Planned date saved. Automatic social posting is off for this workspace.":input.action==="approve"?"This post is approved. Other posts are unchanged; nothing has been published.":"Saved. Email updates are queued for the configured recipients."});
+  return NextResponse.json({message:input.action==="schedule"||input.action==="reschedule"?"Schedule saved. The approved version will publish at this time when its destination is connected.":input.action==="approve"?"Approved. If this post has a future date and a connected destination, it is now scheduled to publish automatically.":"Saved. Email updates are queued for the configured recipients."});
  } catch(e) {return NextResponse.json({error:e instanceof z.ZodError?"Check the post fields and try again.":e instanceof Error?e.message:"This action could not be saved."},{status:400});}
 }
