@@ -80,7 +80,7 @@ export async function generateSocialBatch(input: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: process.env.OPENAI_SOCIAL_MODEL ?? "gpt-5.6-terra",
+        model: process.env.OPENAI_SOCIAL_MODEL ?? "gpt-6-luna",
         store: false,
         instructions: [
           "You are the drafting assistant inside D2D Social.",
